@@ -1,0 +1,6 @@
+import 'package:fase_2_consumo_api/src/core/errors/failure.dart';
+
+/// Fallo que representa un error de conexión.
+class ConnectionFailure extends Failure {
+  const ConnectionFailure(super.message);
+}

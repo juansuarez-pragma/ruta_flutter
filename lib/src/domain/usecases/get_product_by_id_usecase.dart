@@ -5,13 +5,16 @@ import 'package:fase_2_consumo_api/src/core/usecase/usecase.dart';
 import 'package:fase_2_consumo_api/src/domain/entities/product_entity.dart';
 import 'package:fase_2_consumo_api/src/domain/repositories/product_repository.dart';
 
-class GetProductByIdUseCase implements UseCase<ProductEntity, GetProductByIdParams> {
+class GetProductByIdUseCase
+    implements UseCase<ProductEntity, GetProductByIdParams> {
   final ProductRepository repository;
 
   GetProductByIdUseCase(this.repository);
 
   @override
-  Future<Either<Failure, ProductEntity>> call(GetProductByIdParams params) async {
+  Future<Either<Failure, ProductEntity>> call(
+    GetProductByIdParams params,
+  ) async {
     return await repository.getProductById(params.id);
   }
 }

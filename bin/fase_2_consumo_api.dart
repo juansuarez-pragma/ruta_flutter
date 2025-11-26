@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:fase_2_consumo_api/src/core/config/env_config.dart';
+import 'package:fase_2_consumo_api/src/core/config/config.dart';
 import 'package:fase_2_consumo_api/src/core/injection_container.dart' as di;
 import 'package:fase_2_consumo_api/src/presentation/application.dart';
 

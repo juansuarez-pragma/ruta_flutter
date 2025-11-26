@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:fase_2_consumo_api/src/domain/entities/product_entity.dart';
-import 'package:fase_2_consumo_api/src/presentation/contracts/user_interface.dart';
+import 'package:fase_2_consumo_api/src/presentation/contracts/contracts.dart';
 import 'package:fase_2_consumo_api/src/util/strings.dart';
 
 /// Adaptador de interfaz de usuario para consola/terminal.

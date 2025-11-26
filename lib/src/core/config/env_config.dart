@@ -1,7 +1,6 @@
 import 'package:dotenv/dotenv.dart';
-
-/// Enumeración de los ambientes disponibles en la aplicación.
-enum Environment { development, staging, production }
+import 'package:fase_2_consumo_api/src/core/config/env_config_exception.dart';
+import 'package:fase_2_consumo_api/src/core/config/environment.dart';
 
 /// Clase de configuración que gestiona las variables de entorno.
 ///
@@ -109,14 +108,4 @@ class EnvConfig {
 
   /// Indica si el ambiente es de staging.
   bool get isStaging => environment == Environment.staging;
-}
-
-/// Excepción inmutable lanzada cuando hay errores de configuración de entorno.
-class EnvConfigException implements Exception {
-  final String message;
-
-  const EnvConfigException(this.message);
-
-  @override
-  String toString() => 'EnvConfigException: $message';
 }
