@@ -1,5 +1,6 @@
-import 'package:dotenv/dotenv.dart';
+import 'package:fase_2_consumo_api/src/core/config/dotenv_reader.dart';
 import 'package:fase_2_consumo_api/src/core/config/env_config_exception.dart';
+import 'package:fase_2_consumo_api/src/core/config/env_reader.dart';
 import 'package:fase_2_consumo_api/src/core/config/environment.dart';
 
 /// Clase de configuración que gestiona las variables de entorno.
@@ -7,18 +8,28 @@ import 'package:fase_2_consumo_api/src/core/config/environment.dart';
 /// Implementa el patrón Singleton para garantizar una única instancia
 /// de configuración en toda la aplicación.
 ///
+/// Utiliza [EnvReader] para desacoplar la lectura de variables de entorno
+/// de la implementación concreta (dotenv, flutter_dotenv, etc.).
+///
 /// Ejemplo de uso:
 /// ```dart
 /// await EnvConfig.instance.initialize();
 /// final baseUrl = EnvConfig.instance.apiBaseUrl;
+/// ```
+///
+/// Para usar una implementación diferente de [EnvReader]:
+/// ```dart
+/// await EnvConfig.instance.initialize(
+///   reader: MiCustomEnvReader(),
+/// );
 /// ```
 class EnvConfig {
   // Singleton instance
   static final EnvConfig _instance = EnvConfig._internal();
   static EnvConfig get instance => _instance;
 
-  // DotEnv instance
-  DotEnv? _dotEnv;
+  // EnvReader instance (desacoplado de dotenv)
+  EnvReader? _reader;
 
   // Estado de inicialización
   bool _isInitialized = false;
@@ -28,14 +39,19 @@ class EnvConfig {
 
   /// Inicializa la configuración cargando las variables de entorno.
   ///
+  /// [envPath] es la ruta al archivo de configuración (por defecto '.env').
+  /// [reader] es la implementación de [EnvReader] a usar. Por defecto usa
+  /// [DotEnvReader], pero puede cambiarse por otra implementación.
+  ///
   /// Debe llamarse una vez al inicio de la aplicación antes de acceder
   /// a cualquier variable de configuración.
   ///
   /// Lanza [EnvConfigException] si las variables requeridas no están definidas.
-  Future<void> initialize({String envPath = '.env'}) async {
+  Future<void> initialize({String envPath = '.env', EnvReader? reader}) async {
     if (_isInitialized) return;
 
-    _dotEnv = DotEnv(includePlatformEnvironment: true)..load([envPath]);
+    _reader = reader ?? DotEnvReader();
+    await _reader!.load(envPath);
     _validateRequiredVariables();
     _isInitialized = true;
   }
@@ -46,7 +62,7 @@ class EnvConfig {
     final missingVars = <String>[];
 
     for (final varName in requiredVars) {
-      if (_dotEnv?[varName] == null || _dotEnv![varName]!.isEmpty) {
+      if (!_reader!.containsKey(varName)) {
         missingVars.add(varName);
       }
     }
@@ -62,7 +78,7 @@ class EnvConfig {
   /// Obtiene un valor de configuración con valor por defecto opcional.
   String _get(String key, {String defaultValue = ''}) {
     _ensureInitialized();
-    return _dotEnv?[key] ?? defaultValue;
+    return _reader?[key] ?? defaultValue;
   }
 
   /// Obtiene un valor entero de configuración.

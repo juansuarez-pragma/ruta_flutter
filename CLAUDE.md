@@ -51,6 +51,7 @@ Clean Architecture de tres capas con patrón Service Locator (`get_it`) y Ports 
 - **Ports & Adapters Pattern**: Desacopla la UI de la lógica de negocio mediante interfaces abstractas
 - **Interface Segregation Principle (ISP)**: Interfaces de UI segregadas por responsabilidad
 - **Single Responsibility Principle (SRP)**: Un archivo = una clase/enum/interface
+- **Adapter Pattern**: Desacopla dependencias externas (dotenv, http) mediante interfaces
 
 ### Organización de Archivos (SRP)
 
@@ -60,7 +61,9 @@ Cada clase, enum o interface tiene su propio archivo. Los módulos usan barrel f
 lib/src/core/
 ├── config/
 │   ├── config.dart              # Barrel file
-│   ├── env_config.dart
+│   ├── env_reader.dart          # Interface abstracta (Port)
+│   ├── dotenv_reader.dart       # Adapter para dotenv
+│   ├── env_config.dart          # Usa EnvReader (desacoplado)
 │   ├── env_config_exception.dart
 │   └── environment.dart
 ├── errors/
@@ -171,7 +174,7 @@ Todos los textos de usuario en `lib/src/util/strings.dart` (clase `AppStrings`).
 
 ## Variables de Entorno
 
-La configuración se gestiona mediante archivos `.env` usando el paquete `dotenv`.
+La configuración se gestiona mediante archivos `.env`. La implementación está desacoplada de la librería concreta mediante el patrón Adapter.
 
 **Configuración inicial:**
 1. Copiar `.env.example` a `.env`
@@ -182,8 +185,41 @@ La configuración se gestiona mediante archivos `.env` usando el paquete `dotenv
 - `API_TIMEOUT`: Timeout de peticiones HTTP (ms)
 - `ENVIRONMENT`: Ambiente actual (`development`, `staging`, `production`)
 
+**Arquitectura de configuración:**
+
+```
+EnvConfig (Singleton) → EnvReader (Interface) ← DotEnvReader (Adapter)
+```
+
+- **`EnvReader`**: Interface abstracta para leer variables de entorno
+- **`DotEnvReader`**: Implementación usando el paquete `dotenv`
+- **`EnvConfig`**: Singleton que consume `EnvReader` sin conocer la implementación
+
+**Cómo cambiar la librería de env:**
+
+Para usar otra librería (ej. `flutter_dotenv`):
+
+```dart
+class FlutterDotEnvReader implements EnvReader {
+  @override
+  Future<void> load(String path) async {
+    await dotenv.load(fileName: path);
+  }
+
+  @override
+  String? operator [](String key) => dotenv.env[key];
+
+  @override
+  bool containsKey(String key) => dotenv.env.containsKey(key);
+}
+
+// En main():
+await EnvConfig.instance.initialize(reader: FlutterDotEnvReader());
+```
+
 **Clase de configuración:** `EnvConfig` (`lib/src/core/config/env_config.dart`)
 - Patrón Singleton para acceso global
+- Desacoplado de la librería mediante `EnvReader`
 - Validación de variables requeridas al inicializar
 - Debe inicializarse antes de `di.init()` en `main()`
 
