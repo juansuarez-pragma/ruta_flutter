@@ -23,8 +23,10 @@ El proyecto está construido siguiendo principios de software de alta calidad pa
 - **Patrones de Diseño:**
   - **Repository Pattern:** Para abstraer la fuente de datos.
   - **Strategy Pattern:** Utilizado en el `ApiResponseHandler` para gestionar diferentes respuestas HTTP de una manera limpia y escalable.
+  - **Singleton Pattern:** Utilizado en `EnvConfig` para gestión centralizada de variables de entorno.
   - **Clase Base para Repositorios:** Se usa una clase `BaseRepository` para centralizar y reutilizar la lógica de manejo de excepciones en todos los repositorios.
   - **Parseo Manual de JSON:** Los modelos de datos se parsean de JSON a objetos Dart y viceversa de forma manual, eliminando la necesidad de herramientas de generación de código como `json_serializable`.
+- **Variables de Entorno:** La configuración sensible (URLs, timeouts) se gestiona mediante archivos `.env` usando el paquete `dotenv`, evitando URLs hardcodeadas en el código.
 - **Externalización de Textos:** Todos los textos de la aplicación (mensajes, títulos, etc.) se gestionan en una clase `AppStrings` para facilitar el mantenimiento y futuras internacionalizaciones.
 
 ## Configuración del Proyecto
@@ -40,6 +42,25 @@ Asegúrate de tener el [SDK de Dart](https://dart.dev/get-dart) instalado.
    ```bash
    dart pub get
    ```
+4. Configura las variables de entorno:
+   ```bash
+   cp .env.example .env
+   ```
+   Edita el archivo `.env` según tus necesidades.
+
+## Variables de Entorno
+
+El proyecto utiliza variables de entorno para configuración. Copia `.env.example` a `.env` y ajusta los valores:
+
+| Variable | Descripción | Valor por defecto |
+|----------|-------------|-------------------|
+| `API_BASE_URL` | URL base de la API | `https://fakestoreapi.com` |
+| `API_TIMEOUT` | Timeout de peticiones HTTP (ms) | `30000` |
+| `ENVIRONMENT` | Ambiente de ejecución | `development` |
+
+**Ambientes disponibles:** `development`, `staging`, `production`
+
+> **Nota:** El archivo `.env` está excluido del control de versiones por seguridad. Solo `.env.example` se versiona como plantilla.
 
 ## Cómo Ejecutar la Aplicación
 

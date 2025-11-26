@@ -9,7 +9,8 @@ Esta es una aplicación de línea de comandos en Dart que funciona como un clien
 *   **Inyección de Dependencias:** `get_it` (patrón de Localizador de Servicios)
 *   **Cliente HTTP:** `http`
 *   **Manejo de Errores:** `dartz` (para el tipo `Either`) y un `ApiResponseHandler` personalizado
-*   **Patrones de Diseño:** Repositorio, Estrategia
+*   **Configuración:** `dotenv` para gestión de variables de entorno
+*   **Patrones de Diseño:** Repositorio, Estrategia, Singleton (EnvConfig)
 *   **Pruebas (Testing):** El proyecto está estructurado para ser comprobable, aunque actualmente no hay pruebas implementadas.
 
 ## Compilación y Ejecución
@@ -19,10 +20,27 @@ Esta es una aplicación de línea de comandos en Dart que funciona como un clien
     dart pub get
     ```
 
-2.  **Ejecutar la Aplicación:**
+2.  **Configurar Variables de Entorno:**
+    ```bash
+    cp .env.example .env
+    ```
+
+3.  **Ejecutar la Aplicación:**
     ```bash
     dart run
     ```
+
+## Variables de Entorno
+
+El proyecto utiliza el paquete `dotenv` para gestionar la configuración. Las variables se definen en el archivo `.env`:
+
+| Variable | Descripción | Requerida |
+|----------|-------------|-----------|
+| `API_BASE_URL` | URL base de la API | Sí |
+| `API_TIMEOUT` | Timeout de peticiones (ms) | No |
+| `ENVIRONMENT` | Ambiente (`development`, `staging`, `production`) | No |
+
+La clase `EnvConfig` (`lib/src/core/config/env_config.dart`) implementa el patrón Singleton y proporciona acceso tipado a las variables de configuración.
 
 ## Convenciones de Desarrollo
 
@@ -33,6 +51,7 @@ Esta es una aplicación de línea de comandos en Dart que funciona como un clien
 *   **Inyección de Dependencias:** El paquete `get_it` se utiliza para gestionar las dependencias. Todas las dependencias se registran en `lib/src/core/injection_container.dart`.
 *   **Patrón de Repositorio:** El `ProductRepository` define un contrato para las operaciones de datos, y `ProductRepositoryImpl` proporciona la implementación. Se utiliza un `BaseRepository` para centralizar la lógica de manejo de errores.
 *   **Manejo de Errores:** La aplicación utiliza el tipo `Either` del paquete `dartz` para representar el éxito o el fracaso. Se utiliza un `ApiResponseHandler` personalizado para asignar los códigos de estado HTTP a excepciones específicas.
-*   **Externalización de Cadenas de Texto:** Todas las cadenas de texto orientadas al usuario se gestionan en el archivo `util/strings.dart` para simplificar el mantenimiento y la posible internacionalización.
+*   **Externalización de Cadenas de Texto:** Todas las cadenas de texto orientadas al usuario se gestionan en el archivo `lib/src/util/strings.dart` para simplificar el mantenimiento y la posible internacionalización.
 *   **Análisis Manual de JSON:** El JSON se analiza manualmente en las clases de modelo, evitando herramientas de generación de código.
+*   **Variables de Entorno:** La configuración sensible se gestiona mediante `EnvConfig`, que carga valores desde archivos `.env`. Nunca se deben hardcodear URLs o credenciales en el código.
 *   **Seguridad Nula (Null Safety):** El proyecto tiene seguridad nula habilitada.

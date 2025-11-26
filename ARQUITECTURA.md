@@ -8,8 +8,9 @@
 4. [Patrones de Diseño Implementados](#patrones-de-diseño-implementados)
 5. [Flujo de Datos](#flujo-de-datos)
 6. [Manejo de Errores](#manejo-de-errores)
-7. [Inyección de Dependencias](#inyección-de-dependencias)
-8. [Diagrama de Arquitectura](#diagrama-de-arquitectura)
+7. [Variables de Entorno](#variables-de-entorno)
+8. [Inyección de Dependencias](#inyección-de-dependencias)
+9. [Diagrama de Arquitectura](#diagrama-de-arquitectura)
 
 ---
 
@@ -61,6 +62,7 @@ La arquitectura está dividida en **tres capas principales**, cada una con respo
 │  • Utilidades de Red                                    │
 │  • Inyección de Dependencias                            │
 │  • Clases Base Reutilizables                            │
+│  • Configuración de Entorno (EnvConfig)                 │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -233,20 +235,27 @@ abstract class ApiDataSource {
 class ApiDataSourceImpl implements ApiDataSource {
   final http.Client client;
   final ApiResponseHandler responseHandler;
-  static const String baseUrl = 'https://fakestoreapi.com';
+  final EnvConfig _config;
 
-  ApiDataSourceImpl(this.client, this.responseHandler);
+  ApiDataSourceImpl({
+    required this.client,
+    required this.responseHandler,
+    EnvConfig? config,
+  }) : _config = config ?? EnvConfig.instance;
+
+  String get _baseUrl => _config.apiBaseUrl;
 
   @override
   Future<List<ProductModel>> getAllProducts() async {
+    final uri = Uri.parse('$_baseUrl/products');
     try {
-      final response = await client.get(Uri.parse('$baseUrl/products'));
+      final response = await client.get(uri);
       responseHandler.handleResponse(response);
-
-      final List<dynamic> jsonList = jsonDecode(response.body);
-      return jsonList.map((json) => ProductModel.fromJson(json)).toList();
-    } on SocketException {
-      throw ConnectionException(AppStrings.connectionError);
+      return (json.decode(response.body) as List)
+          .map((item) => ProductModel.fromJson(item))
+          .toList();
+    } on http.ClientException {
+      throw ConnectionException();
     }
   }
   // ... más métodos
@@ -257,6 +266,7 @@ class ApiDataSourceImpl implements ApiDataSource {
 - Maneja la comunicación HTTP
 - Lanza excepciones específicas en caso de error
 - Convierte JSON en modelos
+- Obtiene la URL base desde `EnvConfig` (no hardcodeada)
 
 #### 2.3 Implementación de Repositorios (`repositories/`)
 
@@ -487,6 +497,18 @@ class BaseRepository {
 - Fácil de testear
 - Reutilizable en diferentes partes de la aplicación
 
+### 5. Singleton Pattern
+
+**Problema:** Necesitamos una única instancia de configuración accesible globalmente.
+
+**Solución:** `EnvConfig` implementa el patrón Singleton con constructor privado e instancia estática.
+
+**Beneficios:**
+- Garantiza una única fuente de verdad para la configuración
+- Acceso global sin pasar dependencias por constructores
+- Inicialización lazy (solo cuando se necesita)
+- Estado compartido entre todas las partes de la aplicación
+
 ---
 
 ## Flujo de Datos
@@ -617,6 +639,93 @@ El tipo `Either<L, R>` del paquete `dartz` permite:
 
 ---
 
+## Variables de Entorno
+
+El proyecto utiliza el paquete `dotenv` para gestionar la configuración de forma segura, evitando hardcodear URLs y valores sensibles en el código.
+
+### Configuración
+
+**Archivos:**
+- `.env.example`: Plantilla con las variables requeridas (versionado)
+- `.env`: Configuración real del ambiente (excluido de git)
+
+**Variables disponibles:**
+
+| Variable | Descripción | Requerida | Valor por defecto |
+|----------|-------------|-----------|-------------------|
+| `API_BASE_URL` | URL base de la API | Sí | - |
+| `API_TIMEOUT` | Timeout de peticiones HTTP (ms) | No | `30000` |
+| `ENVIRONMENT` | Ambiente de ejecución | No | `development` |
+
+### Clase EnvConfig
+
+**Ubicación:** `lib/src/core/config/env_config.dart`
+
+Implementa el patrón **Singleton** para proporcionar acceso global y tipado a las variables de configuración.
+
+```dart
+/// Clase de configuración que gestiona las variables de entorno.
+class EnvConfig {
+  // Singleton instance
+  static final EnvConfig _instance = EnvConfig._internal();
+  static EnvConfig get instance => _instance;
+
+  // Constructor privado para Singleton
+  EnvConfig._internal();
+
+  /// Inicializa la configuración cargando las variables de entorno.
+  Future<void> initialize({String envPath = '.env'}) async {
+    if (_isInitialized) return;
+    _dotEnv = DotEnv(includePlatformEnvironment: true)..load([envPath]);
+    _validateRequiredVariables();
+    _isInitialized = true;
+  }
+
+  // Getters para variables de configuración
+  String get apiBaseUrl => _get('API_BASE_URL');
+  int get apiTimeout => _getInt('API_TIMEOUT', defaultValue: 30000);
+  Environment get environment => // ...
+  bool get isDevelopment => environment == Environment.development;
+  bool get isProduction => environment == Environment.production;
+}
+```
+
+**Características:**
+- Patrón Singleton para instancia única global
+- Validación de variables requeridas al inicializar
+- Getters tipados para cada variable
+- Soporte para valores por defecto
+- Lanza `EnvConfigException` si faltan variables requeridas
+
+### Uso en la Aplicación
+
+```dart
+// bin/fase_2_consumo_api.dart
+void main() async {
+  // 1. Cargar variables de entorno PRIMERO
+  try {
+    await EnvConfig.instance.initialize();
+  } on EnvConfigException catch (e) {
+    print('Error de configuración: $e');
+    exit(1);
+  }
+
+  // 2. Inicializar dependencias
+  await di.init();
+
+  // ...
+}
+```
+
+### Beneficios
+
+- **Seguridad**: Las credenciales no se exponen en el código fuente
+- **Flexibilidad**: Diferentes configuraciones por ambiente (dev, staging, prod)
+- **Mantenibilidad**: Cambios de configuración sin modificar código
+- **Testabilidad**: Fácil inyección de configuraciones mock en tests
+
+---
+
 ## Inyección de Dependencias
 
 ### Configuración Inicial
@@ -712,6 +821,11 @@ final result = await getAllProductsUseCase(NoParams());
 │  │  Errors &   │  │   Network    │  │   Dependency   │        │
 │  │ Exceptions  │  │   Handler    │  │   Injection    │        │
 │  └─────────────┘  └──────────────┘  └────────────────┘        │
+│                                                                 │
+│  ┌─────────────────────────────────────────────────────┐       │
+│  │              EnvConfig (Singleton)                   │       │
+│  │         Gestión de Variables de Entorno              │       │
+│  └─────────────────────────────────────────────────────┘       │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -726,6 +840,7 @@ Esta arquitectura proporciona:
 ✅ **Escalabilidad** (fácil agregar nuevas funcionalidades)
 ✅ **Mantenibilidad** (cambios localizados en capas específicas)
 ✅ **Independencia de frameworks** (la lógica de negocio es pura)
+✅ **Configuración segura** (variables de entorno externalizadas)
 
 ### Próximos Pasos Sugeridos
 
