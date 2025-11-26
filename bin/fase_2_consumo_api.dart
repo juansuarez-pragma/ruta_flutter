@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:dartz/dartz.dart';
+import 'package:fase_2_consumo_api/src/util/strings.dart' show AppStrings;
 import 'package:http/http.dart' as http;
 import 'package:fase_2_consumo_api/src/core/errors/failures.dart';
 import 'package:fase_2_consumo_api/src/core/injection_container.dart' as di;
@@ -8,7 +9,6 @@ import 'package:fase_2_consumo_api/src/domain/entities/product_entity.dart';
 import 'package:fase_2_consumo_api/src/domain/usecases/get_all_categories_usecase.dart';
 import 'package:fase_2_consumo_api/src/domain/usecases/get_all_products_usecase.dart';
 import 'package:fase_2_consumo_api/src/domain/usecases/get_product_by_id_usecase.dart';
-import 'package:fase_2_consumo_api/src/util/strings.dart';
 
 void main(List<String> arguments) async {
   // 1. Inicializar dependencias
@@ -117,11 +117,13 @@ Future<void> _executeUseCase<T>(
 
 // Función auxiliar para imprimir detalles de un producto
 void _printProduct(ProductEntity product, String header) {
-  print('$header');
+  print(header);
   print('${AppStrings.productId.padRight(12)}${product.id}');
   print('${AppStrings.productTitle.padRight(12)}${product.title}');
   print('${AppStrings.productCategory.padRight(12)}${product.category}');
   print('${AppStrings.productPrice.padRight(12)}\$${product.price}');
-  print('${AppStrings.productDescription.padRight(12)}${product.description.substring(0, product.description.length > 70 ? 70 : product.description.length)}...');
+  print(
+    '${AppStrings.productDescription.padRight(12)}${product.description.substring(0, product.description.length > 70 ? 70 : product.description.length)}...',
+  );
   print('${AppStrings.productImage.padRight(12)}${product.image}\n');
 }

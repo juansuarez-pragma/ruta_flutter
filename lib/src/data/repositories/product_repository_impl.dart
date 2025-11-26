@@ -6,7 +6,8 @@ import 'package:fase_2_consumo_api/src/domain/entities/product_entity.dart';
 import 'package:fase_2_consumo_api/src/domain/repositories/product_repository.dart';
 import 'package:fase_2_consumo_api/src/util/strings.dart';
 
-class ProductRepositoryImpl extends BaseRepository implements ProductRepository {
+class ProductRepositoryImpl extends BaseRepository
+    implements ProductRepository {
   final ApiDataSource remoteDataSource;
 
   ProductRepositoryImpl({required this.remoteDataSource});
@@ -15,21 +16,19 @@ class ProductRepositoryImpl extends BaseRepository implements ProductRepository 
   Future<Either<Failure, List<ProductEntity>>> getAllProducts() async {
     return await handleRequest(() async {
       final productModels = await remoteDataSource.getAllProducts();
-      final productEntities =
-          productModels.map((model) => model.toEntity()).toList();
+      final productEntities = productModels
+          .map((model) => model.toEntity())
+          .toList();
       return productEntities;
     });
   }
 
   @override
   Future<Either<Failure, ProductEntity>> getProductById(int id) async {
-    return await handleRequest(
-      () async {
-        final productModel = await remoteDataSource.getProductById(id);
-        return productModel.toEntity();
-      },
-      notFoundMessage: AppStrings.notFoundProductFailureMessage,
-    );
+    return await handleRequest(() async {
+      final productModel = await remoteDataSource.getProductById(id);
+      return productModel.toEntity();
+    }, notFoundMessage: AppStrings.notFoundProductFailureMessage);
   }
 
   @override
