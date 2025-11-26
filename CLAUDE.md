@@ -30,13 +30,15 @@ dart format .
 
 ## Arquitectura
 
-Clean Architecture de tres capas con patrón Service Locator (`get_it`).
+Clean Architecture de tres capas con patrón Service Locator (`get_it`) y Ports & Adapters para la capa de presentación.
 
 ### Responsabilidades por Capa
 
 - **Domain** (`lib/src/domain/`): Lógica de negocio pura. Entidades (inmutables, extienden `Equatable`), casos de uso (implementan `UseCase<Type, Params>`) e interfaces de repositorio. Sin dependencias externas.
 
 - **Data** (`lib/src/data/`): Comunicación con API y transformación de datos. Los modelos extienden las entidades y proveen métodos `fromJson()`/`toJson()` + `toEntity()`. Las implementaciones de repositorio extienden `BaseRepository` para el mapeo centralizado de excepciones a fallos.
+
+- **Presentation** (`lib/src/presentation/`): Capa de interfaz de usuario desacoplada mediante el patrón Ports & Adapters (Hexagonal Architecture). Permite intercambiar implementaciones de UI (consola, GUI, web, móvil) sin modificar la lógica de negocio.
 
 - **Core** (`lib/src/core/`): Aspectos transversales. Contenedor de inyección de dependencias, `ApiResponseHandler` (patrón Strategy para códigos HTTP), excepciones personalizadas, clases `Failure`, configuración de entorno (`EnvConfig`) y constantes de endpoints (`ApiEndpoints`).
 
@@ -46,22 +48,56 @@ Clean Architecture de tres capas con patrón Service Locator (`get_it`).
 - **Strategy Pattern**: `ApiResponseHandler` mapea códigos HTTP a excepciones mediante un mapa de funciones
 - **BaseRepository**: Centraliza lógica try-catch, convierte excepciones a `Either<Failure, T>`
 - **Use Case Pattern**: Cada caso de uso es una clase callable de responsabilidad única
+- **Ports & Adapters Pattern**: Desacopla la UI de la lógica de negocio mediante interfaces abstractas
+
+### Capa de Presentación (Ports & Adapters)
+
+```
+lib/src/presentation/
+├── contracts/
+│   └── user_interface.dart        # Port: contrato abstracto para cualquier UI
+├── adapters/
+│   └── console_user_interface.dart # Adapter: implementación para consola
+└── application.dart               # Coordinador entre UI y casos de uso
+```
+
+**Componentes:**
+
+- **`UserInterface`** (Port): Interfaz abstracta que define las operaciones de UI (`showMainMenu()`, `showProducts()`, `showError()`, etc.). Cualquier tipo de interfaz debe implementar este contrato.
+
+- **`ConsoleUserInterface`** (Adapter): Implementación concreta para terminal usando `stdin`/`stdout`.
+
+- **`Application`**: Orquesta el flujo de la aplicación. Recibe una instancia de `UserInterface` por inyección de dependencias y coordina la interacción con los casos de uso.
+
+**Cómo cambiar la UI:**
+
+Para implementar una nueva interfaz (Flutter, web, etc.):
+
+1. Crear una clase que implemente `UserInterface`
+2. Registrar la nueva implementación en `injection_container.dart`:
+   ```dart
+   sl.registerLazySingleton<UserInterface>(() => NuevaImplementacionUI());
+   ```
+
+La lógica de negocio permanece intacta.
 
 ### Flujo de Dependencias
 
 ```
-Presentación (bin/) → Casos de Uso → Interfaz Repository ← Repository Impl → DataSource → HTTP
+bin/main → Application → UserInterface (Port) ← ConsoleUserInterface (Adapter)
+                ↓
+           Casos de Uso → Interfaz Repository ← Repository Impl → DataSource → HTTP
 ```
 
 Todas las dependencias registradas en `lib/src/core/injection_container.dart`:
-- Casos de Uso: `registerFactory` (nueva instancia por llamada)
-- Repositories, DataSources, HTTP Client: `registerLazySingleton`
+- `Application`, Casos de Uso: `registerFactory` (nueva instancia por llamada)
+- `UserInterface`, Repositories, DataSources, HTTP Client: `registerLazySingleton`
 
 ### Manejo de Errores
 
 1. DataSource lanza excepciones tipadas (`ServerException`, `ConnectionException`, `NotFoundException`, `ClientException`)
 2. El método `handleRequest()` del Repository captura excepciones y retorna `Left(Failure)`
-3. Presentación usa `result.fold()` para manejar éxito/fallo
+3. `Application` usa `result.fold()` y delega la presentación del error a `UserInterface`
 
 ### Externalización de Textos
 

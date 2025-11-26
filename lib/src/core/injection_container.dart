@@ -8,6 +8,9 @@ import 'package:fase_2_consumo_api/src/domain/repositories/product_repository.da
 import 'package:fase_2_consumo_api/src/domain/usecases/get_all_categories_usecase.dart';
 import 'package:fase_2_consumo_api/src/domain/usecases/get_all_products_usecase.dart';
 import 'package:fase_2_consumo_api/src/domain/usecases/get_product_by_id_usecase.dart';
+import 'package:fase_2_consumo_api/src/presentation/adapters/console_user_interface.dart';
+import 'package:fase_2_consumo_api/src/presentation/application.dart';
+import 'package:fase_2_consumo_api/src/presentation/contracts/user_interface.dart';
 
 final sl = GetIt.instance;
 
@@ -17,6 +20,21 @@ final sl = GetIt.instance;
 Future<void> init() async {
   // Configuración
   sl.registerLazySingleton<EnvConfig>(() => EnvConfig.instance);
+
+  // Presentation - User Interface (Port/Adapter Pattern)
+  // Para cambiar la UI, registrar otra implementación de UserInterface
+  sl.registerLazySingleton<UserInterface>(() => ConsoleUserInterface());
+
+  // Presentation - Application
+  sl.registerFactory(
+    () => Application(
+      ui: sl<UserInterface>(),
+      getAllProducts: sl(),
+      getProductById: sl(),
+      getAllCategories: sl(),
+      onExit: () => sl<http.Client>().close(),
+    ),
+  );
 
   // Use Cases
   sl.registerFactory(() => GetAllProductsUseCase(sl()));
@@ -30,11 +48,7 @@ Future<void> init() async {
 
   // Data Sources
   sl.registerLazySingleton<ApiDataSource>(
-    () => ApiDataSourceImpl(
-      client: sl(),
-      responseHandler: sl(),
-      config: sl(),
-    ),
+    () => ApiDataSourceImpl(client: sl(), responseHandler: sl(), config: sl()),
   );
 
   // Core
