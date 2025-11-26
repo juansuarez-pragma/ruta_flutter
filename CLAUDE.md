@@ -50,13 +50,66 @@ Clean Architecture de tres capas con patrón Service Locator (`get_it`) y Ports 
 - **Use Case Pattern**: Cada caso de uso es una clase callable de responsabilidad única
 - **Ports & Adapters Pattern**: Desacopla la UI de la lógica de negocio mediante interfaces abstractas
 - **Interface Segregation Principle (ISP)**: Interfaces de UI segregadas por responsabilidad
+- **Single Responsibility Principle (SRP)**: Un archivo = una clase/enum/interface
+
+### Organización de Archivos (SRP)
+
+Cada clase, enum o interface tiene su propio archivo. Los módulos usan barrel files para simplificar imports:
+
+```
+lib/src/core/
+├── config/
+│   ├── config.dart              # Barrel file
+│   ├── env_config.dart
+│   ├── env_config_exception.dart
+│   └── environment.dart
+├── errors/
+│   ├── exceptions.dart          # Barrel file
+│   ├── app_exception.dart
+│   ├── server_exception.dart
+│   ├── not_found_exception.dart
+│   ├── client_exception.dart
+│   ├── connection_exception.dart
+│   ├── failures.dart            # Barrel file
+│   ├── failure.dart
+│   ├── server_failure.dart
+│   ├── not_found_failure.dart
+│   ├── client_failure.dart
+│   └── connection_failure.dart
+├── usecase/
+│   ├── usecase.dart             # Barrel file
+│   ├── use_case.dart
+│   └── no_params.dart
+└── ...
+
+lib/src/data/datasources/
+├── datasources.dart             # Barrel file
+├── api_datasource.dart          # Interface
+└── api_datasource_impl.dart     # Implementación
+```
+
+**Uso de barrel files:**
+```dart
+// En lugar de múltiples imports específicos:
+import 'package:.../errors/server_exception.dart';
+import 'package:.../errors/client_exception.dart';
+
+// Usar el barrel file:
+import 'package:.../errors/exceptions.dart';
+```
 
 ### Capa de Presentación (Ports & Adapters + ISP)
 
 ```
 lib/src/presentation/
 ├── contracts/
-│   └── user_interface.dart        # Interfaces segregadas (Ports)
+│   ├── contracts.dart           # Barrel file
+│   ├── user_interface.dart      # Interface compuesta (Port)
+│   ├── user_input.dart
+│   ├── message_output.dart
+│   ├── product_output.dart
+│   ├── category_output.dart
+│   └── menu_option.dart
 ├── adapters/
 │   └── console_user_interface.dart # Adapter: implementación para consola
 └── application.dart               # Coordinador entre UI y casos de uso
