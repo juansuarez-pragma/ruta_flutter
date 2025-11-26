@@ -1,5 +1,6 @@
-/// Barrel file para exportar los orígenes de datos.
+/// Barrel file para exportar todos los datasources.
 library;
 
-export 'api_datasource.dart';
-export 'api_datasource_impl.dart';
+export 'category/category.dart';
+export 'core/core.dart';
+export 'product/product.dart';

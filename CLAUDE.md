@@ -86,9 +86,19 @@ lib/src/core/
 └── ...
 
 lib/src/data/datasources/
-├── datasources.dart             # Barrel file
-├── api_datasource.dart          # Interface
-└── api_datasource_impl.dart     # Implementación
+├── datasources.dart             # Barrel file principal
+├── core/
+│   ├── core.dart                # Barrel file
+│   ├── api_client.dart          # Interface genérica para HTTP
+│   └── api_client_impl.dart     # Implementación con lógica común
+├── product/
+│   ├── product.dart             # Barrel file
+│   ├── product_remote_datasource.dart
+│   └── product_remote_datasource_impl.dart
+└── category/
+    ├── category.dart            # Barrel file
+    ├── category_remote_datasource.dart
+    └── category_remote_datasource_impl.dart
 ```
 
 **Uso de barrel files:**
@@ -150,12 +160,70 @@ Para implementar una nueva interfaz (Flutter, web, etc.):
 
 La lógica de negocio permanece intacta.
 
+### Capa de DataSources (Escalabilidad)
+
+La capa de DataSources está diseñada para escalar a múltiples endpoints sin duplicar código HTTP:
+
+```
+ApiClient (Interface genérica)
+    ↑
+ApiClientImpl (Lógica HTTP común: get, getList, getPrimitiveList)
+    ↑
+┌───┴───────────────┐
+│                   │
+ProductRemoteDS   CategoryRemoteDS   (+ futuros datasources)
+```
+
+**Componentes:**
+
+- **`ApiClient`** (Interface): Define métodos genéricos para peticiones HTTP:
+  - `get<T>()`: Obtener un objeto único
+  - `getList<T>()`: Obtener lista de objetos con fromJson
+  - `getPrimitiveList<T>()`: Obtener lista de tipos primitivos (strings, ints)
+
+- **`ApiClientImpl`**: Centraliza la lógica HTTP (manejo de errores, headers, timeout). Evita duplicación de código en cada DataSource.
+
+- **DataSources específicos** (`ProductRemoteDataSource`, `CategoryRemoteDataSource`): Delegan las peticiones HTTP al `ApiClient` y solo definen endpoints + transformaciones.
+
+**Agregar un nuevo endpoint:**
+
+```dart
+// 1. Crear interface
+abstract class OrderRemoteDataSource {
+  Future<List<OrderModel>> getAll();
+  Future<OrderModel> getById(int id);
+}
+
+// 2. Crear implementación (mínimo código repetido)
+class OrderRemoteDataSourceImpl implements OrderRemoteDataSource {
+  final ApiClient _apiClient;
+  OrderRemoteDataSourceImpl({required ApiClient apiClient}) : _apiClient = apiClient;
+
+  @override
+  Future<List<OrderModel>> getAll() => _apiClient.getList(
+    endpoint: ApiEndpoints.orders,
+    fromJsonList: OrderModel.fromJson,
+  );
+
+  @override
+  Future<OrderModel> getById(int id) => _apiClient.get(
+    endpoint: ApiEndpoints.orderById(id),
+    fromJson: (json) => OrderModel.fromJson(json as Map<String, dynamic>),
+  );
+}
+
+// 3. Registrar en injection_container.dart
+sl.registerLazySingleton<OrderRemoteDataSource>(
+  () => OrderRemoteDataSourceImpl(apiClient: sl()),
+);
+```
+
 ### Flujo de Dependencias
 
 ```
 bin/main → Application → UserInterface (Port) ← ConsoleUserInterface (Adapter)
                 ↓
-           Casos de Uso → Interfaz Repository ← Repository Impl → DataSource → HTTP
+           Casos de Uso → Interfaz Repository ← Repository Impl → DataSources → ApiClient → HTTP
 ```
 
 Todas las dependencias registradas en `lib/src/core/injection_container.dart`:

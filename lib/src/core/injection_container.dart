@@ -43,15 +43,26 @@ Future<void> init() async {
 
   // Repository
   sl.registerLazySingleton<ProductRepository>(
-    () => ProductRepositoryImpl(remoteDataSource: sl()),
+    () => ProductRepositoryImpl(
+      productDataSource: sl(),
+      categoryDataSource: sl(),
+    ),
   );
 
   // Data Sources
-  sl.registerLazySingleton<ApiDataSource>(
-    () => ApiDataSourceImpl(client: sl(), responseHandler: sl(), config: sl()),
+  sl.registerLazySingleton<ProductRemoteDataSource>(
+    () => ProductRemoteDataSourceImpl(apiClient: sl()),
+  );
+  sl.registerLazySingleton<CategoryRemoteDataSource>(
+    () => CategoryRemoteDataSourceImpl(apiClient: sl()),
   );
 
-  // Core
+  // Core - API Client
+  sl.registerLazySingleton<ApiClient>(
+    () => ApiClientImpl(client: sl(), responseHandler: sl(), config: sl()),
+  );
+
+  // Core - HTTP
   sl.registerLazySingleton(() => ApiResponseHandler());
   sl.registerLazySingleton(() => http.Client());
 }
