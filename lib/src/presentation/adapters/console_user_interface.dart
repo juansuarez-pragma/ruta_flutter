@@ -45,25 +45,15 @@ class ConsoleUserInterface implements UserInterface {
   }
 
   @override
-  void showLoading(String operationName) {
+  void showOperationInfo(String operationName) {
     print('\n${AppStrings.separator}');
     print('${AppStrings.executingUseCase} $operationName');
     print(AppStrings.separator);
   }
 
   @override
-  void hideLoading() {
-    // En consola no hay indicador de carga visual que ocultar
-  }
-
-  @override
   void showError(String message) {
     print('${AppStrings.errorPrefix} $message\n');
-  }
-
-  @override
-  void showSuccess(String message) {
-    print('${AppStrings.successPrefix} $message\n');
   }
 
   @override
@@ -98,11 +88,6 @@ class ConsoleUserInterface implements UserInterface {
   @override
   void showGoodbye() {
     print('\n${AppStrings.executionEnd}');
-  }
-
-  @override
-  void dispose() {
-    // No hay recursos que liberar en la implementación de consola
   }
 
   void _printProduct(ProductEntity product, String header) {

@@ -59,12 +59,11 @@ class Application {
     }
 
     _ui.showGoodbye();
-    _ui.dispose();
     _onExit();
   }
 
   Future<void> _handleGetAllProducts() async {
-    _ui.showLoading(AppStrings.getAllProductsUseCaseTitle);
+    _ui.showOperationInfo(AppStrings.getAllProductsUseCaseTitle);
 
     final result = await _getAllProducts(const NoParams());
 
@@ -72,8 +71,6 @@ class Application {
       (failure) => _ui.showError(failure.message),
       (products) => _ui.showProducts(products),
     );
-
-    _ui.hideLoading();
   }
 
   Future<void> _handleGetProductById() async {
@@ -84,7 +81,7 @@ class Application {
       return;
     }
 
-    _ui.showLoading('${AppStrings.getProductByIdUseCaseTitle} (ID: $id)');
+    _ui.showOperationInfo('${AppStrings.getProductByIdUseCaseTitle} (ID: $id)');
 
     final result = await _getProductById(GetProductByIdParams(id: id));
 
@@ -92,12 +89,10 @@ class Application {
       (failure) => _ui.showError(failure.message),
       (product) => _ui.showProduct(product),
     );
-
-    _ui.hideLoading();
   }
 
   Future<void> _handleGetAllCategories() async {
-    _ui.showLoading(AppStrings.getAllCategoriesUseCaseTitle);
+    _ui.showOperationInfo(AppStrings.getAllCategoriesUseCaseTitle);
 
     final result = await _getAllCategories(const NoParams());
 
@@ -105,7 +100,5 @@ class Application {
       (failure) => _ui.showError(failure.message),
       (categories) => _ui.showCategories(categories),
     );
-
-    _ui.hideLoading();
   }
 }

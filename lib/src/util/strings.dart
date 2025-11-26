@@ -33,7 +33,6 @@ class AppStrings {
 
   // Success Messages
   static const String successFound = '>> ÉXITO: Se encontraron';
-  static const String successPrefix = '>> ÉXITO:';
 
   // Error Messages
   static const String errorPrefix = '>> ERROR:';

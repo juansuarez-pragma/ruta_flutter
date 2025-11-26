@@ -49,21 +49,34 @@ Clean Architecture de tres capas con patrón Service Locator (`get_it`) y Ports 
 - **BaseRepository**: Centraliza lógica try-catch, convierte excepciones a `Either<Failure, T>`
 - **Use Case Pattern**: Cada caso de uso es una clase callable de responsabilidad única
 - **Ports & Adapters Pattern**: Desacopla la UI de la lógica de negocio mediante interfaces abstractas
+- **Interface Segregation Principle (ISP)**: Interfaces de UI segregadas por responsabilidad
 
-### Capa de Presentación (Ports & Adapters)
+### Capa de Presentación (Ports & Adapters + ISP)
 
 ```
 lib/src/presentation/
 ├── contracts/
-│   └── user_interface.dart        # Port: contrato abstracto para cualquier UI
+│   └── user_interface.dart        # Interfaces segregadas (Ports)
 ├── adapters/
 │   └── console_user_interface.dart # Adapter: implementación para consola
 └── application.dart               # Coordinador entre UI y casos de uso
 ```
 
+**Interfaces Segregadas (ISP):**
+
+Las interfaces de UI están segregadas por responsabilidad para cumplir con el Interface Segregation Principle:
+
+- **`UserInput`**: Entrada de datos del usuario (`showMainMenu()`, `promptProductId()`)
+- **`MessageOutput`**: Mensajes generales (`showWelcome()`, `showError()`, `showGoodbye()`, `showOperationInfo()`)
+- **`ProductOutput`**: Visualización de productos (`showProducts()`, `showProduct()`)
+- **`CategoryOutput`**: Visualización de categorías (`showCategories()`)
+- **`UserInterface`**: Combina todas las interfaces anteriores
+
+Esto permite que implementaciones parciales (ej. un widget que solo muestra productos) implementen únicamente las interfaces que necesitan.
+
 **Componentes:**
 
-- **`UserInterface`** (Port): Interfaz abstracta que define las operaciones de UI (`showMainMenu()`, `showProducts()`, `showError()`, etc.). Cualquier tipo de interfaz debe implementar este contrato.
+- **`UserInterface`** (Port): Interfaz compuesta que extiende `UserInput`, `MessageOutput`, `ProductOutput` y `CategoryOutput`.
 
 - **`ConsoleUserInterface`** (Adapter): Implementación concreta para terminal usando `stdin`/`stdout`.
 
@@ -73,7 +86,7 @@ lib/src/presentation/
 
 Para implementar una nueva interfaz (Flutter, web, etc.):
 
-1. Crear una clase que implemente `UserInterface`
+1. Crear una clase que implemente `UserInterface` (o solo las interfaces específicas que necesite)
 2. Registrar la nueva implementación en `injection_container.dart`:
    ```dart
    sl.registerLazySingleton<UserInterface>(() => NuevaImplementacionUI());

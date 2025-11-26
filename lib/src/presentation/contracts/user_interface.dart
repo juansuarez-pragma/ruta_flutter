@@ -9,17 +9,8 @@ enum MenuOption {
   invalid,
 }
 
-/// Puerto (Port) que define el contrato para cualquier interfaz de usuario.
-///
-/// Este patrón permite intercambiar la implementación de UI (consola, GUI,
-/// web, móvil) sin afectar la lógica de negocio. Cada plataforma implementa
-/// este contrato según sus capacidades.
-///
-/// Basado en el patrón Ports and Adapters (Hexagonal Architecture).
-abstract class UserInterface {
-  /// Muestra un mensaje de bienvenida al usuario.
-  void showWelcome(String message);
-
+/// Contrato para entrada de datos del usuario.
+abstract class UserInput {
   /// Muestra el menú principal y retorna la opción seleccionada.
   Future<MenuOption> showMainMenu();
 
@@ -27,33 +18,45 @@ abstract class UserInterface {
   ///
   /// Retorna `null` si el usuario cancela o ingresa un valor inválido.
   Future<int?> promptProductId();
+}
 
-  /// Muestra un indicador de carga mientras se ejecuta una operación.
-  void showLoading(String operationName);
-
-  /// Oculta el indicador de carga.
-  void hideLoading();
+/// Contrato para mostrar mensajes al usuario.
+abstract class MessageOutput {
+  /// Muestra un mensaje de bienvenida al usuario.
+  void showWelcome(String message);
 
   /// Muestra un mensaje de error al usuario.
   void showError(String message);
 
-  /// Muestra un mensaje de éxito al usuario.
-  void showSuccess(String message);
+  /// Muestra un mensaje de despedida.
+  void showGoodbye();
 
+  /// Muestra información sobre la operación en curso.
+  void showOperationInfo(String operationName);
+}
+
+/// Contrato para mostrar datos de productos.
+abstract class ProductOutput {
   /// Muestra una lista de productos.
   void showProducts(List<ProductEntity> products);
 
   /// Muestra un producto individual.
   void showProduct(ProductEntity product);
+}
 
+/// Contrato para mostrar datos de categorías.
+abstract class CategoryOutput {
   /// Muestra una lista de categorías.
   void showCategories(List<String> categories);
-
-  /// Muestra un mensaje de despedida y limpia recursos.
-  void showGoodbye();
-
-  /// Libera recursos utilizados por la interfaz.
-  ///
-  /// Debe llamarse al finalizar la aplicación.
-  void dispose();
 }
+
+/// Puerto (Port) que combina todos los contratos de UI necesarios.
+///
+/// Este patrón permite intercambiar la implementación de UI (consola, GUI,
+/// web, móvil) sin afectar la lógica de negocio. Cada plataforma implementa
+/// estos contratos según sus capacidades.
+///
+/// Basado en el patrón Ports and Adapters (Hexagonal Architecture)
+/// aplicando Interface Segregation Principle (ISP).
+abstract class UserInterface
+    implements UserInput, MessageOutput, ProductOutput, CategoryOutput {}
