@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:fase_2_consumo_api/src/core/config/env_config.dart';
 import 'package:fase_2_consumo_api/src/core/errors/exceptions.dart';
 import 'package:fase_2_consumo_api/src/core/network/api_response_handler.dart';
 import 'package:fase_2_consumo_api/src/data/models/product_model.dart';
@@ -13,13 +14,19 @@ abstract class ApiDataSource {
 class ApiDataSourceImpl implements ApiDataSource {
   final http.Client client;
   final ApiResponseHandler responseHandler;
-  static const String BASE_URL = 'https://fakestoreapi.com';
+  final EnvConfig _config;
 
-  ApiDataSourceImpl({required this.client, required this.responseHandler});
+  ApiDataSourceImpl({
+    required this.client,
+    required this.responseHandler,
+    EnvConfig? config,
+  }) : _config = config ?? EnvConfig.instance;
+
+  String get _baseUrl => _config.apiBaseUrl;
 
   @override
   Future<List<ProductModel>> getAllProducts() async {
-    final uri = Uri.parse('$BASE_URL/products');
+    final uri = Uri.parse('$_baseUrl/products');
     try {
       final response = await client.get(uri);
       responseHandler.handleResponse(response);
@@ -33,7 +40,7 @@ class ApiDataSourceImpl implements ApiDataSource {
 
   @override
   Future<ProductModel> getProductById(int id) async {
-    final uri = Uri.parse('$BASE_URL/products/$id');
+    final uri = Uri.parse('$_baseUrl/products/$id');
     try {
       final response = await client.get(uri);
       responseHandler.handleResponse(response);
@@ -45,7 +52,7 @@ class ApiDataSourceImpl implements ApiDataSource {
 
   @override
   Future<List<String>> getAllCategories() async {
-    final uri = Uri.parse('$BASE_URL/products/categories');
+    final uri = Uri.parse('$_baseUrl/products/categories');
     try {
       final response = await client.get(uri);
       responseHandler.handleResponse(response);

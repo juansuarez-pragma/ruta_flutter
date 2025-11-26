@@ -1,5 +1,6 @@
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
+import 'package:fase_2_consumo_api/src/core/config/env_config.dart';
 import 'package:fase_2_consumo_api/src/core/network/api_response_handler.dart';
 import 'package:fase_2_consumo_api/src/data/datasources/api_datasource.dart';
 import 'package:fase_2_consumo_api/src/data/repositories/product_repository_impl.dart';
@@ -10,7 +11,13 @@ import 'package:fase_2_consumo_api/src/domain/usecases/get_product_by_id_usecase
 
 final sl = GetIt.instance;
 
-void init() {
+/// Inicializa todas las dependencias de la aplicación.
+///
+/// Debe llamarse después de [EnvConfig.instance.initialize()].
+Future<void> init() async {
+  // Configuración
+  sl.registerLazySingleton<EnvConfig>(() => EnvConfig.instance);
+
   // Use Cases
   sl.registerFactory(() => GetAllProductsUseCase(sl()));
   sl.registerFactory(() => GetProductByIdUseCase(sl()));
@@ -23,7 +30,11 @@ void init() {
 
   // Data Sources
   sl.registerLazySingleton<ApiDataSource>(
-    () => ApiDataSourceImpl(client: sl(), responseHandler: sl()),
+    () => ApiDataSourceImpl(
+      client: sl(),
+      responseHandler: sl(),
+      config: sl(),
+    ),
   );
 
   // Core

@@ -38,7 +38,7 @@ Clean Architecture de tres capas con patrón Service Locator (`get_it`).
 
 - **Data** (`lib/src/data/`): Comunicación con API y transformación de datos. Los modelos extienden las entidades y proveen métodos `fromJson()`/`toJson()` + `toEntity()`. Las implementaciones de repositorio extienden `BaseRepository` para el mapeo centralizado de excepciones a fallos.
 
-- **Core** (`lib/src/core/`): Aspectos transversales. Contenedor de inyección de dependencias, `ApiResponseHandler` (patrón Strategy para códigos HTTP), excepciones personalizadas y clases `Failure`.
+- **Core** (`lib/src/core/`): Aspectos transversales. Contenedor de inyección de dependencias, `ApiResponseHandler` (patrón Strategy para códigos HTTP), excepciones personalizadas, clases `Failure` y configuración de entorno (`EnvConfig`).
 
 ### Patrones Clave
 
@@ -67,9 +67,27 @@ Todas las dependencias registradas en `lib/src/core/injection_container.dart`:
 
 Todos los textos de usuario en `lib/src/util/strings.dart` (clase `AppStrings`).
 
+## Variables de Entorno
+
+La configuración se gestiona mediante archivos `.env` usando el paquete `dotenv`.
+
+**Configuración inicial:**
+1. Copiar `.env.example` a `.env`
+2. Ajustar valores según el ambiente
+
+**Variables disponibles:**
+- `API_BASE_URL`: URL base de la API
+- `API_TIMEOUT`: Timeout de peticiones HTTP (ms)
+- `ENVIRONMENT`: Ambiente actual (`development`, `staging`, `production`)
+
+**Clase de configuración:** `EnvConfig` (`lib/src/core/config/env_config.dart`)
+- Patrón Singleton para acceso global
+- Validación de variables requeridas al inicializar
+- Debe inicializarse antes de `di.init()` en `main()`
+
 ## API
 
-URL Base: `https://fakestoreapi.com`
+URL Base: Configurada en variable de entorno `API_BASE_URL`
 
 Endpoints consumidos:
 - `GET /products` - Todos los productos

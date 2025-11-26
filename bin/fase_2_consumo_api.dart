@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:dartz/dartz.dart';
 import 'package:fase_2_consumo_api/src/util/strings.dart' show AppStrings;
 import 'package:http/http.dart' as http;
+import 'package:fase_2_consumo_api/src/core/config/env_config.dart';
 import 'package:fase_2_consumo_api/src/core/errors/failures.dart';
 import 'package:fase_2_consumo_api/src/core/injection_container.dart' as di;
 import 'package:fase_2_consumo_api/src/core/usecase/usecase.dart';
@@ -11,12 +12,21 @@ import 'package:fase_2_consumo_api/src/domain/usecases/get_all_products_usecase.
 import 'package:fase_2_consumo_api/src/domain/usecases/get_product_by_id_usecase.dart';
 
 void main(List<String> arguments) async {
-  // 1. Inicializar dependencias
-  di.init();
+  // 1. Cargar variables de entorno
+  try {
+    await EnvConfig.instance.initialize();
+  } on EnvConfigException catch (e) {
+    print('Error de configuración: $e');
+    print('Asegúrate de crear el archivo .env basándote en .env.example');
+    exit(1);
+  }
+
+  // 2. Inicializar dependencias
+  await di.init();
 
   print('--- Bienvenido al Cliente Interactivo de Fake Store API ---\n');
 
-  // 2. Bucle principal de la aplicación
+  // 3. Bucle principal de la aplicación
   while (true) {
     _showMenu();
     final choice = stdin.readLineSync();
