@@ -38,7 +38,7 @@ Clean Architecture de tres capas con patrón Service Locator (`get_it`).
 
 - **Data** (`lib/src/data/`): Comunicación con API y transformación de datos. Los modelos extienden las entidades y proveen métodos `fromJson()`/`toJson()` + `toEntity()`. Las implementaciones de repositorio extienden `BaseRepository` para el mapeo centralizado de excepciones a fallos.
 
-- **Core** (`lib/src/core/`): Aspectos transversales. Contenedor de inyección de dependencias, `ApiResponseHandler` (patrón Strategy para códigos HTTP), excepciones personalizadas, clases `Failure` y configuración de entorno (`EnvConfig`).
+- **Core** (`lib/src/core/`): Aspectos transversales. Contenedor de inyección de dependencias, `ApiResponseHandler` (patrón Strategy para códigos HTTP), excepciones personalizadas, clases `Failure`, configuración de entorno (`EnvConfig`) y constantes de endpoints (`ApiEndpoints`).
 
 ### Patrones Clave
 
@@ -89,7 +89,9 @@ La configuración se gestiona mediante archivos `.env` usando el paquete `dotenv
 
 URL Base: Configurada en variable de entorno `API_BASE_URL`
 
+**Endpoints centralizados en:** `lib/src/core/constants/api_endpoints.dart`
+
 Endpoints consumidos:
-- `GET /products` - Todos los productos
-- `GET /products/{id}` - Producto por ID
-- `GET /products/categories` - Todas las categorías
+- `ApiEndpoints.products` → `GET /products`
+- `ApiEndpoints.productById(id)` → `GET /products/{id}`
+- `ApiEndpoints.categories` → `GET /products/categories`
