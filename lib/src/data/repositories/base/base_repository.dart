@@ -2,7 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:meta/meta.dart';
 import 'package:fase_2_consumo_api/src/core/errors/exceptions.dart';
 import 'package:fase_2_consumo_api/src/core/errors/failures.dart';
-import 'package:fase_2_consumo_api/util/strings.dart';
+import 'package:fase_2_consumo_api/src/util/strings.dart';
 
 abstract class BaseRepository {
   @protected

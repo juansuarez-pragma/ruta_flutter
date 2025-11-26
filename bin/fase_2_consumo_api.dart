@@ -8,7 +8,7 @@ import 'package:fase_2_consumo_api/src/domain/entities/product_entity.dart';
 import 'package:fase_2_consumo_api/src/domain/usecases/get_all_categories_usecase.dart';
 import 'package:fase_2_consumo_api/src/domain/usecases/get_all_products_usecase.dart';
 import 'package:fase_2_consumo_api/src/domain/usecases/get_product_by_id_usecase.dart';
-import 'package:fase_2_consumo_api/util/strings.dart';
+import 'package:fase_2_consumo_api/src/util/strings.dart';
 
 void main(List<String> arguments) async {
   // 1. Inicializar dependencias

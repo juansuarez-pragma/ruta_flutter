@@ -4,7 +4,7 @@ import 'package:fase_2_consumo_api/src/data/datasources/api_datasource.dart';
 import 'package:fase_2_consumo_api/src/data/repositories/base/base_repository.dart';
 import 'package:fase_2_consumo_api/src/domain/entities/product_entity.dart';
 import 'package:fase_2_consumo_api/src/domain/repositories/product_repository.dart';
-import 'package:fase_2_consumo_api/util/strings.dart';
+import 'package:fase_2_consumo_api/src/util/strings.dart';
 
 class ProductRepositoryImpl extends BaseRepository implements ProductRepository {
   final ApiDataSource remoteDataSource;
