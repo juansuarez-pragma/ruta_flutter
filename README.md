@@ -24,6 +24,7 @@ El proyecto está construido siguiendo principios de software de alta calidad pa
   - **Repository Pattern:** Para abstraer la fuente de datos.
   - **Strategy Pattern:** Utilizado en el `ApiResponseHandler` para gestionar diferentes respuestas HTTP de una manera limpia y escalable.
   - **Clase Base para Repositorios:** Se usa una clase `BaseRepository` para centralizar y reutilizar la lógica de manejo de excepciones en todos los repositorios.
+  - **Parseo Manual de JSON:** Los modelos de datos se parsean de JSON a objetos Dart y viceversa de forma manual, eliminando la necesidad de herramientas de generación de código como `json_serializable`.
 - **Externalización de Textos:** Todos los textos de la aplicación (mensajes, títulos, etc.) se gestionan en una clase `AppStrings` para facilitar el mantenimiento y futuras internacionalizaciones.
 
 ## Configuración del Proyecto
@@ -38,10 +39,6 @@ Asegúrate de tener el [SDK de Dart](https://dart.dev/get-dart) instalado.
 3. Instala las dependencias:
    ```bash
    dart pub get
-   ```
-4. Genera los archivos de serialización JSON:
-   ```bash
-   dart run build_runner build --delete-conflicting-outputs
    ```
 
 ## Cómo Ejecutar la Aplicación
