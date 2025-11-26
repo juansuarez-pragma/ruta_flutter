@@ -13,20 +13,29 @@ class ProductRepositoryImpl extends BaseRepository implements ProductRepository 
 
   @override
   Future<Either<Failure, List<ProductEntity>>> getAllProducts() async {
-    return await handleExceptions(() => remoteDataSource.getAllProducts());
+    return await handleRequest(() async {
+      final productModels = await remoteDataSource.getAllProducts();
+      final productEntities =
+          productModels.map((model) => model.toEntity()).toList();
+      return productEntities;
+    });
   }
 
   @override
   Future<Either<Failure, ProductEntity>> getProductById(int id) async {
-    return await handleExceptions(
-      () => remoteDataSource.getProductById(id),
+    return await handleRequest(
+      () async {
+        final productModel = await remoteDataSource.getProductById(id);
+        return productModel.toEntity();
+      },
       notFoundMessage: AppStrings.notFoundProductFailureMessage,
     );
   }
 
   @override
   Future<Either<Failure, List<String>>> getAllCategories() async {
-    return await handleExceptions(
+    // Las categorías son solo strings, no necesitan mapeo
+    return await handleRequest(
       () => remoteDataSource.getAllCategories(),
       notFoundMessage: AppStrings.notFoundCategoriesFailureMessage,
     );

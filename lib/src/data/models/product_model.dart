@@ -4,24 +4,37 @@ import 'package:fase_2_consumo_api/src/domain/entities/product_entity.dart';
 part 'product_model.g.dart';
 
 @JsonSerializable()
-class ProductModel extends ProductEntity {
-  const ProductModel({
-    required int id,
-    required String title,
-    required double price,
-    required String description,
-    required String category,
-    required String image,
-  }) : super(
-          id: id,
-          title: title,
-          price: price,
-          description: description,
-          category: category,
-          image: image,
-        );
+class ProductModel {
+  final int id;
+  final String title;
+  final double price;
+  final String description;
+  final String category;
+  final String image;
 
-  factory ProductModel.fromJson(Map<String, dynamic> json) => _$ProductModelFromJson(json);
+  const ProductModel({
+    required this.id,
+    required this.title,
+    required this.price,
+    required this.description,
+    required this.category,
+    required this.image,
+  });
+
+  factory ProductModel.fromJson(Map<String, dynamic> json) =>
+      _$ProductModelFromJson(json);
 
   Map<String, dynamic> toJson() => _$ProductModelToJson(this);
+
+  // Mapper para convertir el Modelo (DTO) a una Entidad de Dominio
+  ProductEntity toEntity() {
+    return ProductEntity(
+      id: id,
+      title: title,
+      price: price,
+      description: description,
+      category: category,
+      image: image,
+    );
+  }
 }

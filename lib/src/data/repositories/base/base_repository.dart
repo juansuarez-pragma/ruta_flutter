@@ -6,7 +6,7 @@ import 'package:fase_2_consumo_api/util/strings.dart';
 
 abstract class BaseRepository {
   @protected
-  Future<Either<Failure, T>> handleExceptions<T>(
+  Future<Either<Failure, T>> handleRequest<T>(
     Future<T> Function() action, {
     String notFoundMessage = AppStrings.notFoundFailureMessage,
   }) async {
@@ -22,7 +22,9 @@ abstract class BaseRepository {
     } on ConnectionException {
       return Left(ConnectionFailure(AppStrings.connectionFailureMessage));
     } catch (e) {
-      return Left(ServerFailure('${AppStrings.unexpectedFailureMessage} ${e.toString()}'));
+      return Left(
+        ServerFailure('${AppStrings.unexpectedFailureMessage} ${e.toString()}'),
+      );
     }
   }
 }
