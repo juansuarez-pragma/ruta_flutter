@@ -111,11 +111,11 @@ class EnvConfig {
   bool get isStaging => environment == Environment.staging;
 }
 
-/// Excepción lanzada cuando hay errores de configuración de entorno.
+/// Excepción inmutable lanzada cuando hay errores de configuración de entorno.
 class EnvConfigException implements Exception {
   final String message;
 
-  EnvConfigException(this.message);
+  const EnvConfigException(this.message);
 
   @override
   String toString() => 'EnvConfigException: $message';
