@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "pragma-mcp-server-aws-dev": {
+      "command": "npx",
+      "args": [
+        "mcp-remote@latest",
+        "https://mcp-dev.pragma.com.co/pragma-mcp-server/mcp",
+        "50679"
+      ]
+    }
+  }
+}
