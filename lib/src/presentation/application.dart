@@ -40,9 +40,9 @@ class Application {
   Future<void> run() async {
     _ui.showWelcome(AppStrings.welcomeMessage);
 
-    var running = true;
-    while (running) {
-      final option = await _ui.showMainMenu();
+    MenuOption option;
+    do {
+      option = await _ui.showMainMenu();
 
       switch (option) {
         case MenuOption.getAllProducts:
@@ -52,11 +52,11 @@ class Application {
         case MenuOption.getAllCategories:
           await _handleGetAllCategories();
         case MenuOption.exit:
-          running = false;
+          break;
         case MenuOption.invalid:
           _ui.showError(AppStrings.invalidOptionError);
       }
-    }
+    } while (option != MenuOption.exit);
 
     _ui.showGoodbye();
     _onExit();
