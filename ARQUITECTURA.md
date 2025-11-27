@@ -382,34 +382,36 @@ class ApiResponseHandler {
 }
 ```
 
-#### 3.3 Inyección de Dependencias (`core/injection_container.dart`)
+#### 3.3 Inyección de Dependencias (`di/injection_container.dart`)
 
 Utiliza el patrón **Service Locator** con el paquete `get_it`:
 
 ```dart
-final sl = GetIt.instance;
+/// Instancia global del Service Locator.
+/// Se usa nombre descriptivo en lugar de abreviaciones como 'sl'.
+final GetIt serviceLocator = GetIt.instance;
 
 Future<void> init() async {
   // Use Cases - Factory (nueva instancia cada vez)
-  sl.registerFactory(() => GetAllProductsUseCase(sl()));
-  sl.registerFactory(() => GetProductByIdUseCase(sl()));
-  sl.registerFactory(() => GetAllCategoriesUseCase(sl()));
+  serviceLocator.registerFactory(() => GetAllProductsUseCase(serviceLocator()));
+  serviceLocator.registerFactory(() => GetProductByIdUseCase(serviceLocator()));
+  serviceLocator.registerFactory(() => GetAllCategoriesUseCase(serviceLocator()));
 
   // Repository - Lazy Singleton (instancia única, creada cuando se necesita)
-  sl.registerLazySingleton<ProductRepository>(
-    () => ProductRepositoryImpl(sl()),
+  serviceLocator.registerLazySingleton<ProductRepository>(
+    () => ProductRepositoryImpl(serviceLocator()),
   );
 
   // DataSource - Lazy Singleton
-  sl.registerLazySingleton<ApiDataSource>(
-    () => ApiDataSourceImpl(sl(), sl()),
+  serviceLocator.registerLazySingleton<ApiDataSource>(
+    () => ApiDataSourceImpl(serviceLocator(), serviceLocator()),
   );
 
   // Network - Lazy Singleton
-  sl.registerLazySingleton(() => ApiResponseHandler());
+  serviceLocator.registerLazySingleton(() => ApiResponseHandler());
 
   // HTTP Client - Lazy Singleton
-  sl.registerLazySingleton(() => http.Client());
+  serviceLocator.registerLazySingleton(() => http.Client());
 }
 ```
 
@@ -732,7 +734,7 @@ void main() async {
 
 ```dart
 // Obtener instancia del caso de uso
-final getAllProductsUseCase = sl<GetAllProductsUseCase>();
+final getAllProductsUseCase = serviceLocator<GetAllProductsUseCase>();
 
 // Ejecutar caso de uso
 final result = await getAllProductsUseCase(NoParams());

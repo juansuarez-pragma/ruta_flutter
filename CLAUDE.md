@@ -40,7 +40,9 @@ Clean Architecture de tres capas con patrón Service Locator (`get_it`) y Ports 
 
 - **Presentation** (`lib/src/presentation/`): Capa de interfaz de usuario desacoplada mediante el patrón Ports & Adapters (Hexagonal Architecture). Permite intercambiar implementaciones de UI (consola, GUI, web, móvil) sin modificar la lógica de negocio.
 
-- **Core** (`lib/src/core/`): Aspectos transversales. Contenedor de inyección de dependencias, `ApiResponseHandler` (patrón Strategy para códigos HTTP), excepciones personalizadas, clases `Failure`, configuración de entorno (`EnvConfig`) y constantes de endpoints (`ApiEndpoints`).
+- **Core** (`lib/src/core/`): Aspectos transversales. `ApiResponseHandler` (patrón Strategy para códigos HTTP), excepciones personalizadas, clases `Failure`, configuración de entorno (`EnvConfig`) y constantes de endpoints (`ApiEndpoints`).
+
+- **DI** (`lib/src/di/`): Contenedor de inyección de dependencias. Centraliza el registro de todas las implementaciones usando `get_it` como Service Locator.
 
 ### Patrones Clave
 
@@ -154,9 +156,9 @@ Esto permite que implementaciones parciales (ej. un widget que solo muestra prod
 Para implementar una nueva interfaz (Flutter, web, etc.):
 
 1. Crear una clase que implemente `UserInterface` (o solo las interfaces específicas que necesite)
-2. Registrar la nueva implementación en `injection_container.dart`:
+2. Registrar la nueva implementación en `lib/src/di/injection_container.dart`:
    ```dart
-   sl.registerLazySingleton<UserInterface>(() => NuevaImplementacionUI());
+   serviceLocator.registerLazySingleton<UserInterface>(() => NuevaImplementacionUI());
    ```
 
 La lógica de negocio permanece intacta.
@@ -213,9 +215,9 @@ class OrderRemoteDataSourceImpl implements OrderRemoteDataSource {
   );
 }
 
-// 3. Registrar en injection_container.dart
-sl.registerLazySingleton<OrderRemoteDataSource>(
-  () => OrderRemoteDataSourceImpl(apiClient: sl()),
+// 3. Registrar en lib/src/di/injection_container.dart
+serviceLocator.registerLazySingleton<OrderRemoteDataSource>(
+  () => OrderRemoteDataSourceImpl(apiClient: serviceLocator()),
 );
 ```
 
@@ -227,9 +229,11 @@ bin/main → Application → UserInterface (Port) ← ConsoleUserInterface (Adap
            Casos de Uso → Interfaz Repository ← Repository Impl → DataSources → ApiClient → HTTP
 ```
 
-Todas las dependencias registradas en `lib/src/core/injection_container.dart`:
+Todas las dependencias registradas en `lib/src/di/injection_container.dart`:
 - `Application`, Casos de Uso: `registerFactory` (nueva instancia por llamada)
 - `UserInterface`, Repositories, DataSources, HTTP Client: `registerLazySingleton`
+
+**Convención de nombres:** Se usa `serviceLocator` en lugar de abreviaciones como `sl` para mejorar la legibilidad del código.
 
 ### Manejo de Errores
 

@@ -46,8 +46,9 @@ La clase `EnvConfig` (`lib/src/core/config/env_config.dart`) implementa el patr�
     *   `domain`: Contiene la lógica de negocio (entidades, casos de uso, contratos de repositorio).
     *   `data`: Implementa el acceso a los datos (modelos, fuentes de datos, implementaciones de repositorio).
     *   `presentation`: Capa de UI desacoplada mediante Ports & Adapters (contratos e implementaciones de interfaz).
-    *   `core`: Contiene aspectos transversales (inyección de dependencias, manejo de errores, utilidades de red, configuración).
-*   **Inyección de Dependencias:** El paquete `get_it` se utiliza para gestionar las dependencias. Todas las dependencias se registran en `lib/src/core/injection_container.dart`.
+    *   `core`: Contiene aspectos transversales (manejo de errores, utilidades de red, configuración).
+    *   `di`: Contenedor de inyección de dependencias.
+*   **Inyección de Dependencias:** El paquete `get_it` se utiliza para gestionar las dependencias. Todas las dependencias se registran en `lib/src/di/injection_container.dart`. Se usa `serviceLocator` como nombre descriptivo en lugar de abreviaciones.
 *   **Patrón de Repositorio:** El `ProductRepository` define un contrato para las operaciones de datos, y `ProductRepositoryImpl` proporciona la implementación. Se utiliza un `BaseRepository` para centralizar la lógica de manejo de errores.
 *   **Manejo de Errores:** La aplicación utiliza el tipo `Either` del paquete `dartz` para representar el éxito o el fracaso. Se utiliza un `ApiResponseHandler` personalizado para asignar los códigos de estado HTTP a excepciones específicas.
 *   **Externalización de Cadenas de Texto:** Todas las cadenas de texto orientadas al usuario se gestionan en el archivo `lib/src/util/strings.dart` para simplificar el mantenimiento y la posible internacionalización.
