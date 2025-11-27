@@ -1,8 +1,4 @@
 import 'package:fase_2_consumo_api/src/core/config/config.dart';
-import 'package:fase_2_consumo_api/src/core/config/dotenv_reader.dart';
-import 'package:fase_2_consumo_api/src/core/config/env_config_exception.dart';
-import 'package:fase_2_consumo_api/src/core/config/env_reader.dart';
-import 'package:fase_2_consumo_api/src/core/config/environment.dart';
 
 /// Clase de configuración que gestiona las variables de entorno.
 ///
@@ -82,12 +78,6 @@ class EnvConfig {
     return _reader?[key] ?? defaultValue;
   }
 
-  /// Obtiene un valor entero de configuración.
-  int _getInt(String key, {int defaultValue = 0}) {
-    final value = _get(key);
-    return int.tryParse(value) ?? defaultValue;
-  }
-
   /// Verifica que la configuración esté inicializada.
   void _ensureInitialized() {
     if (!_isInitialized) {
@@ -104,9 +94,6 @@ class EnvConfig {
 
   /// URL base de la API.
   String get apiBaseUrl => _get('API_BASE_URL');
-
-  /// Timeout de las peticiones HTTP en milisegundos.
-  int get apiTimeout => _getInt('API_TIMEOUT', defaultValue: 30000);
 
   /// Ambiente actual de la aplicación.
   Environment get environment {
