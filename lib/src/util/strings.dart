@@ -1,5 +1,7 @@
-// fase_2_consumo_api/util/strings.dart
-
+/// Constantes de texto para la interfaz de usuario.
+///
+/// Centraliza todos los strings de la aplicación para facilitar
+/// mantenimiento e internacionalización futura.
 class AppStrings {
   // Private constructor to prevent instantiation
   AppStrings._();

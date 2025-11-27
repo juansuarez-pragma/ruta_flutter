@@ -30,6 +30,7 @@ class ApiResponseHandler {
     final strategy = _errorStrategies[statusCode];
     if (strategy != null) {
       strategy();
+      return;
     }
 
     // 5xx - Errores del servidor

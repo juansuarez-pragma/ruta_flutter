@@ -57,12 +57,8 @@ Future<void> init() async {
   // ============================================
   // Domain Layer - Use Cases
   // ============================================
-  serviceLocator.registerFactory(
-    () => GetAllProductsUseCase(serviceLocator()),
-  );
-  serviceLocator.registerFactory(
-    () => GetProductByIdUseCase(serviceLocator()),
-  );
+  serviceLocator.registerFactory(() => GetAllProductsUseCase(serviceLocator()));
+  serviceLocator.registerFactory(() => GetProductByIdUseCase(serviceLocator()));
   serviceLocator.registerFactory(
     () => GetAllCategoriesUseCase(serviceLocator()),
   );

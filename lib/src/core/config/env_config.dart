@@ -72,10 +72,18 @@ class EnvConfig {
     }
   }
 
-  /// Obtiene un valor de configuración con valor por defecto opcional.
-  String _get(String key, {String defaultValue = ''}) {
+  /// Obtiene un valor de configuración requerido.
+  ///
+  /// Lanza [EnvConfigException] si la variable no existe o está vacía.
+  String _getRequired(String key) {
     _ensureInitialized();
-    return _reader?[key] ?? defaultValue;
+    final value = _reader?[key];
+    if (value == null || value.isEmpty) {
+      throw EnvConfigException(
+        'Variable de entorno requerida no encontrada: $key',
+      );
+    }
+    return value;
   }
 
   /// Verifica que la configuración esté inicializada.
@@ -92,6 +100,6 @@ class EnvConfig {
   // Getters para variables de configuración
   // ============================================
 
-  /// URL base de la API.
-  String get apiBaseUrl => _get('API_BASE_URL');
+  /// URL base de la API (requerida).
+  String get apiBaseUrl => _getRequired('API_BASE_URL');
 }

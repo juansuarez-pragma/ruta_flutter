@@ -41,8 +41,8 @@ class ApiClientImpl implements ApiClient {
       final response = await _client.get(uri);
       _responseHandler.handleResponse(response);
       return fromJson(json.decode(response.body));
-    } on http.ClientException {
-      throw const ConnectionException();
+    } on http.ClientException catch (e) {
+      throw ConnectionException(uri: uri, originalError: e.message);
     }
   }
 
@@ -59,8 +59,8 @@ class ApiClientImpl implements ApiClient {
       return jsonList
           .map((item) => fromJsonList(item as Map<String, dynamic>))
           .toList();
-    } on http.ClientException {
-      throw const ConnectionException();
+    } on http.ClientException catch (e) {
+      throw ConnectionException(uri: uri, originalError: e.message);
     }
   }
 
@@ -72,8 +72,8 @@ class ApiClientImpl implements ApiClient {
       _responseHandler.handleResponse(response);
       final List<dynamic> jsonList = json.decode(response.body);
       return jsonList.cast<T>();
-    } on http.ClientException {
-      throw const ConnectionException();
+    } on http.ClientException catch (e) {
+      throw ConnectionException(uri: uri, originalError: e.message);
     }
   }
 }
