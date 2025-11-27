@@ -34,10 +34,10 @@ Future<void> init() async {
   serviceLocator.registerLazySingleton<EnvConfig>(() => EnvConfig.instance);
 
   // ============================================
-  // Presentation Layer
+  // Capa de Presentación
   // ============================================
 
-  // User Interface (Port/Adapter Pattern)
+  // Interfaz de Usuario (Patrón Port/Adapter)
   // Para cambiar la UI, registrar otra implementación de UserInterface
   serviceLocator.registerLazySingleton<UserInterface>(
     () => ConsoleUserInterface(),
@@ -55,7 +55,7 @@ Future<void> init() async {
   );
 
   // ============================================
-  // Domain Layer - Use Cases
+  // Capa de Dominio - Casos de Uso
   // ============================================
   serviceLocator.registerFactory(() => GetAllProductsUseCase(serviceLocator()));
   serviceLocator.registerFactory(() => GetProductByIdUseCase(serviceLocator()));
@@ -64,7 +64,7 @@ Future<void> init() async {
   );
 
   // ============================================
-  // Data Layer - Repository
+  // Capa de Datos - Repositorio
   // ============================================
   serviceLocator.registerLazySingleton<ProductRepository>(
     () => ProductRepositoryImpl(
@@ -74,7 +74,7 @@ Future<void> init() async {
   );
 
   // ============================================
-  // Data Layer - Data Sources
+  // Capa de Datos - Fuentes de Datos
   // ============================================
   serviceLocator.registerLazySingleton<ProductRemoteDataSource>(
     () => ProductRemoteDataSourceImpl(apiClient: serviceLocator()),
@@ -84,7 +84,7 @@ Future<void> init() async {
   );
 
   // ============================================
-  // Core - Network
+  // Core - Red
   // ============================================
   serviceLocator.registerLazySingleton<ApiClient>(
     () => ApiClientImpl(

@@ -3,7 +3,7 @@
 /// Centraliza todos los strings de la aplicación para facilitar
 /// mantenimiento e internacionalización futura.
 class AppStrings {
-  // Private constructor to prevent instantiation
+  // Constructor privado para prevenir instanciación.
   AppStrings._();
 
   // General
@@ -13,7 +13,7 @@ class AppStrings {
   static const String separator =
       '--------------------------------------------------';
 
-  // Menu
+  // Menú
   static const String menuTitle = 'Por favor, elige una opción:';
   static const String menuOptionGetAllProducts = 'Obtener todos los productos';
   static const String menuOptionGetProductById = 'Obtener un producto por ID';
@@ -22,20 +22,20 @@ class AppStrings {
   static const String menuOptionExit = 'Salir';
   static const String menuPrompt = 'Opción:';
 
-  // Prompts
+  // Solicitudes
   static const String promptProductId =
       'Por favor, ingresa el ID del producto:';
 
-  // Use Case Titles
+  // Títulos de casos de uso
   static const String getAllProductsUseCaseTitle = 'GetAllProductsUseCase';
   static const String getProductByIdUseCaseTitle = 'GetProductByIdUseCase';
   static const String getAllCategoriesUseCaseTitle = 'GetAllCategoriesUseCase';
   static const String executingUseCase = '[+] EJECUTANDO:';
 
-  // Success Messages
+  // Mensajes de éxito
   static const String successFound = '>> ÉXITO: Se encontraron';
 
-  // Error Messages
+  // Mensajes de error
   static const String errorPrefix = '>> ERROR:';
   static const String invalidOptionError =
       'Opción no válida. Por favor, intenta de nuevo.';
@@ -50,12 +50,12 @@ class AppStrings {
       'Error de conexión a internet.';
   static const String unexpectedFailureMessage = 'Error inesperado:';
 
-  // Labels
+  // Etiquetas
   static const String productsLabel = 'productos.';
   static const String categoriesLabel = 'categorías.';
   static const String productLabel = 'Producto';
 
-  // Product Details
+  // Detalles del producto
   static const String productId = 'ID:';
   static const String productTitle = 'Título:';
   static const String productCategory = 'Categoría:';

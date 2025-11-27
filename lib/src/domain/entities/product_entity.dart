@@ -1,5 +1,8 @@
 import 'package:equatable/equatable.dart';
 
+/// Entidad que representa un producto del dominio.
+///
+/// Es inmutable y usa [Equatable] para comparación por valor.
 class ProductEntity extends Equatable {
   final int id;
   final String title;

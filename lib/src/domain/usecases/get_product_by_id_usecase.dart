@@ -5,6 +5,7 @@ import 'package:fase_2_consumo_api/src/core/usecase/usecase.dart';
 import 'package:fase_2_consumo_api/src/domain/entities/product_entity.dart';
 import 'package:fase_2_consumo_api/src/domain/repositories/product_repository.dart';
 
+/// Caso de uso para obtener un producto por su ID.
 class GetProductByIdUseCase
     implements UseCase<ProductEntity, GetProductByIdParams> {
   final ProductRepository repository;
@@ -19,6 +20,7 @@ class GetProductByIdUseCase
   }
 }
 
+/// Parámetros para el caso de uso [GetProductByIdUseCase].
 class GetProductByIdParams extends Equatable {
   final int id;
 

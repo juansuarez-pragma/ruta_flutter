@@ -1,5 +1,9 @@
 import 'package:fase_2_consumo_api/src/domain/entities/product_entity.dart';
 
+/// Modelo de datos para un producto.
+///
+/// Maneja la serialización/deserialización de JSON y la conversión
+/// a la entidad de dominio [ProductEntity].
 class ProductModel {
   final int id;
   final String title;
@@ -17,6 +21,7 @@ class ProductModel {
     required this.image,
   });
 
+  /// Crea un [ProductModel] a partir de un mapa JSON.
   factory ProductModel.fromJson(Map<String, dynamic> json) {
     return ProductModel(
       id: json['id'] as int,
@@ -28,6 +33,7 @@ class ProductModel {
     );
   }
 
+  /// Convierte este modelo a una entidad de dominio.
   ProductEntity toEntity() {
     return ProductEntity(
       id: id,
