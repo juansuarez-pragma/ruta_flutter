@@ -6,3 +6,4 @@ export 'env_config.dart';
 export 'env_config_exception.dart';
 export 'env_reader.dart';
 export 'environment.dart';
+export 'utils/environment_variables.dart';

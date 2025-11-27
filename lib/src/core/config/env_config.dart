@@ -1,3 +1,4 @@
+import 'package:fase_2_consumo_api/src/core/config/config.dart';
 import 'package:fase_2_consumo_api/src/core/config/dotenv_reader.dart';
 import 'package:fase_2_consumo_api/src/core/config/env_config_exception.dart';
 import 'package:fase_2_consumo_api/src/core/config/env_reader.dart';
@@ -9,7 +10,7 @@ import 'package:fase_2_consumo_api/src/core/config/environment.dart';
 /// de configuración en toda la aplicación.
 ///
 /// Utiliza [EnvReader] para desacoplar la lectura de variables de entorno
-/// de la implementación concreta (dotenv, flutter_dotenv, etc.).
+/// de la implementación concreta (dotenv).
 ///
 /// Ejemplo de uso:
 /// ```dart
@@ -58,7 +59,7 @@ class EnvConfig {
 
   /// Valida que todas las variables de entorno requeridas estén definidas.
   void _validateRequiredVariables() {
-    final requiredVars = ['API_BASE_URL'];
+    final requiredVars = EnvironmentVariables.values();
     final missingVars = <String>[];
 
     for (final varName in requiredVars) {
