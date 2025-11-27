@@ -103,13 +103,4 @@ class EnvConfig {
       orElse: () => Environment.development,
     );
   }
-
-  /// Indica si el ambiente es de desarrollo.
-  bool get isDevelopment => environment == Environment.development;
-
-  /// Indica si el ambiente es de producción.
-  bool get isProduction => environment == Environment.production;
-
-  /// Indica si el ambiente es de staging.
-  bool get isStaging => environment == Environment.staging;
 }
