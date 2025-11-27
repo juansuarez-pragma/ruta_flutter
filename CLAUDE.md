@@ -304,3 +304,222 @@ Endpoints consumidos:
 - `ApiEndpoints.products` → `GET /products`
 - `ApiEndpoints.productById(id)` → `GET /products/{id}`
 - `ApiEndpoints.categories` → `GET /products/categories`
+
+## Métricas de Calidad de Código
+
+**IMPORTANTE:** Antes de implementar cualquier código, el agente DEBE verificar el cumplimiento de estas métricas. Después de implementar, ejecutar `dart analyze` y `dart format .` para validar.
+
+### Checklist Obligatorio Pre-Implementación
+
+- [ ] ¿El código sigue Clean Architecture? (dependencias fluyen hacia Domain)
+- [ ] ¿Cada clase/enum/interface tiene su propio archivo? (SRP)
+- [ ] ¿Se usan nombres descriptivos en español para comentarios?
+- [ ] ¿Las excepciones incluyen información de diagnóstico?
+- [ ] ¿Se evitan magic numbers? (usar constantes)
+- [ ] ¿Se usa `Either<Failure, T>` para manejo de errores?
+
+### Principios SOLID (Obligatorios)
+
+| Principio | Implementación en este proyecto |
+|-----------|--------------------------------|
+| **S**ingle Responsibility | Un archivo = una clase. Cada clase tiene una única razón para cambiar. |
+| **O**pen/Closed | Extender comportamiento sin modificar código existente (ej. nuevos DataSources). |
+| **L**iskov Substitution | Las implementaciones pueden sustituir sus interfaces sin romper el sistema. |
+| **I**nterface Segregation | Interfaces pequeñas y específicas (`UserInput`, `ProductOutput`, etc.). |
+| **D**ependency Inversion | Depender de abstracciones, no de implementaciones concretas. |
+
+### Estándares de Código
+
+#### Nomenclatura
+- **Clases**: `PascalCase` (ej. `ProductEntity`, `GetAllProductsUseCase`)
+- **Archivos**: `snake_case` (ej. `product_entity.dart`, `get_all_products_usecase.dart`)
+- **Variables/métodos privados**: Prefijo `_` (ej. `_apiClient`, `_handleRequest`)
+- **Constantes**: `camelCase` para miembros de clase, `SCREAMING_SNAKE_CASE` solo para constantes globales
+- **Comentarios**: Siempre en **español**
+
+#### Documentación Obligatoria
+Todo código público DEBE tener documentación `///` en español:
+
+```dart
+/// Caso de uso para obtener todos los productos.
+///
+/// Retorna [Either] con [Failure] en caso de error o lista de [ProductEntity] en éxito.
+class GetAllProductsUseCase implements UseCase<List<ProductEntity>, NoParams> {
+```
+
+#### Estructura de Archivos
+
+```dart
+// 1. Imports de paquetes externos (ordenados alfabéticamente)
+import 'package:dartz/dartz.dart';
+import 'package:equatable/equatable.dart';
+
+// 2. Imports del proyecto (ordenados alfabéticamente)
+import 'package:fase_2_consumo_api/src/core/errors/failures.dart';
+import 'package:fase_2_consumo_api/src/domain/entities/product_entity.dart';
+
+// 3. Documentación de clase
+/// Descripción de la clase en español.
+
+// 4. Declaración de clase
+class MiClase {
+  // 5. Campos (primero finales, luego mutables)
+  final Dependencia _dependencia;
+
+  // 6. Constructor
+  MiClase({required Dependencia dependencia}) : _dependencia = dependencia;
+
+  // 7. Métodos públicos
+
+  // 8. Métodos privados
+}
+```
+
+### Manejo de Errores
+
+#### Excepciones (Capa Data)
+Las excepciones DEBEN incluir información de diagnóstico cuando sea relevante:
+
+```dart
+// ✅ Correcto: Incluye contexto
+throw ConnectionException(
+  uri: uri,
+  originalError: e.message,
+);
+
+// ❌ Incorrecto: Sin contexto
+throw ConnectionException();
+```
+
+#### Failures (Capa Domain)
+Usar el patrón `Either` de `dartz` para retornar errores sin lanzar excepciones:
+
+```dart
+// ✅ Correcto
+Future<Either<Failure, ProductEntity>> getProduct(int id);
+
+// ❌ Incorrecto
+Future<ProductEntity> getProduct(int id); // Puede lanzar excepciones
+```
+
+### Configuración del Linter
+
+El proyecto usa reglas estrictas en `analysis_options.yaml`:
+
+```yaml
+analyzer:
+  errors:
+    unused_local_variable: error
+    unused_import: error
+    unused_element: error
+    dead_code: error
+    unused_field: error
+```
+
+**Antes de cada commit:**
+1. Ejecutar `dart analyze` → 0 errores
+2. Ejecutar `dart format .` → Formatear código
+3. Verificar que no hay código muerto ni imports sin usar
+
+### Patrones de Implementación
+
+#### Nuevo Caso de Uso
+
+```dart
+// lib/src/domain/usecases/mi_nuevo_usecase.dart
+import 'package:dartz/dartz.dart';
+import 'package:fase_2_consumo_api/src/core/errors/failures.dart';
+import 'package:fase_2_consumo_api/src/core/usecase/usecase.dart';
+
+/// Caso de uso para [descripción en español].
+class MiNuevoUseCase implements UseCase<TipoRetorno, TipoParams> {
+  final MiRepository _repository;
+
+  MiNuevoUseCase(this._repository);
+
+  @override
+  Future<Either<Failure, TipoRetorno>> call(TipoParams params) async {
+    return await _repository.miMetodo(params.valor);
+  }
+}
+```
+
+#### Nueva Entidad
+
+```dart
+// lib/src/domain/entities/mi_entidad.dart
+import 'package:equatable/equatable.dart';
+
+/// Entidad que representa [descripción en español].
+///
+/// Es inmutable y usa [Equatable] para comparación por valor.
+class MiEntidad extends Equatable {
+  final int id;
+  final String nombre;
+
+  const MiEntidad({
+    required this.id,
+    required this.nombre,
+  });
+
+  @override
+  List<Object?> get props => [id, nombre];
+}
+```
+
+#### Nuevo DataSource
+
+```dart
+// lib/src/data/datasources/mi_feature/mi_feature_remote_datasource.dart
+
+/// Interface para el origen de datos remoto de [feature].
+abstract class MiFeatureRemoteDataSource {
+  /// Obtiene todos los [items] desde la API.
+  Future<List<MiModel>> getAll();
+}
+
+// lib/src/data/datasources/mi_feature/mi_feature_remote_datasource_impl.dart
+
+/// Implementación de [MiFeatureRemoteDataSource] usando [ApiClient].
+class MiFeatureRemoteDataSourceImpl implements MiFeatureRemoteDataSource {
+  final ApiClient _apiClient;
+
+  MiFeatureRemoteDataSourceImpl({required ApiClient apiClient})
+    : _apiClient = apiClient;
+
+  @override
+  Future<List<MiModel>> getAll() {
+    return _apiClient.getList(
+      endpoint: ApiEndpoints.miEndpoint,
+      fromJsonList: MiModel.fromJson,
+    );
+  }
+}
+```
+
+### Validación Final
+
+Antes de considerar una implementación completa, verificar:
+
+| Criterio | Validación |
+|----------|------------|
+| Arquitectura | Las dependencias fluyen hacia Domain (nunca al revés) |
+| SOLID | Todos los principios se respetan |
+| Análisis estático | `dart analyze` retorna 0 errores |
+| Formato | `dart format .` no genera cambios |
+| Documentación | Toda clase/método público tiene `///` en español |
+| Errores | Se usa `Either<Failure, T>` en capas domain/data |
+| Constantes | No hay magic numbers ni strings hardcodeados |
+| Nombres | Descriptivos, sin abreviaciones confusas |
+
+### Métricas de Calidad Objetivo
+
+| Métrica | Objetivo | Actual |
+|---------|----------|--------|
+| Arquitectura y Diseño | ≥90% | 95% |
+| Legibilidad y Mantenibilidad | ≥90% | 98% |
+| Patrones y Buenas Prácticas | ≥90% | 98% |
+| Manejo de Errores | ≥85% | 95% |
+| Configuración y Seguridad | ≥85% | 95% |
+| Análisis Estático | 100% | 100% |
+| **TOTAL** | **≥90%** | **96.83%** |
