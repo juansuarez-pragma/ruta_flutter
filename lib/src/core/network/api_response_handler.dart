@@ -1,39 +1,69 @@
 import 'package:http/http.dart' as http;
 import 'package:fase_2_consumo_api/src/core/errors/exceptions.dart';
+import 'package:fase_2_consumo_api/src/core/network/http_status_codes.dart';
 
+/// Maneja las respuestas HTTP y lanza excepciones según el código de estado.
+///
+/// Implementa el patrón Strategy para mapear códigos HTTP específicos
+/// a excepciones tipadas. Los códigos no mapeados explícitamente
+/// se manejan por rangos (4xx → ClientException, 5xx → ServerException).
+///
+/// Referencia de códigos HTTP:
+/// - 2xx: Éxito (no lanza excepción)
+/// - 4xx: Error del cliente (la solicitud es incorrecta)
+/// - 5xx: Error del servidor (el servidor falló al procesar)
 class ApiResponseHandler {
+  /// Procesa la respuesta HTTP y lanza excepciones si hay errores.
+  ///
+  /// No hace nada si el código de estado indica éxito (2xx).
+  /// Para códigos de error, busca primero una estrategia específica
+  /// y luego aplica manejo por rangos.
   void handleResponse(http.Response response) {
     final int statusCode = response.statusCode;
 
-    // Si la respuesta es exitosa, no hacemos nada.
-    if (statusCode >= 200 && statusCode < 300) {
+    // 2xx - Respuestas exitosas: no hacemos nada
+    if (HttpStatusCodes.isSuccess(statusCode)) {
       return;
     }
 
-    // Estrategias para códigos de error específicos
+    // Buscar estrategia específica para el código
     final strategy = _errorStrategies[statusCode];
     if (strategy != null) {
       strategy();
     }
 
-    // Estrategias de respaldo por rangos
-    if (statusCode >= 500) {
+    // 5xx - Errores del servidor
+    if (HttpStatusCodes.isServerError(statusCode)) {
       throw ServerException();
     }
-    if (statusCode >= 400) {
+
+    // 4xx - Errores del cliente
+    if (HttpStatusCodes.isClientError(statusCode)) {
       throw ClientException();
     }
 
-    // Fallback final para cualquier otro caso
+    // Fallback para cualquier otro código no esperado
     throw ServerException();
   }
 
-  // Mapa que implementa el Patrón Strategy
+  /// Mapa de estrategias para códigos HTTP específicos.
+  ///
+  /// Permite manejar códigos individuales con excepciones específicas.
+  /// Los códigos no listados aquí se manejan por rangos en [handleResponse].
   static final Map<int, Function> _errorStrategies = {
-    400: () => throw ClientException(),
-    401: () => throw ClientException(), // Podría ser UnauthorizedException
-    403: () => throw ClientException(), // Podría ser ForbiddenException
-    404: () => throw NotFoundException(),
-    500: () => throw ServerException(),
+    // 400 Bad Request: solicitud mal formada o inválida
+    HttpStatusCodes.badRequest: () => throw ClientException(),
+
+    // 401 Unauthorized: requiere autenticación
+    HttpStatusCodes.unauthorized: () => throw ClientException(),
+
+    // 403 Forbidden: autenticado pero sin permisos
+    HttpStatusCodes.forbidden: () => throw ClientException(),
+
+    // 404 Not Found: recurso no existe
+    HttpStatusCodes.notFound: () => throw NotFoundException(),
+
+    // 500 Internal Server Error: error genérico del servidor
+    HttpStatusCodes.internalServerError: () => throw ServerException(),
   };
 }
