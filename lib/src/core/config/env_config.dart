@@ -94,13 +94,4 @@ class EnvConfig {
 
   /// URL base de la API.
   String get apiBaseUrl => _get('API_BASE_URL');
-
-  /// Ambiente actual de la aplicación.
-  Environment get environment {
-    final env = _get('ENVIRONMENT', defaultValue: 'development');
-    return Environment.values.firstWhere(
-      (e) => e.name == env,
-      orElse: () => Environment.development,
-    );
-  }
 }

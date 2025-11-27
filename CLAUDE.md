@@ -36,7 +36,7 @@ Clean Architecture de tres capas con patrón Service Locator (`get_it`) y Ports 
 
 - **Domain** (`lib/src/domain/`): Lógica de negocio pura. Entidades (inmutables, extienden `Equatable`), casos de uso (implementan `UseCase<Type, Params>`) e interfaces de repositorio. Sin dependencias externas.
 
-- **Data** (`lib/src/data/`): Comunicación con API y transformación de datos. Los modelos extienden las entidades y proveen métodos `fromJson()`/`toJson()` + `toEntity()`. Las implementaciones de repositorio extienden `BaseRepository` para el mapeo centralizado de excepciones a fallos.
+- **Data** (`lib/src/data/`): Comunicación con API y transformación de datos. Los modelos proveen métodos `fromJson()` y `toEntity()` para transformar datos JSON a entidades de dominio. Las implementaciones de repositorio extienden `BaseRepository` para el mapeo centralizado de excepciones a fallos.
 
 - **Presentation** (`lib/src/presentation/`): Capa de interfaz de usuario desacoplada mediante el patrón Ports & Adapters (Hexagonal Architecture). Permite intercambiar implementaciones de UI (consola, GUI, web, móvil) sin modificar la lógica de negocio.
 
@@ -65,7 +65,8 @@ lib/src/core/
 │   ├── dotenv_reader.dart       # Adapter para dotenv
 │   ├── env_config.dart          # Usa EnvReader (desacoplado)
 │   ├── env_config_exception.dart
-│   └── environment.dart
+│   └── utils/
+│       └── environment_variables.dart  # Variables requeridas
 ├── errors/
 │   ├── exceptions.dart          # Barrel file
 │   ├── app_exception.dart
@@ -249,9 +250,7 @@ La configuración se gestiona mediante archivos `.env`. La implementación está
 2. Ajustar valores según el ambiente
 
 **Variables disponibles:**
-- `API_BASE_URL`: URL base de la API
-- `API_TIMEOUT`: Timeout de peticiones HTTP (ms)
-- `ENVIRONMENT`: Ambiente actual (`development`, `staging`, `production`)
+- `API_BASE_URL`: URL base de la API (requerida)
 
 **Arquitectura de configuración:**
 

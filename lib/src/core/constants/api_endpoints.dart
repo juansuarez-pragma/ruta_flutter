@@ -22,15 +22,6 @@ abstract class ApiEndpoints {
   /// GET /products/{id}
   static String productById(int id) => '/products/$id';
 
-  /// Obtener productos por categoría.
-  /// GET /products/category/{category}
-  static String productsByCategory(String category) =>
-      '/products/category/$category';
-
-  /// Obtener productos con límite.
-  /// GET /products?limit={limit}
-  static String productsWithLimit(int limit) => '/products?limit=$limit';
-
   // ============================================
   // Categorías
   // ============================================

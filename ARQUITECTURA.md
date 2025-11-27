@@ -168,14 +168,21 @@ Representan la estructura de datos que viene de fuentes externas (API, base de d
 **Ejemplo: `product_model.dart`**
 
 ```dart
-class ProductModel extends ProductEntity {
+class ProductModel {
+  final int id;
+  final String title;
+  final double price;
+  final String description;
+  final String category;
+  final String image;
+
   const ProductModel({
-    required super.id,
-    required super.title,
-    required super.price,
-    required super.description,
-    required super.category,
-    required super.image,
+    required this.id,
+    required this.title,
+    required this.price,
+    required this.description,
+    required this.category,
+    required this.image,
   });
 
   // Parseo manual de JSON
@@ -188,17 +195,6 @@ class ProductModel extends ProductEntity {
       category: json['category'] as String,
       image: json['image'] as String,
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'title': title,
-      'price': price,
-      'description': description,
-      'category': category,
-      'image': image,
-    };
   }
 
   // Mapeo a entidad de dominio
@@ -214,8 +210,8 @@ class ProductModel extends ProductEntity {
 ```
 
 **Características:**
-- Extiende la entidad de dominio
-- Implementa `fromJson()` y `toJson()` para serialización
+- Clase independiente con sus propios campos
+- Implementa `fromJson()` para deserialización
 - Método `toEntity()` para mapear a objetos de dominio
 - Parseo manual sin herramientas de generación de código
 
@@ -654,8 +650,6 @@ El proyecto utiliza el paquete `dotenv` para gestionar la configuración de form
 | Variable | Descripción | Requerida | Valor por defecto |
 |----------|-------------|-----------|-------------------|
 | `API_BASE_URL` | URL base de la API | Sí | - |
-| `API_TIMEOUT` | Timeout de peticiones HTTP (ms) | No | `30000` |
-| `ENVIRONMENT` | Ambiente de ejecución | No | `development` |
 
 ### Clase EnvConfig
 
@@ -683,10 +677,6 @@ class EnvConfig {
 
   // Getters para variables de configuración
   String get apiBaseUrl => _get('API_BASE_URL');
-  int get apiTimeout => _getInt('API_TIMEOUT', defaultValue: 30000);
-  Environment get environment => // ...
-  bool get isDevelopment => environment == Environment.development;
-  bool get isProduction => environment == Environment.production;
 }
 ```
 
@@ -853,5 +843,5 @@ Esta arquitectura proporciona:
 ---
 
 **Documentación generada para el proyecto Fase 2: Consumo de API**
-Versión: 1.0.0
-Última actualización: 2025-11-25
+Versión: 1.1.0
+Última actualización: 2025-11-27

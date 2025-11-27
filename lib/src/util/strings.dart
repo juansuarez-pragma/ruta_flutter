@@ -5,7 +5,6 @@ class AppStrings {
   AppStrings._();
 
   // General
-  static const String appTitle = '--- INICIANDO EJECUCIÓN DE CASOS DE USO ---';
   static const String executionEnd = '--- FIN DE LA EJECUCIÓN ---';
   static const String welcomeMessage =
       '--- Bienvenido al Cliente Interactivo de Fake Store API ---\n';

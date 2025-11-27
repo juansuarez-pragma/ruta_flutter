@@ -10,7 +10,7 @@ Esta es una aplicación de línea de comandos en Dart que funciona como un clien
 *   **Cliente HTTP:** `http`
 *   **Manejo de Errores:** `dartz` (para el tipo `Either`) y un `ApiResponseHandler` personalizado
 *   **Configuración:** `dotenv` para gestión de variables de entorno
-*   **Patrones de Diseño:** Repositorio, Estrategia, Singleton (EnvConfig)
+*   **Patrones de Diseño:** Repository, Strategy, Singleton, Adapter, Ports & Adapters
 *   **Pruebas (Testing):** El proyecto está estructurado para ser comprobable, aunque actualmente no hay pruebas implementadas.
 
 ## Compilación y Ejecución
@@ -37,17 +37,16 @@ El proyecto utiliza el paquete `dotenv` para gestionar la configuración. Las va
 | Variable | Descripción | Requerida |
 |----------|-------------|-----------|
 | `API_BASE_URL` | URL base de la API | Sí |
-| `API_TIMEOUT` | Timeout de peticiones (ms) | No |
-| `ENVIRONMENT` | Ambiente (`development`, `staging`, `production`) | No |
 
-La clase `EnvConfig` (`lib/src/core/config/env_config.dart`) implementa el patrón Singleton y proporciona acceso tipado a las variables de configuración.
+La clase `EnvConfig` (`lib/src/core/config/env_config.dart`) implementa el patrón Singleton y proporciona acceso tipado a las variables de configuración. Utiliza el patrón Adapter mediante `EnvReader` para desacoplar la implementación concreta de dotenv.
 
 ## Convenciones de Desarrollo
 
-*   **Arquitectura Limpia:** El código está organizado en las capas `domain`, `data` y `core`.
+*   **Arquitectura Limpia:** El código está organizado en las capas `domain`, `data`, `presentation` y `core`.
     *   `domain`: Contiene la lógica de negocio (entidades, casos de uso, contratos de repositorio).
     *   `data`: Implementa el acceso a los datos (modelos, fuentes de datos, implementaciones de repositorio).
-    *   `core`: Contiene aspectos transversales (inyección de dependencias, manejo de errores, utilidades de red).
+    *   `presentation`: Capa de UI desacoplada mediante Ports & Adapters (contratos e implementaciones de interfaz).
+    *   `core`: Contiene aspectos transversales (inyección de dependencias, manejo de errores, utilidades de red, configuración).
 *   **Inyección de Dependencias:** El paquete `get_it` se utiliza para gestionar las dependencias. Todas las dependencias se registran en `lib/src/core/injection_container.dart`.
 *   **Patrón de Repositorio:** El `ProductRepository` define un contrato para las operaciones de datos, y `ProductRepositoryImpl` proporciona la implementación. Se utiliza un `BaseRepository` para centralizar la lógica de manejo de errores.
 *   **Manejo de Errores:** La aplicación utiliza el tipo `Either` del paquete `dartz` para representar el éxito o el fracaso. Se utiliza un `ApiResponseHandler` personalizado para asignar los códigos de estado HTTP a excepciones específicas.

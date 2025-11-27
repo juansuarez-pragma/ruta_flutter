@@ -28,17 +28,6 @@ class ProductModel {
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'title': title,
-      'price': price,
-      'description': description,
-      'category': category,
-      'image': image,
-    };
-  }
-
   ProductEntity toEntity() {
     return ProductEntity(
       id: id,
