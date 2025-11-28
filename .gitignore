@@ -7,6 +7,10 @@ build/
 
 # Generated files
 *.g.dart
+*.mocks.dart
+
+# Coverage reports
+coverage/
 
 # IDE files
 .idea/
