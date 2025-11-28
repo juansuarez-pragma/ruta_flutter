@@ -522,4 +522,396 @@ Antes de considerar una implementación completa, verificar:
 | Manejo de Errores | ≥85% | 95% |
 | Configuración y Seguridad | ≥85% | 95% |
 | Análisis Estático | 100% | 100% |
+| Cobertura de Tests | ≥90% | 92.17% |
 | **TOTAL** | **≥90%** | **96.83%** |
+
+## Testing
+
+El proyecto cuenta con una suite completa de tests unitarios e integración con cobertura del 92.17%.
+
+### Estructura de Tests
+
+```
+test/
+├── fixtures/                    # Datos JSON de prueba
+│   └── product_fixtures.dart
+├── helpers/                     # Utilidades compartidas
+│   ├── mocks.dart              # Definiciones @GenerateMocks
+│   ├── mocks.mocks.dart        # Generado por build_runner
+│   └── test_helpers.dart       # Funciones factory
+├── unit/
+│   ├── domain/
+│   │   ├── entities/           # Tests de entidades (Equatable)
+│   │   └── usecases/           # Tests de casos de uso
+│   ├── data/
+│   │   ├── models/             # Tests de fromJson/toEntity
+│   │   ├── repositories/       # Tests de mapeo excepciones→failures
+│   │   └── datasources/        # Tests de delegación a ApiClient
+│   ├── core/
+│   │   ├── network/            # Tests de ApiResponseHandler
+│   │   ├── errors/             # Tests de Failures y Exceptions
+│   │   └── config/             # Tests de EnvConfig
+│   └── presentation/
+│       └── contracts/          # Tests de MenuOption
+└── integration/
+    └── presentation/           # Tests de Application (flujos completos)
+```
+
+### Comandos de Testing
+
+```bash
+# Ejecutar todos los tests
+dart test
+
+# Ejecutar tests de una capa específica
+dart test test/unit/domain/
+dart test test/unit/data/
+dart test test/unit/core/
+dart test test/integration/
+
+# Ejecutar un archivo específico
+dart test test/unit/domain/usecases/get_all_products_usecase_test.dart
+
+# Ejecutar tests con cobertura
+dart test --coverage=coverage
+
+# Generar reporte de cobertura
+~/.pub-cache/bin/format_coverage --lcov --in=coverage --out=coverage/lcov.info --report-on=lib
+
+# Regenerar mocks después de cambiar interfaces
+dart run build_runner build --delete-conflicting-outputs
+```
+
+### Dependencias de Testing
+
+```yaml
+dev_dependencies:
+  test: 1.25.6
+  mockito: ^5.4.4        # Generación de mocks
+  build_runner: ^2.4.13  # Generación de código
+```
+
+### Guía para Escribir Tests
+
+#### Patrón AAA (Arrange-Act-Assert)
+
+Todos los tests DEBEN seguir este patrón:
+
+```dart
+test('descripción del comportamiento esperado', () async {
+  // Arrange - Preparar datos y configurar mocks
+  final testData = createTestProductEntityList();
+  when(mockRepository.getAllProducts())
+      .thenAnswer((_) async => Right(testData));
+
+  // Act - Ejecutar la acción bajo prueba
+  final result = await useCase(const NoParams());
+
+  // Assert - Verificar el resultado
+  expect(result, Right(testData));
+  verify(mockRepository.getAllProducts()).called(1);
+  verifyNoMoreInteractions(mockRepository);
+});
+```
+
+#### Nomenclatura de Tests
+
+- Nombres en **español**, descriptivos del comportamiento
+- Formato: `'[contexto] [acción] [resultado esperado]'`
+
+```dart
+// ✅ Correcto
+test('retorna lista de productos cuando el repositorio tiene éxito', () {});
+test('retorna ServerFailure cuando el datasource lanza ServerException', () {});
+test('lanza NotFoundException para código 404', () {});
+
+// ❌ Incorrecto
+test('test1', () {});
+test('works', () {});
+test('should return products', () {});  // En inglés
+```
+
+#### Testing de Either (dartz)
+
+```dart
+// Verificar Right (éxito)
+expect(result.isRight(), isTrue);
+result.fold(
+  (failure) => fail('No debería retornar failure'),
+  (value) => expect(value, expectedValue),
+);
+
+// Verificar Left (error)
+expect(result.isLeft(), isTrue);
+result.fold(
+  (failure) {
+    expect(failure, isA<ServerFailure>());
+    expect(failure.message, expectedMessage);
+  },
+  (_) => fail('No debería retornar Right'),
+);
+```
+
+#### Uso de Mocks
+
+```dart
+// Configurar respuesta exitosa
+when(mockDataSource.getAll()).thenAnswer((_) async => testModels);
+
+// Configurar excepción
+when(mockDataSource.getAll()).thenThrow(ServerException());
+
+// Verificar llamada única
+verify(mockRepository.getAll()).called(1);
+
+// Verificar nunca llamado
+verifyNever(mockRepository.delete(any));
+
+// Verificar sin más interacciones
+verifyNoMoreInteractions(mockRepository);
+```
+
+### Cobertura por Capa
+
+| Capa | Tests | Cobertura Objetivo |
+|------|-------|-------------------|
+| Domain | entities, usecases | 100% |
+| Data | models, repositories, datasources | ≥90% |
+| Core | network, errors, config | ≥85% |
+| Presentation | application, contracts | ≥80% |
+| **Total** | **168 tests** | **≥90%** |
+
+### Agregar Tests para Nueva Funcionalidad
+
+Al agregar nueva funcionalidad, seguir este orden:
+
+1. **Domain Tests** (primero):
+   - Test de entidad (si es nueva)
+   - Test de use case
+
+2. **Data Tests**:
+   - Test de model (`fromJson`, `toEntity`)
+   - Test de repository (mapeo de excepciones)
+   - Test de datasource (delegación a ApiClient)
+
+3. **Core Tests** (si aplica):
+   - Tests de nuevas excepciones/failures
+   - Tests de nuevos handlers
+
+4. **Integration Tests**:
+   - Test del flujo completo en Application
+
+#### Plantilla para Test de UseCase
+
+```dart
+import 'package:dartz/dartz.dart';
+import 'package:mockito/mockito.dart';
+import 'package:test/test.dart';
+import 'package:fase_2_consumo_api/src/core/errors/failures.dart';
+import 'package:fase_2_consumo_api/src/core/usecase/usecase.dart';
+import 'package:fase_2_consumo_api/src/domain/usecases/mi_usecase.dart';
+
+import '../../../helpers/mocks.mocks.dart';
+import '../../../helpers/test_helpers.dart';
+
+void main() {
+  late MiUseCase useCase;
+  late MockMiRepository mockRepository;
+
+  setUp(() {
+    mockRepository = MockMiRepository();
+    useCase = MiUseCase(mockRepository);
+  });
+
+  group('MiUseCase', () {
+    test('retorna datos cuando el repositorio tiene éxito', () async {
+      // Arrange
+      final testData = createTestData();
+      when(mockRepository.getData())
+          .thenAnswer((_) async => Right(testData));
+
+      // Act
+      final result = await useCase(const NoParams());
+
+      // Assert
+      expect(result, Right(testData));
+      verify(mockRepository.getData()).called(1);
+    });
+
+    test('retorna Failure cuando el repositorio falla', () async {
+      // Arrange
+      final failure = ServerFailure('Error');
+      when(mockRepository.getData())
+          .thenAnswer((_) async => Left(failure));
+
+      // Act
+      final result = await useCase(const NoParams());
+
+      // Assert
+      expect(result, Left(failure));
+    });
+  });
+}
+```
+
+#### Plantilla para Test de Repository
+
+```dart
+import 'package:dartz/dartz.dart';
+import 'package:mockito/mockito.dart';
+import 'package:test/test.dart';
+import 'package:fase_2_consumo_api/src/core/errors/exceptions.dart';
+import 'package:fase_2_consumo_api/src/core/errors/failures.dart';
+import 'package:fase_2_consumo_api/src/data/repositories/mi_repository_impl.dart';
+
+import '../../../helpers/mocks.mocks.dart';
+import '../../../helpers/test_helpers.dart';
+
+void main() {
+  late MiRepositoryImpl repository;
+  late MockMiRemoteDataSource mockDataSource;
+
+  setUp(() {
+    mockDataSource = MockMiRemoteDataSource();
+    repository = MiRepositoryImpl(dataSource: mockDataSource);
+  });
+
+  group('MiRepositoryImpl', () {
+    test('retorna Right con datos cuando datasource tiene éxito', () async {
+      // Arrange
+      final testModels = createTestModelList();
+      when(mockDataSource.getAll()).thenAnswer((_) async => testModels);
+
+      // Act
+      final result = await repository.getAll();
+
+      // Assert
+      expect(result.isRight(), isTrue);
+    });
+
+    test('retorna Left ServerFailure cuando datasource lanza ServerException', () async {
+      // Arrange
+      when(mockDataSource.getAll()).thenThrow(ServerException());
+
+      // Act
+      final result = await repository.getAll();
+
+      // Assert
+      expect(result.isLeft(), isTrue);
+      result.fold(
+        (failure) => expect(failure, isA<ServerFailure>()),
+        (_) => fail('No debería retornar Right'),
+      );
+    });
+
+    test('retorna Left ConnectionFailure cuando datasource lanza ConnectionException', () async {
+      // Arrange
+      when(mockDataSource.getAll()).thenThrow(
+        ConnectionException(uri: Uri.parse('https://api.test.com')),
+      );
+
+      // Act
+      final result = await repository.getAll();
+
+      // Assert
+      result.fold(
+        (failure) => expect(failure, isA<ConnectionFailure>()),
+        (_) => fail('No debería retornar Right'),
+      );
+    });
+  });
+}
+```
+
+### Agregar Nuevos Mocks
+
+Cuando se crea una nueva interface que necesita ser mockeada:
+
+1. Agregar al archivo `test/helpers/mocks.dart`:
+   ```dart
+   @GenerateMocks([
+     // ... mocks existentes
+     NuevaInterface,  // Agregar aquí
+   ])
+   void main() {}
+   ```
+
+2. Regenerar mocks:
+   ```bash
+   dart run build_runner build --delete-conflicting-outputs
+   ```
+
+3. Importar en el test:
+   ```dart
+   import '../../helpers/mocks.mocks.dart';
+   // Usar: MockNuevaInterface
+   ```
+
+### Helpers Disponibles
+
+En `test/helpers/test_helpers.dart`:
+
+```dart
+// Crear entidad de prueba
+ProductEntity createTestProductEntity({
+  int id = 1,
+  String title = 'Producto de prueba',
+  double price = 99.99,
+  // ...
+});
+
+// Crear modelo de prueba
+ProductModel createTestProductModel({...});
+
+// Crear lista de entidades
+List<ProductEntity> createTestProductEntityList({int count = 2});
+
+// Crear lista de modelos
+List<ProductModel> createTestProductModelList({int count = 2});
+
+// Crear lista de categorías
+List<String> createTestCategories();
+```
+
+### Fixtures Disponibles
+
+En `test/fixtures/product_fixtures.dart`:
+
+```dart
+// JSON válido
+const Map<String, dynamic> validProductJson;
+const Map<String, dynamic> validProductJson2;
+
+// JSON con precio entero (para probar conversión num→double)
+const Map<String, dynamic> productJsonWithIntPrice;
+
+// JSON incompleto (para probar errores)
+const Map<String, dynamic> incompleteProductJson;
+
+// JSON con tipo incorrecto
+const Map<String, dynamic> wrongTypeProductJson;
+
+// Lista de JSONs
+const List<Map<String, dynamic>> validProductListJson;
+
+// Lista de categorías
+const List<String> validCategoriesList;
+```
+
+### Verificación Pre-Commit
+
+Antes de cada commit, ejecutar:
+
+```bash
+# 1. Todos los tests pasan
+dart test
+
+# 2. Análisis estático sin errores
+dart analyze
+
+# 3. Código formateado
+dart format .
+
+# 4. (Opcional) Verificar cobertura
+dart test --coverage=coverage
+```
