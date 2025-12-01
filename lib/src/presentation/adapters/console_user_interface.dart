@@ -9,8 +9,10 @@ import 'package:fase_2_consumo_api/src/util/strings.dart';
 /// Implementa el contrato [UserInterface] usando stdin/stdout para
 /// interactuar con el usuario a través de la línea de comandos.
 class ConsoleUserInterface implements UserInterface {
-  static const int _labelPadding = 12; // Alinea las etiquetas a la izquierda con un ancho fijo de 12 caracteres:
-  static const int _descriptionMaxLength = 70; //  Trunca descripciones largas a 70 caracteres para que no desborden la consola:
+  static const int _labelPadding =
+      12; // Alinea las etiquetas a la izquierda con un ancho fijo de 12 caracteres:
+  static const int _descriptionMaxLength =
+      70; //  Trunca descripciones largas a 70 caracteres para que no desborden la consola:
 
   @override
   void showWelcome(String message) {
