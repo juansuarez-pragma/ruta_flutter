@@ -17,7 +17,7 @@ void main() {
       expect(MenuOption.values.length, 6);
     });
 
-    test('valores son distintos', () {
+    test('valores son diferentes', () {
       // Arrange
       final values = MenuOption.values;
       final uniqueValues = values.toSet();
