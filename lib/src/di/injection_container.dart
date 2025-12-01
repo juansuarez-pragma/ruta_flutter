@@ -15,17 +15,9 @@ import 'package:fase_2_consumo_api/src/presentation/application.dart'
 import 'package:fase_2_consumo_api/src/presentation/contracts/contracts.dart';
 
 /// Instancia global del Service Locator para inyección de dependencias.
-///
-/// Usar nombres descriptivos en lugar de abreviaciones mejora la legibilidad
-/// y facilita el mantenimiento del código.
+
 final GetIt serviceLocator = GetIt.instance;
 
-/// Inicializa todas las dependencias de la aplicación.
-///
-/// Registra todas las implementaciones concretas para las abstracciones
-/// definidas en la arquitectura. Debe llamarse después de
-/// [EnvConfig.instance.initialize()].
-///
 /// Tipos de registro:
 /// - `registerFactory`: Nueva instancia en cada llamada (Use Cases, Application)
 /// - `registerLazySingleton`: Instancia única, creada cuando se necesita

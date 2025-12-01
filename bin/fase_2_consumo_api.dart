@@ -18,7 +18,6 @@ void main(List<String> arguments) async {
   await di.init();
 
   // 3. Ejecutar la aplicación
-  // La UI se inyecta a través del contenedor de dependencias.
   // Para cambiar de consola a otra UI (GUI, web, móvil),
   // solo se necesita registrar otra implementación de UserInterface
   // en injection_container.dart

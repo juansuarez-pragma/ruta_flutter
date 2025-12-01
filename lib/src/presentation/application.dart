@@ -11,9 +11,6 @@ import 'package:fase_2_consumo_api/src/util/strings.dart';
 /// el flujo de la aplicación sin conocer los detalles de implementación
 /// de la UI. Recibe una instancia de [UserInterface] que puede ser cualquier
 /// implementación (consola, GUI, web, etc.).
-///
-/// Sigue el principio de inversión de dependencias: depende de abstracciones
-/// ([UserInterface]) no de implementaciones concretas.
 class ApplicationController {
   final UserInterface _ui;
   final GetAllProductsUseCase _getAllProducts;
