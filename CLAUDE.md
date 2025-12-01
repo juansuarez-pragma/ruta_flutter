@@ -34,14 +34,7 @@ Clean Architecture de tres capas con patrón Service Locator (`get_it`) y Ports 
 
 ### Responsabilidades por Capa
 
-- **Domain** (`lib/src/domain/`): Lógica de negocio pura. Incluye:
-  - **Entities**: Inmutables, extienden `Equatable`
-  - **Value Objects**: Encapsulan validaciones y reglas de negocio (`Money`, `ProductId`, `ProductTitle`)
-  - **Aggregates**: Aggregate Roots con comportamientos de dominio (`ProductAggregate`)
-  - **Domain Events**: Eventos que representan hechos significativos (`ProductViewedEvent`)
-  - **Use Cases**: Implementan `UseCase<Type, Params>`
-  - **Repository Interfaces**: Contratos para acceso a datos
-  - Sin dependencias externas.
+- **Domain** (`lib/src/domain/`): Lógica de negocio pura. Entidades (inmutables, extienden `Equatable`), casos de uso (implementan `UseCase<Type, Params>`) e interfaces de repositorio. Sin dependencias externas.
 
 - **Data** (`lib/src/data/`): Comunicación con API y transformación de datos. Los modelos proveen métodos `fromJson()` y `toEntity()` para transformar datos JSON a entidades de dominio. Las implementaciones de repositorio extienden `BaseRepository` para el mapeo centralizado de excepciones a fallos.
 
@@ -61,9 +54,6 @@ Clean Architecture de tres capas con patrón Service Locator (`get_it`) y Ports 
 - **Interface Segregation Principle (ISP)**: Interfaces de UI segregadas por responsabilidad
 - **Single Responsibility Principle (SRP)**: Un archivo = una clase/enum/interface
 - **Adapter Pattern**: Desacopla dependencias externas (dotenv, http) mediante interfaces
-- **Value Object Pattern**: Encapsula validaciones y comportamientos en objetos inmutables
-- **Aggregate Pattern**: Raíz de agregado que garantiza consistencia e invariantes
-- **Domain Events Pattern**: Eventos que representan hechos de negocio ocurridos
 
 ### Organización de Archivos (SRP)
 
@@ -534,7 +524,7 @@ Antes de considerar una implementación completa, verificar:
 | Configuración y Seguridad | ≥85% | 95% |
 | Análisis Estático | 100% | 100% |
 | Cobertura de Tests | ≥90% | 93%+ |
-| **TOTAL** | **≥90%** | **97%** |
+| **TOTAL** | **≥90%** | **96%** |
 
 ## Metodología TDD
 
@@ -598,153 +588,6 @@ Antes de escribir cada test, documentar la especificación:
 
 **Documentación completa:** Ver `docs/TDD_PROCESS.md`
 
-## DDD Táctico
-
-El proyecto implementa patrones tácticos de Domain-Driven Design para enriquecer la capa de dominio.
-
-### Value Objects
-
-Objetos inmutables que encapsulan validaciones y comportamientos:
-
-```
-lib/src/domain/value_objects/
-├── value_objects.dart     # Barrel file
-├── value_object.dart      # Clase base abstracta
-├── shared/
-│   └── money.dart         # Valor monetario no negativo
-└── product/
-    ├── product_id.dart    # ID de producto (entero positivo)
-    └── product_title.dart # Título (no vacío, max 200 chars)
-```
-
-**Ejemplo de uso:**
-```dart
-// Money: Valores monetarios con precisión de 2 decimales
-final precio = Money.fromDouble(99.99);
-final descuento = Money.fromDouble(10.00);
-final total = precio.subtract(descuento); // $89.99
-
-// ProductId: Identificador validado
-final id = ProductId(42); // OK
-// ProductId(0); // ❌ ArgumentError
-
-// ProductTitle: Título validado
-final title = ProductTitle('Laptop Gaming'); // OK
-// ProductTitle(''); // ❌ ArgumentError
-```
-
-### Domain Events
-
-Eventos que representan hechos significativos del dominio:
-
-```
-lib/src/domain/events/
-├── events.dart            # Barrel file
-├── domain_event.dart      # Clase base (eventId, occurredAt)
-├── product/
-│   └── product_viewed_event.dart
-└── cart/
-    └── cart_events.dart   # ItemAddedToCart, ItemRemoved, QuantityUpdated, CartCleared
-```
-
-**Ejemplo de uso:**
-```dart
-// Crear evento cuando se visualiza un producto
-final event = ProductViewedEvent(productId: ProductId(42));
-eventBus.publish(event);
-
-// Eventos del carrito
-final result = cart.addItemWithEvent(...);
-print(result.event); // ItemAddedToCartEvent
-```
-
-### Aggregates
-
-Aggregate Roots que encapsulan entidades y comportamientos de dominio:
-
-```
-lib/src/domain/aggregates/
-├── aggregates.dart
-├── product/
-│   └── product_aggregate.dart  # Incluye Rating (Value Object embebido)
-└── cart/
-    └── cart_aggregate.dart     # Carrito de compras con eventos
-```
-
-**ProductAggregate - Comportamientos:**
-
-| Método | Descripción |
-|--------|-------------|
-| `hasDiscount(Money)` | Verifica si tiene descuento |
-| `calculateDiscount(Money)` | Calcula monto del descuento |
-| `discountPercentage(Money)` | Calcula porcentaje de descuento |
-| `isInCategory(String)` | Verifica categoría (case-insensitive) |
-| `recordView()` | Emite `ProductViewedEvent` |
-| `isHighlyRated({threshold})` | Rating >= threshold (default 4.0) |
-| `hasEnoughReviews({min})` | Count >= min (default 10) |
-
-**Ejemplo de uso:**
-```dart
-final product = ProductAggregate(
-  id: ProductId(1),
-  title: ProductTitle('Laptop Gaming'),
-  price: Money.fromDouble(999.99),
-  description: 'Alta performance',
-  category: 'electronics',
-  image: 'https://example.com/laptop.jpg',
-  rating: Rating(rate: 4.5, count: 150),
-);
-
-// Verificar descuento
-final originalPrice = Money.fromDouble(1199.99);
-if (product.hasDiscount(originalPrice)) {
-  print('Descuento: ${product.discountPercentage(originalPrice)}%');
-}
-
-// Verificar si es producto destacado
-if (product.isHighlyRated() && product.hasEnoughReviews()) {
-  featuredProducts.add(product);
-}
-
-// Emitir evento de visualización
-final event = product.recordView();
-```
-
-**CartAggregate - Comportamientos:**
-
-| Método | Descripción | Evento |
-|--------|-------------|--------|
-| `addItem()` | Agrega producto o incrementa cantidad | `ItemAddedToCartEvent` |
-| `updateQuantity()` | Actualiza cantidad de ítem | `CartItemQuantityUpdatedEvent` |
-| `removeItem()` | Elimina ítem del carrito | `ItemRemovedFromCartEvent` |
-| `clear()` | Vacía el carrito | `CartClearedEvent` |
-
-**Consultas:**
-- `items`, `isEmpty`, `isNotEmpty`
-- `itemCount`, `uniqueItemCount`, `total`
-- `containsProduct()`, `getItem()`
-
-**Ejemplo de uso:**
-```dart
-var cart = CartAggregate.empty();
-
-// Agregar productos
-cart = cart.addItem(
-  productId: ProductId(1),
-  quantity: 2,
-  unitPrice: Money.fromDouble(100.0),
-);
-
-print(cart.total);     // $200.00
-print(cart.itemCount); // 2
-
-// Con eventos
-final result = cart.addItemWithEvent(...);
-print(result.event); // ItemAddedToCartEvent
-```
-
-**Documentación completa:** Ver `docs/FASE_2_DDD_REPORT.md` y `docs/FASE_4_CART_DOMAIN_REPORT.md`
-
 ## ATDD (Acceptance Test-Driven Development)
 
 El proyecto implementa tests de aceptación en formato BDD (Behavior-Driven Development) con Given-When-Then.
@@ -757,9 +600,7 @@ test/acceptance/
 └── features/
     ├── product_listing_acceptance_test.dart
     ├── product_detail_acceptance_test.dart
-    ├── product_category_acceptance_test.dart
-    ├── product_aggregate_acceptance_test.dart
-    └── cart_acceptance_test.dart
+    └── product_category_acceptance_test.dart
 ```
 
 ### Formato de Tests
@@ -791,11 +632,9 @@ test(
 | Listado de Productos | 6 | 6 |
 | Detalle de Producto | 6 | 6 |
 | Filtrar por Categoría | 6 | 6 |
-| Comportamientos DDD | 5 | 15 |
-| Carrito de Compras | 8 | 17 |
-| **Total** | **31** | **50** |
+| **Total** | **18** | **18** |
 
-**Documentación completa:** Ver `docs/FASE_3_ATDD_REPORT.md` y `docs/FASE_4_CART_DOMAIN_REPORT.md`
+**Documentación completa:** Ver `docs/FASE_3_ATDD_REPORT.md`
 
 ## CI/CD (Integración Continua)
 
@@ -808,12 +647,11 @@ El proyecto usa GitHub Actions para automatizar calidad de código.
 ```
 
 **Jobs:**
-1. **analyze**: Formato y análisis estático
-2. **test**: Tests unitarios e integración + cobertura
-3. **test-acceptance**: Tests de aceptación ATDD
-4. **quality-gate**: Verificación final
+1. **lint**: Formato (`dart format`) y análisis estático (`dart analyze`)
+2. **unit-test**: Tests unitarios e integración
+3. **acceptance-test**: Tests de aceptación ATDD
 
-**Triggers:** Push/PR a `main`, `test`, `develop`
+**Triggers:** Pull Request a `main`
 
 **Comandos locales para simular CI:**
 ```bash
@@ -822,8 +660,6 @@ dart analyze --fatal-infos
 dart test
 dart test test/acceptance/
 ```
-
-**Documentación completa:** Ver `docs/FASE_5_CI_CD_REPORT.md`
 
 ## Testing
 
@@ -842,10 +678,7 @@ test/
 ├── unit/
 │   ├── domain/
 │   │   ├── entities/           # Tests de entidades (Equatable)
-│   │   ├── usecases/           # Tests de casos de uso
-│   │   ├── value_objects/      # Tests de Value Objects
-│   │   ├── events/             # Tests de Domain Events
-│   │   └── aggregates/         # Tests de Aggregates
+│   │   └── usecases/           # Tests de casos de uso
 │   ├── data/
 │   │   ├── models/             # Tests de fromJson/toEntity
 │   │   ├── repositories/       # Tests de mapeo excepciones→failures
@@ -984,7 +817,7 @@ verifyNoMoreInteractions(mockRepository);
 | Data | models, repositories, datasources | ≥90% |
 | Core | network, errors, config | ≥85% |
 | Presentation | application, contracts | ≥80% |
-| **Total** | **311 tests** | **≥90%** |
+| **Total** | **207 tests** | **≥90%** |
 
 ### Agregar Tests para Nueva Funcionalidad
 

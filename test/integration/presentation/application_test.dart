@@ -4,6 +4,7 @@ import 'package:test/test.dart';
 import 'package:fase_2_consumo_api/src/core/errors/failures.dart';
 import 'package:fase_2_consumo_api/src/core/usecase/usecase.dart';
 import 'package:fase_2_consumo_api/src/domain/usecases/get_product_by_id_usecase.dart';
+import 'package:fase_2_consumo_api/src/domain/usecases/get_products_by_category_usecase.dart';
 import 'package:fase_2_consumo_api/src/presentation/application.dart'
     show ApplicationController;
 import 'package:fase_2_consumo_api/src/presentation/contracts/contracts.dart';
@@ -18,6 +19,7 @@ void main() {
   late MockGetAllProductsUseCase mockGetAllProducts;
   late MockGetProductByIdUseCase mockGetProductById;
   late MockGetAllCategoriesUseCase mockGetAllCategories;
+  late MockGetProductsByCategoryUseCase mockGetProductsByCategory;
   late bool exitCalled;
 
   setUp(() {
@@ -25,6 +27,7 @@ void main() {
     mockGetAllProducts = MockGetAllProductsUseCase();
     mockGetProductById = MockGetProductByIdUseCase();
     mockGetAllCategories = MockGetAllCategoriesUseCase();
+    mockGetProductsByCategory = MockGetProductsByCategoryUseCase();
     exitCalled = false;
 
     application = ApplicationController(
@@ -32,6 +35,7 @@ void main() {
       getAllProducts: mockGetAllProducts,
       getProductById: mockGetProductById,
       getAllCategories: mockGetAllCategories,
+      getProductsByCategory: mockGetProductsByCategory,
       onExit: () => exitCalled = true,
     );
   });
@@ -282,6 +286,142 @@ void main() {
         // Assert
         verify(mockUI.showError(failure.message)).called(1);
       });
+    });
+
+    group('getProductsByCategory', () {
+      test(
+        'obtiene categorías, solicita selección y muestra productos',
+        () async {
+          // Arrange
+          final testCategories = createTestCategories();
+          final testProducts = createTestProductEntityList(count: 2);
+          const selectedCategory = 'electronics';
+
+          when(
+            mockGetAllCategories(const NoParams()),
+          ).thenAnswer((_) async => Right(testCategories));
+          when(
+            mockUI.promptCategory(testCategories),
+          ).thenAnswer((_) async => selectedCategory);
+          when(
+            mockGetProductsByCategory(
+              const CategoryParams(category: selectedCategory),
+            ),
+          ).thenAnswer((_) async => Right(testProducts));
+
+          var callCount = 0;
+          when(mockUI.showMainMenu()).thenAnswer((_) async {
+            callCount++;
+            return callCount == 1
+                ? MenuOption.getProductsByCategory
+                : MenuOption.exit;
+          });
+
+          // Act
+          await application.run();
+
+          // Assert
+          verify(mockGetAllCategories(const NoParams())).called(1);
+          verify(mockUI.promptCategory(testCategories)).called(1);
+          verify(
+            mockGetProductsByCategory(
+              const CategoryParams(category: selectedCategory),
+            ),
+          ).called(1);
+          verify(mockUI.showProducts(testProducts)).called(1);
+        },
+      );
+
+      test(
+        'muestra error cuando la selección de categoría es inválida',
+        () async {
+          // Arrange
+          final testCategories = createTestCategories();
+
+          when(
+            mockGetAllCategories(const NoParams()),
+          ).thenAnswer((_) async => Right(testCategories));
+          when(
+            mockUI.promptCategory(testCategories),
+          ).thenAnswer((_) async => null);
+
+          var callCount = 0;
+          when(mockUI.showMainMenu()).thenAnswer((_) async {
+            callCount++;
+            return callCount == 1
+                ? MenuOption.getProductsByCategory
+                : MenuOption.exit;
+          });
+
+          // Act
+          await application.run();
+
+          // Assert
+          verify(mockUI.showError(AppStrings.invalidCategoryError)).called(1);
+          verifyNever(mockGetProductsByCategory(any));
+        },
+      );
+
+      test('muestra error cuando falla obtener categorías', () async {
+        // Arrange
+        final failure = ConnectionFailure('Sin conexión');
+
+        when(
+          mockGetAllCategories(const NoParams()),
+        ).thenAnswer((_) async => Left(failure));
+
+        var callCount = 0;
+        when(mockUI.showMainMenu()).thenAnswer((_) async {
+          callCount++;
+          return callCount == 1
+              ? MenuOption.getProductsByCategory
+              : MenuOption.exit;
+        });
+
+        // Act
+        await application.run();
+
+        // Assert
+        verify(mockUI.showError(failure.message)).called(1);
+        verifyNever(mockUI.promptCategory(any));
+        verifyNever(mockGetProductsByCategory(any));
+      });
+
+      test(
+        'muestra error cuando falla obtener productos por categoría',
+        () async {
+          // Arrange
+          final testCategories = createTestCategories();
+          const selectedCategory = 'electronics';
+          final failure = ServerFailure('Error del servidor');
+
+          when(
+            mockGetAllCategories(const NoParams()),
+          ).thenAnswer((_) async => Right(testCategories));
+          when(
+            mockUI.promptCategory(testCategories),
+          ).thenAnswer((_) async => selectedCategory);
+          when(
+            mockGetProductsByCategory(
+              const CategoryParams(category: selectedCategory),
+            ),
+          ).thenAnswer((_) async => Left(failure));
+
+          var callCount = 0;
+          when(mockUI.showMainMenu()).thenAnswer((_) async {
+            callCount++;
+            return callCount == 1
+                ? MenuOption.getProductsByCategory
+                : MenuOption.exit;
+          });
+
+          // Act
+          await application.run();
+
+          // Assert
+          verify(mockUI.showError(failure.message)).called(1);
+        },
+      );
     });
 
     group('ciclo del menú', () {

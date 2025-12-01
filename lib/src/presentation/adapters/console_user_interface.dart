@@ -9,8 +9,10 @@ import 'package:fase_2_consumo_api/src/util/strings.dart';
 /// Implementa el contrato [UserInterface] usando stdin/stdout para
 /// interactuar con el usuario a través de la línea de comandos.
 class ConsoleUserInterface implements UserInterface {
-  static const int _labelPadding = 12; // Alinea las etiquetas a la izquierda con un ancho fijo de 12 caracteres:
-  static const int _descriptionMaxLength = 70; //  Trunca descripciones largas a 70 caracteres para que no desborden la consola:
+  static const int _labelPadding =
+      12; // Alinea las etiquetas a la izquierda con un ancho fijo de 12 caracteres:
+  static const int _descriptionMaxLength =
+      70; //  Trunca descripciones largas a 70 caracteres para que no desborden la consola:
 
   @override
   void showWelcome(String message) {
@@ -23,7 +25,8 @@ class ConsoleUserInterface implements UserInterface {
     print('1. ${AppStrings.menuOptionGetAllProducts}');
     print('2. ${AppStrings.menuOptionGetProductById}');
     print('3. ${AppStrings.menuOptionGetAllCategories}');
-    print('4. ${AppStrings.menuOptionExit}');
+    print('4. ${AppStrings.menuOptionGetProductsByCategory}');
+    print('5. ${AppStrings.menuOptionExit}');
     stdout.write('${AppStrings.menuPrompt} ');
 
     final choice = stdin.readLineSync()?.trim();
@@ -32,7 +35,8 @@ class ConsoleUserInterface implements UserInterface {
       '1' => MenuOption.getAllProducts,
       '2' => MenuOption.getProductById,
       '3' => MenuOption.getAllCategories,
-      '4' => MenuOption.exit,
+      '4' => MenuOption.getProductsByCategory,
+      '5' => MenuOption.exit,
       _ => MenuOption.invalid,
     };
   }
@@ -42,6 +46,24 @@ class ConsoleUserInterface implements UserInterface {
     stdout.write('${AppStrings.promptProductId} ');
     final input = stdin.readLineSync()?.trim();
     return int.tryParse(input ?? '');
+  }
+
+  @override
+  Future<String?> promptCategory(List<String> categories) async {
+    print('\n${AppStrings.promptCategory}');
+    for (var i = 0; i < categories.length; i++) {
+      print('${i + 1}. ${categories[i]}');
+    }
+    stdout.write('${AppStrings.menuPrompt} ');
+
+    final input = stdin.readLineSync()?.trim();
+    final index = int.tryParse(input ?? '');
+
+    if (index == null || index < 1 || index > categories.length) {
+      return null;
+    }
+
+    return categories[index - 1];
   }
 
   @override

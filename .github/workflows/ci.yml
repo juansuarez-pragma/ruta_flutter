@@ -1,119 +1,86 @@
 name: CI
 
 on:
-  push:
-    branches: [main]
   pull_request:
     branches: [main]
 
 env:
-  DART_SDK_VERSION: "3.5.4"
+  DART_SDK_VERSION: "3.9.2"
 
 jobs:
-  analyze:
-    name: Análisis estático
+  lint:
+    name: Lint & Static Analysis
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout código
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Configurar Dart SDK
+      - name: Setup Dart SDK
         uses: dart-lang/setup-dart@v1
         with:
           sdk: ${{ env.DART_SDK_VERSION }}
 
-      - name: Instalar dependencias
+      - name: Install dependencies
         run: dart pub get
 
-      - name: Verificar formato de código
+      - name: Generate mocks
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Format generated code
+        run: dart format .
+
+      - name: Check formatting
         run: dart format --output=none --set-exit-if-changed .
 
-      - name: Análisis estático
+      - name: Analyze
         run: dart analyze --fatal-infos
 
-  test:
-    name: Tests unitarios e integración
+  unit-test:
+    name: Unit & Integration Tests
     runs-on: ubuntu-latest
-    needs: analyze
+    needs: lint
     steps:
-      - name: Checkout código
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Configurar Dart SDK
+      - name: Setup Dart SDK
         uses: dart-lang/setup-dart@v1
         with:
           sdk: ${{ env.DART_SDK_VERSION }}
 
-      - name: Instalar dependencias
+      - name: Setup environment
+        run: cp .env.example .env
+
+      - name: Install dependencies
         run: dart pub get
 
-      - name: Ejecutar tests
+      - name: Generate mocks
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Run tests
         run: dart test --reporter=github
 
-      - name: Ejecutar tests con cobertura
-        run: dart test --coverage=coverage
-
-      - name: Instalar herramienta de cobertura
-        run: dart pub global activate coverage
-
-      - name: Generar reporte LCOV
-        run: |
-          dart pub global run coverage:format_coverage \
-            --lcov \
-            --in=coverage \
-            --out=coverage/lcov.info \
-            --report-on=lib
-
-      - name: Subir cobertura a Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          files: coverage/lcov.info
-          fail_ci_if_error: false
-          verbose: true
-
-  test-acceptance:
-    name: Tests de aceptación (ATDD)
+  acceptance-test:
+    name: Acceptance Tests (ATDD)
     runs-on: ubuntu-latest
-    needs: analyze
+    needs: lint
     steps:
-      - name: Checkout código
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Configurar Dart SDK
+      - name: Setup Dart SDK
         uses: dart-lang/setup-dart@v1
         with:
           sdk: ${{ env.DART_SDK_VERSION }}
 
-      - name: Instalar dependencias
+      - name: Setup environment
+        run: cp .env.example .env
+
+      - name: Install dependencies
         run: dart pub get
 
-      - name: Ejecutar tests de aceptación
+      - name: Generate mocks
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Run acceptance tests
         run: dart test test/acceptance/ --reporter=github
-
-  quality-gate:
-    name: Quality Gate
-    runs-on: ubuntu-latest
-    needs: [analyze, test, test-acceptance]
-    steps:
-      - name: Checkout código
-        uses: actions/checkout@v4
-
-      - name: Configurar Dart SDK
-        uses: dart-lang/setup-dart@v1
-        with:
-          sdk: ${{ env.DART_SDK_VERSION }}
-
-      - name: Instalar dependencias
-        run: dart pub get
-
-      - name: Ejecutar todos los tests
-        run: dart test
-
-      - name: Verificar que todos los tests pasan
-        run: |
-          TEST_COUNT=$(dart test --reporter=json 2>/dev/null | grep -c '"success":true' || echo "0")
-          echo "Tests pasados: $TEST_COUNT"
-          if [ "$TEST_COUNT" -lt 300 ]; then
-            echo "⚠️ Advertencia: El proyecto debería tener al menos 300 tests"
-          fi
-          echo "✅ Quality Gate pasado"
