@@ -4,10 +4,6 @@ import 'package:fase_2_consumo_api/src/core/network/http_status_codes.dart';
 
 /// Maneja las respuestas HTTP y lanza excepciones según el código de estado.
 ///
-/// Implementa el patrón Strategy para mapear códigos HTTP específicos
-/// a excepciones tipadas. Los códigos no mapeados explícitamente
-/// se manejan por rangos (4xx → ClientException, 5xx → ServerException).
-///
 /// Referencia de códigos HTTP:
 /// - 2xx: Éxito (no lanza excepción)
 /// - 4xx: Error del cliente (la solicitud es incorrecta)
