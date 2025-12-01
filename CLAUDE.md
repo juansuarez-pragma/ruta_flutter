@@ -661,6 +661,91 @@ dart test
 dart test test/acceptance/
 ```
 
+## Docker
+
+El proyecto incluye soporte para contenedores Docker, permitiendo ejecutar la aplicación sin instalar Dart.
+
+### Archivos Docker
+
+```
+Dockerfile          # Multi-stage build para imagen optimizada
+.dockerignore       # Excluye archivos innecesarios del build
+```
+
+### Arquitectura del Dockerfile
+
+El Dockerfile usa **multi-stage build** para crear una imagen final liviana:
+
+```
+┌─────────────────────────────────────────────────────────┐
+│ ETAPA 1: Build (dart:3.9.2)                             │
+│ ├── Instala dependencias (dart pub get)                 │
+│ ├── Copia código fuente                                 │
+│ └── Compila a ejecutable nativo (dart compile exe)      │
+└─────────────────────────────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────┐
+│ ETAPA 2: Runtime (debian:bookworm-slim)                 │
+│ ├── Instala certificados SSL (ca-certificates)          │
+│ ├── Copia ejecutable compilado (~10MB)                  │
+│ └── Copia configuración (.env.example → .env)           │
+└─────────────────────────────────────────────────────────┘
+```
+
+**Beneficios:**
+- Imagen final ~80MB (vs ~800MB con SDK completo)
+- Ejecutable nativo sin necesidad de Dart runtime
+- Tiempos de inicio rápidos
+
+### Comandos Docker
+
+```bash
+# Construir imagen
+docker build -t juancarlos05/fake-store-cli:latest .
+
+# Ejecutar contenedor (modo interactivo)
+docker run -it juancarlos05/fake-store-cli
+
+# Ejecutar con variables de entorno personalizadas
+docker run -it -e API_BASE_URL=https://otra-api.com juancarlos05/fake-store-cli
+```
+
+### Publicar en Docker Hub
+
+```bash
+# 1. Login en Docker Hub
+docker login
+
+# 2. Construir imagen
+docker build -t juancarlos05/fake-store-cli:latest .
+
+# 3. Publicar
+docker push juancarlos05/fake-store-cli:latest
+```
+
+### Usuarios descargan y ejecutan
+
+```bash
+docker run -it juancarlos05/fake-store-cli
+```
+
+### Estructura del Dockerfile
+
+| Línea | Comando | Descripción |
+|-------|---------|-------------|
+| `FROM dart:3.9.2 AS build` | Imagen base con Dart SDK |
+| `WORKDIR /app` | Directorio de trabajo |
+| `COPY pubspec.* ./` | Copia dependencias (optimiza cache) |
+| `RUN dart pub get` | Instala dependencias |
+| `COPY . .` | Copia código fuente |
+| `RUN dart compile exe ...` | Compila a ejecutable nativo AOT |
+| `FROM debian:bookworm-slim` | Imagen final liviana |
+| `RUN apt-get install ca-certificates` | Certificados SSL para HTTPS |
+| `COPY --from=build .../app` | Copia solo el ejecutable |
+| `COPY --from=build .../.env.example` | Copia configuración |
+| `ENTRYPOINT ["/app/bin/app"]` | Comando de inicio |
+
 ## Testing
 
 El proyecto cuenta con una suite completa de tests unitarios e integración con cobertura del 93%+.
