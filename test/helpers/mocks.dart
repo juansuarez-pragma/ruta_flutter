@@ -20,6 +20,7 @@ import 'package:fase_2_consumo_api/src/domain/repositories/product_repository.da
 import 'package:fase_2_consumo_api/src/domain/usecases/get_all_categories_usecase.dart';
 import 'package:fase_2_consumo_api/src/domain/usecases/get_all_products_usecase.dart';
 import 'package:fase_2_consumo_api/src/domain/usecases/get_product_by_id_usecase.dart';
+import 'package:fase_2_consumo_api/src/domain/usecases/get_products_by_category_usecase.dart';
 import 'package:fase_2_consumo_api/src/presentation/contracts/contracts.dart';
 
 /// Genera mocks para todas las dependencias principales.
@@ -31,6 +32,7 @@ import 'package:fase_2_consumo_api/src/presentation/contracts/contracts.dart';
   GetAllProductsUseCase,
   GetProductByIdUseCase,
   GetAllCategoriesUseCase,
+  GetProductsByCategoryUseCase,
 
   // Data - DataSources
   ProductRemoteDataSource,

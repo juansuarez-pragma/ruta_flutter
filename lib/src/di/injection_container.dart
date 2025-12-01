@@ -8,22 +8,16 @@ import 'package:fase_2_consumo_api/src/domain/repositories/product_repository.da
 import 'package:fase_2_consumo_api/src/domain/usecases/get_all_categories_usecase.dart';
 import 'package:fase_2_consumo_api/src/domain/usecases/get_all_products_usecase.dart';
 import 'package:fase_2_consumo_api/src/domain/usecases/get_product_by_id_usecase.dart';
+import 'package:fase_2_consumo_api/src/domain/usecases/get_products_by_category_usecase.dart';
 import 'package:fase_2_consumo_api/src/presentation/adapters/console_user_interface.dart';
-import 'package:fase_2_consumo_api/src/presentation/application.dart';
+import 'package:fase_2_consumo_api/src/presentation/application.dart'
+    show ApplicationController;
 import 'package:fase_2_consumo_api/src/presentation/contracts/contracts.dart';
 
 /// Instancia global del Service Locator para inyección de dependencias.
-///
-/// Usar nombres descriptivos en lugar de abreviaciones mejora la legibilidad
-/// y facilita el mantenimiento del código.
+
 final GetIt serviceLocator = GetIt.instance;
 
-/// Inicializa todas las dependencias de la aplicación.
-///
-/// Registra todas las implementaciones concretas para las abstracciones
-/// definidas en la arquitectura. Debe llamarse después de
-/// [EnvConfig.instance.initialize()].
-///
 /// Tipos de registro:
 /// - `registerFactory`: Nueva instancia en cada llamada (Use Cases, Application)
 /// - `registerLazySingleton`: Instancia única, creada cuando se necesita
@@ -43,13 +37,14 @@ Future<void> init() async {
     () => ConsoleUserInterface(),
   );
 
-  // Application - Coordinador principal
+  // ApplicationController - Coordinador principal
   serviceLocator.registerFactory(
-    () => Application(
+    () => ApplicationController(
       ui: serviceLocator<UserInterface>(),
       getAllProducts: serviceLocator(),
       getProductById: serviceLocator(),
       getAllCategories: serviceLocator(),
+      getProductsByCategory: serviceLocator(),
       onExit: () => serviceLocator<http.Client>().close(),
     ),
   );
@@ -61,6 +56,9 @@ Future<void> init() async {
   serviceLocator.registerFactory(() => GetProductByIdUseCase(serviceLocator()));
   serviceLocator.registerFactory(
     () => GetAllCategoriesUseCase(serviceLocator()),
+  );
+  serviceLocator.registerFactory(
+    () => GetProductsByCategoryUseCase(serviceLocator()),
   );
 
   // ============================================

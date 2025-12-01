@@ -9,4 +9,9 @@ abstract class UserInput {
   ///
   /// Retorna `null` si el usuario cancela o ingresa un valor inválido.
   Future<int?> promptProductId();
+
+  /// Solicita al usuario que seleccione una categoría de la lista.
+  ///
+  /// Retorna `null` si el usuario cancela o selecciona una opción inválida.
+  Future<String?> promptCategory(List<String> categories);
 }

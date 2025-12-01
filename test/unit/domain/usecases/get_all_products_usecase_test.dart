@@ -18,26 +18,31 @@ void main() {
   });
 
   group('GetAllProductsUseCase', () {
-    test('retorna lista de productos cuando el repositorio tiene éxito', () async {
-      // Arrange
-      final testProducts = createTestProductEntityList(count: 3);
-      when(mockRepository.getAllProducts())
-          .thenAnswer((_) async => Right(testProducts));
+    test(
+      'retorna lista de productos cuando el repositorio tiene éxito',
+      () async {
+        // Arrange
+        final testProducts = createTestProductEntityList(count: 3);
+        when(
+          mockRepository.getAllProducts(),
+        ).thenAnswer((_) async => Right(testProducts));
 
-      // Act
-      final result = await useCase(const NoParams());
+        // Act
+        final result = await useCase(const NoParams());
 
-      // Assert
-      expect(result, Right(testProducts));
-      verify(mockRepository.getAllProducts()).called(1);
-      verifyNoMoreInteractions(mockRepository);
-    });
+        // Assert
+        expect(result, Right(testProducts));
+        verify(mockRepository.getAllProducts()).called(1);
+        verifyNoMoreInteractions(mockRepository);
+      },
+    );
 
     test('retorna Failure cuando el repositorio falla', () async {
       // Arrange
       final failure = ServerFailure('Error del servidor');
-      when(mockRepository.getAllProducts())
-          .thenAnswer((_) async => Left(failure));
+      when(
+        mockRepository.getAllProducts(),
+      ).thenAnswer((_) async => Left(failure));
 
       // Act
       final result = await useCase(const NoParams());
@@ -49,8 +54,9 @@ void main() {
 
     test('retorna lista vacía cuando no hay productos', () async {
       // Arrange
-      when(mockRepository.getAllProducts())
-          .thenAnswer((_) async => const Right([]));
+      when(
+        mockRepository.getAllProducts(),
+      ).thenAnswer((_) async => const Right([]));
 
       // Act
       final result = await useCase(const NoParams());

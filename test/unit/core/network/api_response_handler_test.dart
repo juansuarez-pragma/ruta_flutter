@@ -60,7 +60,10 @@ void main() {
 
       test('lanza ClientException para 400 Bad Request', () {
         // Arrange
-        final response = http.Response('Bad Request', HttpStatusCodes.badRequest);
+        final response = http.Response(
+          'Bad Request',
+          HttpStatusCodes.badRequest,
+        );
 
         // Act & Assert
         expect(
@@ -71,7 +74,10 @@ void main() {
 
       test('lanza ClientException para 401 Unauthorized', () {
         // Arrange
-        final response = http.Response('Unauthorized', HttpStatusCodes.unauthorized);
+        final response = http.Response(
+          'Unauthorized',
+          HttpStatusCodes.unauthorized,
+        );
 
         // Act & Assert
         expect(
@@ -91,20 +97,26 @@ void main() {
         );
       });
 
-      test('lanza ClientException para código 4xx no mapeado explícitamente', () {
-        // Arrange - 422 Unprocessable Entity no está en el mapa
-        final response = http.Response('Unprocessable Entity', 422);
+      test(
+        'lanza ClientException para código 4xx no mapeado explícitamente',
+        () {
+          // Arrange - 422 Unprocessable Entity no está en el mapa
+          final response = http.Response('Unprocessable Entity', 422);
 
-        // Act & Assert
-        expect(
-          () => handler.handleResponse(response),
-          throwsA(isA<ClientException>()),
-        );
-      });
+          // Act & Assert
+          expect(
+            () => handler.handleResponse(response),
+            throwsA(isA<ClientException>()),
+          );
+        },
+      );
 
       test('lanza ClientException para 429 Too Many Requests', () {
         // Arrange
-        final response = http.Response('Rate Limited', HttpStatusCodes.tooManyRequests);
+        final response = http.Response(
+          'Rate Limited',
+          HttpStatusCodes.tooManyRequests,
+        );
 
         // Act & Assert
         expect(
@@ -117,7 +129,10 @@ void main() {
     group('errores del servidor (5xx)', () {
       test('lanza ServerException para 500 Internal Server Error', () {
         // Arrange
-        final response = http.Response('Server Error', HttpStatusCodes.internalServerError);
+        final response = http.Response(
+          'Server Error',
+          HttpStatusCodes.internalServerError,
+        );
 
         // Act & Assert
         expect(
@@ -126,20 +141,29 @@ void main() {
         );
       });
 
-      test('lanza ServerException para código 5xx no mapeado explícitamente', () {
-        // Arrange - 502 Bad Gateway no está en el mapa
-        final response = http.Response('Bad Gateway', HttpStatusCodes.badGateway);
+      test(
+        'lanza ServerException para código 5xx no mapeado explícitamente',
+        () {
+          // Arrange - 502 Bad Gateway no está en el mapa
+          final response = http.Response(
+            'Bad Gateway',
+            HttpStatusCodes.badGateway,
+          );
 
-        // Act & Assert
-        expect(
-          () => handler.handleResponse(response),
-          throwsA(isA<ServerException>()),
-        );
-      });
+          // Act & Assert
+          expect(
+            () => handler.handleResponse(response),
+            throwsA(isA<ServerException>()),
+          );
+        },
+      );
 
       test('lanza ServerException para 503 Service Unavailable', () {
         // Arrange
-        final response = http.Response('Service Unavailable', HttpStatusCodes.serviceUnavailable);
+        final response = http.Response(
+          'Service Unavailable',
+          HttpStatusCodes.serviceUnavailable,
+        );
 
         // Act & Assert
         expect(

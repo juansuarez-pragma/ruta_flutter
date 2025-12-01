@@ -149,7 +149,7 @@ Esto permite que implementaciones parciales (ej. un widget que solo muestra prod
 
 - **`ConsoleUserInterface`** (Adapter): Implementación concreta para terminal usando `stdin`/`stdout`.
 
-- **`Application`**: Orquesta el flujo de la aplicación. Recibe una instancia de `UserInterface` por inyección de dependencias y coordina la interacción con los casos de uso.
+- **`ApplicationController`**: Orquesta el flujo de la aplicación. Recibe una instancia de `UserInterface` por inyección de dependencias y coordina la interacción con los casos de uso.
 
 **Cómo cambiar la UI:**
 
@@ -224,13 +224,13 @@ serviceLocator.registerLazySingleton<OrderRemoteDataSource>(
 ### Flujo de Dependencias
 
 ```
-bin/main → Application → UserInterface (Port) ← ConsoleUserInterface (Adapter)
+bin/main → ApplicationController → UserInterface (Port) ← ConsoleUserInterface (Adapter)
                 ↓
            Casos de Uso → Interfaz Repository ← Repository Impl → DataSources → ApiClient → HTTP
 ```
 
 Todas las dependencias registradas en `lib/src/di/injection_container.dart`:
-- `Application`, Casos de Uso: `registerFactory` (nueva instancia por llamada)
+- `ApplicationController`, Casos de Uso: `registerFactory` (nueva instancia por llamada)
 - `UserInterface`, Repositories, DataSources, HTTP Client: `registerLazySingleton`
 
 **Convención de nombres:** Se usa `serviceLocator` en lugar de abreviaciones como `sl` para mejorar la legibilidad del código.
@@ -239,7 +239,7 @@ Todas las dependencias registradas en `lib/src/di/injection_container.dart`:
 
 1. DataSource lanza excepciones tipadas (`ServerException`, `ConnectionException`, `NotFoundException`, `ClientException`)
 2. El método `handleRequest()` del Repository captura excepciones y retorna `Left(Failure)`
-3. `Application` usa `result.fold()` y delega la presentación del error a `UserInterface`
+3. `ApplicationController` usa `result.fold()` y delega la presentación del error a `UserInterface`
 
 ### Externalización de Textos
 
@@ -304,6 +304,7 @@ Endpoints consumidos:
 - `ApiEndpoints.products` → `GET /products`
 - `ApiEndpoints.productById(id)` → `GET /products/{id}`
 - `ApiEndpoints.categories` → `GET /products/categories`
+- `ApiEndpoints.productsByCategory(category)` → `GET /products/category/{category}`
 
 ## Métricas de Calidad de Código
 
@@ -522,12 +523,147 @@ Antes de considerar una implementación completa, verificar:
 | Manejo de Errores | ≥85% | 95% |
 | Configuración y Seguridad | ≥85% | 95% |
 | Análisis Estático | 100% | 100% |
-| Cobertura de Tests | ≥90% | 92.17% |
-| **TOTAL** | **≥90%** | **96.83%** |
+| Cobertura de Tests | ≥90% | 93%+ |
+| **TOTAL** | **≥90%** | **96%** |
+
+## Metodología TDD
+
+El proyecto sigue la metodología **Test-Driven Development (TDD)** de forma obligatoria para toda nueva funcionalidad.
+
+### Ciclo Red-Green-Refactor
+
+```
+┌─────────┐    ┌─────────┐    ┌──────────┐
+│   RED   │───▶│  GREEN  │───▶│ REFACTOR │───┐
+│ (Test)  │    │ (Code)  │    │ (Clean)  │   │
+└─────────┘    └─────────┘    └──────────┘   │
+     ▲                                        │
+     └────────────────────────────────────────┘
+```
+
+1. **RED**: Escribir test que FALLA (código no existe)
+2. **GREEN**: Escribir código MÍNIMO para pasar
+3. **REFACTOR**: Mejorar código sin romper tests
+
+### Orden de Implementación TDD
+
+```
+1. Domain Layer (primero)
+   ├── UseCase Test → UseCase Implementation
+   └── Repository Interface (si es nuevo)
+
+2. Data Layer (segundo)
+   ├── DataSource Test → DataSource Implementation
+   ├── Repository Test → Repository Implementation
+   └── Model Test → Model (si es nuevo)
+
+3. Presentation Layer (tercero)
+   └── ApplicationController Test → ApplicationController updates
+```
+
+### Especificación Obligatoria
+
+Antes de escribir cada test, documentar la especificación:
+
+```dart
+/// ESPECIFICACIÓN: [NombreComponente]
+///
+/// Responsabilidad: [Una sola responsabilidad]
+///
+/// Entrada:
+///   - [param1]: [tipo] - [descripción]
+///
+/// Salida esperada (éxito):
+///   - [tipo de retorno y condiciones]
+///
+/// Salida esperada (error):
+///   - [tipos de error y cuándo ocurren]
+///
+/// Precondiciones:
+///   - [condiciones que deben cumplirse]
+///
+/// Postcondiciones:
+///   - [efectos después de la ejecución]
+```
+
+**Documentación completa:** Ver `docs/TDD_PROCESS.md`
+
+## ATDD (Acceptance Test-Driven Development)
+
+El proyecto implementa tests de aceptación en formato BDD (Behavior-Driven Development) con Given-When-Then.
+
+### Estructura de Tests de Aceptación
+
+```
+test/acceptance/
+├── acceptance_test_base.dart       # Helpers BDD
+└── features/
+    ├── product_listing_acceptance_test.dart
+    ├── product_detail_acceptance_test.dart
+    └── product_category_acceptance_test.dart
+```
+
+### Formato de Tests
+
+```dart
+test(
+  'Given catálogo con productos, '
+  'When solicita ver todos, '
+  'Then recibe lista completa',
+  () async {
+    // Given
+    final productList = createTestProductEntityList(count: 5);
+    when(mockRepository.getAllProducts())
+        .thenAnswer((_) async => Right(productList));
+
+    // When
+    final result = await useCase(const NoParams());
+
+    // Then
+    expect(result.isRight(), isTrue);
+  },
+);
+```
+
+### Features Documentadas
+
+| Feature | Criterios de Aceptación | Tests |
+|---------|------------------------|-------|
+| Listado de Productos | 6 | 6 |
+| Detalle de Producto | 6 | 6 |
+| Filtrar por Categoría | 6 | 6 |
+| **Total** | **18** | **18** |
+
+**Documentación completa:** Ver `docs/FASE_3_ATDD_REPORT.md`
+
+## CI/CD (Integración Continua)
+
+El proyecto usa GitHub Actions para automatizar calidad de código.
+
+### Pipeline
+
+```
+.github/workflows/ci.yml
+```
+
+**Jobs:**
+1. **lint**: Formato (`dart format`) y análisis estático (`dart analyze`)
+2. **unit-test**: Tests unitarios e integración
+3. **acceptance-test**: Tests de aceptación ATDD
+
+**Triggers:** Pull Request a `main`
+
+**Comandos locales para simular CI:**
+```bash
+dart format --output=none --set-exit-if-changed .
+dart analyze --fatal-infos
+dart test
+dart test test/acceptance/
+```
 
 ## Testing
 
-El proyecto cuenta con una suite completa de tests unitarios e integración con cobertura del 92.17%.
+El proyecto cuenta con una suite completa de tests unitarios e integración con cobertura del 93%+.
 
 ### Estructura de Tests
 
@@ -553,8 +689,10 @@ test/
 │   │   └── config/             # Tests de EnvConfig
 │   └── presentation/
 │       └── contracts/          # Tests de MenuOption
-└── integration/
-    └── presentation/           # Tests de Application (flujos completos)
+├── integration/
+│   └── presentation/           # Tests de ApplicationController (flujos completos)
+└── acceptance/
+    └── features/               # Tests de aceptación BDD
 ```
 
 ### Comandos de Testing
@@ -679,7 +817,7 @@ verifyNoMoreInteractions(mockRepository);
 | Data | models, repositories, datasources | ≥90% |
 | Core | network, errors, config | ≥85% |
 | Presentation | application, contracts | ≥80% |
-| **Total** | **168 tests** | **≥90%** |
+| **Total** | **207 tests** | **≥90%** |
 
 ### Agregar Tests para Nueva Funcionalidad
 
@@ -699,7 +837,7 @@ Al agregar nueva funcionalidad, seguir este orden:
    - Tests de nuevos handlers
 
 4. **Integration Tests**:
-   - Test del flujo completo en Application
+   - Test del flujo completo en ApplicationController
 
 #### Plantilla para Test de UseCase
 

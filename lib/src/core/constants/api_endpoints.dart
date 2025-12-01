@@ -22,6 +22,11 @@ abstract class ApiEndpoints {
   /// GET /products/{id}
   static String productById(int id) => '/products/$id';
 
+  /// Obtener productos por categoría.
+  /// GET /products/category/{categoryName}
+  static String productsByCategory(String category) =>
+      '/products/category/$category';
+
   // ============================================
   // Categorías
   // ============================================

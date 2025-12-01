@@ -8,12 +8,13 @@ void main() {
       expect(MenuOption.values, contains(MenuOption.getAllProducts));
       expect(MenuOption.values, contains(MenuOption.getProductById));
       expect(MenuOption.values, contains(MenuOption.getAllCategories));
+      expect(MenuOption.values, contains(MenuOption.getProductsByCategory));
       expect(MenuOption.values, contains(MenuOption.exit));
       expect(MenuOption.values, contains(MenuOption.invalid));
     });
 
-    test('tiene exactamente 5 valores', () {
-      expect(MenuOption.values.length, 5);
+    test('tiene exactamente 6 valores', () {
+      expect(MenuOption.values.length, 6);
     });
 
     test('valores son distintos', () {
@@ -29,18 +30,23 @@ void main() {
       expect(MenuOption.getAllProducts.index, 0);
     });
 
-    test('exit tiene índice 3', () {
-      expect(MenuOption.exit.index, 3);
+    test('getProductsByCategory tiene índice 3', () {
+      expect(MenuOption.getProductsByCategory.index, 3);
     });
 
-    test('invalid tiene índice 4', () {
-      expect(MenuOption.invalid.index, 4);
+    test('exit tiene índice 4', () {
+      expect(MenuOption.exit.index, 4);
+    });
+
+    test('invalid tiene índice 5', () {
+      expect(MenuOption.invalid.index, 5);
     });
 
     test('name retorna el nombre correcto', () {
       expect(MenuOption.getAllProducts.name, 'getAllProducts');
       expect(MenuOption.getProductById.name, 'getProductById');
       expect(MenuOption.getAllCategories.name, 'getAllCategories');
+      expect(MenuOption.getProductsByCategory.name, 'getProductsByCategory');
       expect(MenuOption.exit.name, 'exit');
       expect(MenuOption.invalid.name, 'invalid');
     });

@@ -1,13 +1,6 @@
 /// Constantes de códigos de estado HTTP.
-///
-/// Referencia: https://developer.mozilla.org/es/docs/Web/HTTP/Status
-///
-/// Los códigos de estado HTTP se dividen en 5 categorías:
-/// - 1xx: Respuestas informativas
-/// - 2xx: Respuestas exitosas
-/// - 3xx: Redirecciones
-/// - 4xx: Errores del cliente
-/// - 5xx: Errores del servidor
+library;
+
 abstract class HttpStatusCodes {
   HttpStatusCodes._();
 
