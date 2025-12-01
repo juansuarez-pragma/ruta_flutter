@@ -1,8 +1,6 @@
 name: CI
 
 on:
-  push:
-    branches: [main]
   pull_request:
     branches: [main]
 
@@ -52,27 +50,6 @@ jobs:
 
       - name: Ejecutar tests
         run: dart test --reporter=github
-
-      - name: Ejecutar tests con cobertura
-        run: dart test --coverage=coverage
-
-      - name: Instalar herramienta de cobertura
-        run: dart pub global activate coverage
-
-      - name: Generar reporte LCOV
-        run: |
-          dart pub global run coverage:format_coverage \
-            --lcov \
-            --in=coverage \
-            --out=coverage/lcov.info \
-            --report-on=lib
-
-      - name: Subir cobertura a Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          files: coverage/lcov.info
-          fail_ci_if_error: false
-          verbose: true
 
   test-acceptance:
     name: Tests de aceptación (ATDD)
