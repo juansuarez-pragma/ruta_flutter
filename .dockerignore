@@ -1,0 +1,26 @@
+# Dependencias
+.dart_tool/
+.packages
+build/
+pubspec.lock
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Tests y cobertura
+coverage/
+test/
+
+# Git
+.git/
+.gitignore
+
+# Documentación
+docs/
+*.md
+!README.md
+
+# Otros
+devtools_options.yaml
