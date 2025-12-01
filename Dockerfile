@@ -1,5 +1,5 @@
 # Imagen base de Dart
-FROM dart:3.5.4 AS build
+FROM dart:3.9.2 AS build
 
 # Directorio de trabajo
 WORKDIR /app
