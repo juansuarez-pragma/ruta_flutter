@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main, test, develop]
+    branches: [main]
   pull_request:
-    branches: [main, test, develop]
+    branches: [main]
 
 env:
   DART_SDK_VERSION: "3.5.4"
