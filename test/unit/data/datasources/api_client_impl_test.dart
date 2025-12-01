@@ -43,8 +43,9 @@ void main() {
       test('retorna objeto parseado cuando la respuesta es 200', () async {
         // Arrange
         final responseBody = json.encode(validProductJson);
-        when(mockHttpClient.get(Uri.parse('$testBaseUrl$testEndpoint')))
-            .thenAnswer((_) async => http.Response(responseBody, 200));
+        when(
+          mockHttpClient.get(Uri.parse('$testBaseUrl$testEndpoint')),
+        ).thenAnswer((_) async => http.Response(responseBody, 200));
         when(mockResponseHandler.handleResponse(any)).thenReturn(null);
 
         // Act
@@ -56,8 +57,9 @@ void main() {
         // Assert
         expect(result['id'], 1);
         expect(result['title'], 'Producto de prueba');
-        verify(mockHttpClient.get(Uri.parse('$testBaseUrl$testEndpoint')))
-            .called(1);
+        verify(
+          mockHttpClient.get(Uri.parse('$testBaseUrl$testEndpoint')),
+        ).called(1);
       });
 
       test('llama a handleResponse con la respuesta HTTP', () async {
@@ -78,10 +80,12 @@ void main() {
 
       test('propaga ServerException cuando handleResponse la lanza', () async {
         // Arrange
-        when(mockHttpClient.get(any))
-            .thenAnswer((_) async => http.Response('Error', 500));
-        when(mockResponseHandler.handleResponse(any))
-            .thenThrow(ServerException());
+        when(
+          mockHttpClient.get(any),
+        ).thenAnswer((_) async => http.Response('Error', 500));
+        when(
+          mockResponseHandler.handleResponse(any),
+        ).thenThrow(ServerException());
 
         // Act & Assert
         expect(
@@ -93,27 +97,33 @@ void main() {
         );
       });
 
-      test('propaga NotFoundException cuando handleResponse la lanza', () async {
-        // Arrange
-        when(mockHttpClient.get(any))
-            .thenAnswer((_) async => http.Response('Not Found', 404));
-        when(mockResponseHandler.handleResponse(any))
-            .thenThrow(NotFoundException());
+      test(
+        'propaga NotFoundException cuando handleResponse la lanza',
+        () async {
+          // Arrange
+          when(
+            mockHttpClient.get(any),
+          ).thenAnswer((_) async => http.Response('Not Found', 404));
+          when(
+            mockResponseHandler.handleResponse(any),
+          ).thenThrow(NotFoundException());
 
-        // Act & Assert
-        expect(
-          () => apiClient.get<Map<String, dynamic>>(
-            endpoint: testEndpoint,
-            fromJson: (json) => json as Map<String, dynamic>,
-          ),
-          throwsA(isA<NotFoundException>()),
-        );
-      });
+          // Act & Assert
+          expect(
+            () => apiClient.get<Map<String, dynamic>>(
+              endpoint: testEndpoint,
+              fromJson: (json) => json as Map<String, dynamic>,
+            ),
+            throwsA(isA<NotFoundException>()),
+          );
+        },
+      );
 
       test('lanza ConnectionException cuando hay error de red', () async {
         // Arrange
-        when(mockHttpClient.get(any))
-            .thenThrow(http.ClientException('Connection refused'));
+        when(
+          mockHttpClient.get(any),
+        ).thenThrow(http.ClientException('Connection refused'));
 
         // Act & Assert
         expect(
@@ -127,45 +137,54 @@ void main() {
     });
 
     group('getList', () {
-      test('retorna lista de objetos parseados cuando la respuesta es 200', () async {
-        // Arrange
-        final responseBody = json.encode(validProductListJson);
-        when(mockHttpClient.get(Uri.parse('$testBaseUrl$testEndpoint')))
-            .thenAnswer((_) async => http.Response(responseBody, 200));
-        when(mockResponseHandler.handleResponse(any)).thenReturn(null);
+      test(
+        'retorna lista de objetos parseados cuando la respuesta es 200',
+        () async {
+          // Arrange
+          final responseBody = json.encode(validProductListJson);
+          when(
+            mockHttpClient.get(Uri.parse('$testBaseUrl$testEndpoint')),
+          ).thenAnswer((_) async => http.Response(responseBody, 200));
+          when(mockResponseHandler.handleResponse(any)).thenReturn(null);
 
-        // Act
-        final result = await apiClient.getList<Map<String, dynamic>>(
-          endpoint: testEndpoint,
-          fromJsonList: (json) => json,
-        );
+          // Act
+          final result = await apiClient.getList<Map<String, dynamic>>(
+            endpoint: testEndpoint,
+            fromJsonList: (json) => json,
+          );
 
-        // Assert
-        expect(result.length, 2);
-        expect(result[0]['id'], 1);
-        expect(result[1]['id'], 2);
-      });
+          // Assert
+          expect(result.length, 2);
+          expect(result[0]['id'], 1);
+          expect(result[1]['id'], 2);
+        },
+      );
 
-      test('retorna lista vacía cuando la respuesta es un array vacío', () async {
-        // Arrange
-        when(mockHttpClient.get(any))
-            .thenAnswer((_) async => http.Response('[]', 200));
-        when(mockResponseHandler.handleResponse(any)).thenReturn(null);
+      test(
+        'retorna lista vacía cuando la respuesta es un array vacío',
+        () async {
+          // Arrange
+          when(
+            mockHttpClient.get(any),
+          ).thenAnswer((_) async => http.Response('[]', 200));
+          when(mockResponseHandler.handleResponse(any)).thenReturn(null);
 
-        // Act
-        final result = await apiClient.getList<Map<String, dynamic>>(
-          endpoint: testEndpoint,
-          fromJsonList: (json) => json,
-        );
+          // Act
+          final result = await apiClient.getList<Map<String, dynamic>>(
+            endpoint: testEndpoint,
+            fromJsonList: (json) => json,
+          );
 
-        // Assert
-        expect(result, isEmpty);
-      });
+          // Assert
+          expect(result, isEmpty);
+        },
+      );
 
       test('lanza ConnectionException cuando hay error de red', () async {
         // Arrange
-        when(mockHttpClient.get(any))
-            .thenThrow(http.ClientException('Network error'));
+        when(
+          mockHttpClient.get(any),
+        ).thenThrow(http.ClientException('Network error'));
 
         // Act & Assert
         expect(
@@ -182,8 +201,9 @@ void main() {
       test('retorna lista de strings cuando la respuesta es 200', () async {
         // Arrange
         final responseBody = json.encode(validCategoriesList);
-        when(mockHttpClient.get(Uri.parse('$testBaseUrl$testEndpoint')))
-            .thenAnswer((_) async => http.Response(responseBody, 200));
+        when(
+          mockHttpClient.get(Uri.parse('$testBaseUrl$testEndpoint')),
+        ).thenAnswer((_) async => http.Response(responseBody, 200));
         when(mockResponseHandler.handleResponse(any)).thenReturn(null);
 
         // Act
@@ -197,25 +217,30 @@ void main() {
         expect(result, contains('jewelery'));
       });
 
-      test('retorna lista vacía cuando la respuesta es un array vacío', () async {
-        // Arrange
-        when(mockHttpClient.get(any))
-            .thenAnswer((_) async => http.Response('[]', 200));
-        when(mockResponseHandler.handleResponse(any)).thenReturn(null);
+      test(
+        'retorna lista vacía cuando la respuesta es un array vacío',
+        () async {
+          // Arrange
+          when(
+            mockHttpClient.get(any),
+          ).thenAnswer((_) async => http.Response('[]', 200));
+          when(mockResponseHandler.handleResponse(any)).thenReturn(null);
 
-        // Act
-        final result = await apiClient.getPrimitiveList<String>(
-          endpoint: testEndpoint,
-        );
+          // Act
+          final result = await apiClient.getPrimitiveList<String>(
+            endpoint: testEndpoint,
+          );
 
-        // Assert
-        expect(result, isEmpty);
-      });
+          // Assert
+          expect(result, isEmpty);
+        },
+      );
 
       test('lanza ConnectionException cuando hay error de red', () async {
         // Arrange
-        when(mockHttpClient.get(any))
-            .thenThrow(http.ClientException('Connection timeout'));
+        when(
+          mockHttpClient.get(any),
+        ).thenThrow(http.ClientException('Connection timeout'));
 
         // Act & Assert
         expect(
@@ -226,22 +251,27 @@ void main() {
     });
 
     group('URL construction', () {
-      test('construye URL correctamente combinando baseUrl y endpoint', () async {
-        // Arrange
-        when(mockHttpClient.get(any))
-            .thenAnswer((_) async => http.Response('{}', 200));
-        when(mockResponseHandler.handleResponse(any)).thenReturn(null);
+      test(
+        'construye URL correctamente combinando baseUrl y endpoint',
+        () async {
+          // Arrange
+          when(
+            mockHttpClient.get(any),
+          ).thenAnswer((_) async => http.Response('{}', 200));
+          when(mockResponseHandler.handleResponse(any)).thenReturn(null);
 
-        // Act
-        await apiClient.get<Map<String, dynamic>>(
-          endpoint: '/products/123',
-          fromJson: (json) => json as Map<String, dynamic>,
-        );
+          // Act
+          await apiClient.get<Map<String, dynamic>>(
+            endpoint: '/products/123',
+            fromJson: (json) => json as Map<String, dynamic>,
+          );
 
-        // Assert
-        verify(mockHttpClient.get(Uri.parse('$testBaseUrl/products/123')))
-            .called(1);
-      });
+          // Assert
+          verify(
+            mockHttpClient.get(Uri.parse('$testBaseUrl/products/123')),
+          ).called(1);
+        },
+      );
     });
   });
 }

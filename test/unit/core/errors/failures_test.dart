@@ -142,23 +142,29 @@ void main() {
     });
 
     group('igualdad entre diferentes tipos de Failure', () {
-      test('ServerFailure y NotFoundFailure con mismo mensaje no son iguales', () {
-        // Arrange
-        const serverFailure = ServerFailure('Error');
-        const notFoundFailure = NotFoundFailure('Error');
+      test(
+        'ServerFailure y NotFoundFailure con mismo mensaje no son iguales',
+        () {
+          // Arrange
+          const serverFailure = ServerFailure('Error');
+          const notFoundFailure = NotFoundFailure('Error');
 
-        // Assert
-        expect(serverFailure, isNot(equals(notFoundFailure)));
-      });
+          // Assert
+          expect(serverFailure, isNot(equals(notFoundFailure)));
+        },
+      );
 
-      test('ClientFailure y ConnectionFailure con mismo mensaje no son iguales', () {
-        // Arrange
-        const clientFailure = ClientFailure('Error');
-        const connectionFailure = ConnectionFailure('Error');
+      test(
+        'ClientFailure y ConnectionFailure con mismo mensaje no son iguales',
+        () {
+          // Arrange
+          const clientFailure = ClientFailure('Error');
+          const connectionFailure = ConnectionFailure('Error');
 
-        // Assert
-        expect(clientFailure, isNot(equals(connectionFailure)));
-      });
+          // Assert
+          expect(clientFailure, isNot(equals(connectionFailure)));
+        },
+      );
     });
   });
 }

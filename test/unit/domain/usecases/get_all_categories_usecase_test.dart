@@ -18,26 +18,31 @@ void main() {
   });
 
   group('GetAllCategoriesUseCase', () {
-    test('retorna lista de categorías cuando el repositorio tiene éxito', () async {
-      // Arrange
-      final testCategories = createTestCategories();
-      when(mockRepository.getAllCategories())
-          .thenAnswer((_) async => Right(testCategories));
+    test(
+      'retorna lista de categorías cuando el repositorio tiene éxito',
+      () async {
+        // Arrange
+        final testCategories = createTestCategories();
+        when(
+          mockRepository.getAllCategories(),
+        ).thenAnswer((_) async => Right(testCategories));
 
-      // Act
-      final result = await useCase(const NoParams());
+        // Act
+        final result = await useCase(const NoParams());
 
-      // Assert
-      expect(result, Right(testCategories));
-      verify(mockRepository.getAllCategories()).called(1);
-      verifyNoMoreInteractions(mockRepository);
-    });
+        // Assert
+        expect(result, Right(testCategories));
+        verify(mockRepository.getAllCategories()).called(1);
+        verifyNoMoreInteractions(mockRepository);
+      },
+    );
 
     test('retorna Failure cuando el repositorio falla', () async {
       // Arrange
       final failure = ServerFailure('Error del servidor');
-      when(mockRepository.getAllCategories())
-          .thenAnswer((_) async => Left(failure));
+      when(
+        mockRepository.getAllCategories(),
+      ).thenAnswer((_) async => Left(failure));
 
       // Act
       final result = await useCase(const NoParams());
@@ -49,8 +54,9 @@ void main() {
 
     test('retorna lista vacía cuando no hay categorías', () async {
       // Arrange
-      when(mockRepository.getAllCategories())
-          .thenAnswer((_) async => const Right(<String>[]));
+      when(
+        mockRepository.getAllCategories(),
+      ).thenAnswer((_) async => const Right(<String>[]));
 
       // Act
       final result = await useCase(const NoParams());

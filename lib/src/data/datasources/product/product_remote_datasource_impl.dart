@@ -28,4 +28,12 @@ class ProductRemoteDataSourceImpl implements ProductRemoteDataSource {
       fromJson: (json) => ProductModel.fromJson(json as Map<String, dynamic>),
     );
   }
+
+  @override
+  Future<List<ProductModel>> getByCategory(String category) {
+    return _apiClient.getList(
+      endpoint: ApiEndpoints.productsByCategory(category),
+      fromJsonList: ProductModel.fromJson,
+    );
+  }
 }

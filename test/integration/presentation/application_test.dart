@@ -39,8 +39,7 @@ void main() {
     group('run', () {
       test('muestra mensaje de bienvenida al iniciar', () async {
         // Arrange
-        when(mockUI.showMainMenu())
-            .thenAnswer((_) async => MenuOption.exit);
+        when(mockUI.showMainMenu()).thenAnswer((_) async => MenuOption.exit);
 
         // Act
         await application.run();
@@ -51,8 +50,7 @@ void main() {
 
       test('muestra menú después del mensaje de bienvenida', () async {
         // Arrange
-        when(mockUI.showMainMenu())
-            .thenAnswer((_) async => MenuOption.exit);
+        when(mockUI.showMainMenu()).thenAnswer((_) async => MenuOption.exit);
 
         // Act
         await application.run();
@@ -63,8 +61,7 @@ void main() {
 
       test('muestra mensaje de despedida al salir', () async {
         // Arrange
-        when(mockUI.showMainMenu())
-            .thenAnswer((_) async => MenuOption.exit);
+        when(mockUI.showMainMenu()).thenAnswer((_) async => MenuOption.exit);
 
         // Act
         await application.run();
@@ -75,8 +72,7 @@ void main() {
 
       test('llama a onExit al terminar', () async {
         // Arrange
-        when(mockUI.showMainMenu())
-            .thenAnswer((_) async => MenuOption.exit);
+        when(mockUI.showMainMenu()).thenAnswer((_) async => MenuOption.exit);
 
         // Act
         await application.run();
@@ -105,8 +101,9 @@ void main() {
       test('llama al caso de uso y muestra productos en éxito', () async {
         // Arrange
         final testProducts = createTestProductEntityList(count: 3);
-        when(mockGetAllProducts(const NoParams()))
-            .thenAnswer((_) async => Right(testProducts));
+        when(
+          mockGetAllProducts(const NoParams()),
+        ).thenAnswer((_) async => Right(testProducts));
 
         var callCount = 0;
         when(mockUI.showMainMenu()).thenAnswer((_) async {
@@ -118,8 +115,9 @@ void main() {
         await application.run();
 
         // Assert
-        verify(mockUI.showOperationInfo(AppStrings.getAllProductsUseCaseTitle))
-            .called(1);
+        verify(
+          mockUI.showOperationInfo(AppStrings.getAllProductsUseCaseTitle),
+        ).called(1);
         verify(mockGetAllProducts(const NoParams())).called(1);
         verify(mockUI.showProducts(testProducts)).called(1);
       });
@@ -127,8 +125,9 @@ void main() {
       test('muestra error cuando el caso de uso falla', () async {
         // Arrange
         final failure = ServerFailure('Error del servidor');
-        when(mockGetAllProducts(const NoParams()))
-            .thenAnswer((_) async => Left(failure));
+        when(
+          mockGetAllProducts(const NoParams()),
+        ).thenAnswer((_) async => Left(failure));
 
         var callCount = 0;
         when(mockUI.showMainMenu()).thenAnswer((_) async {
@@ -150,8 +149,9 @@ void main() {
         const testId = 5;
         final testProduct = createTestProductEntity(id: testId);
         when(mockUI.promptProductId()).thenAnswer((_) async => testId);
-        when(mockGetProductById(const GetProductByIdParams(id: testId)))
-            .thenAnswer((_) async => Right(testProduct));
+        when(
+          mockGetProductById(const GetProductByIdParams(id: testId)),
+        ).thenAnswer((_) async => Right(testProduct));
 
         var callCount = 0;
         when(mockUI.showMainMenu()).thenAnswer((_) async {
@@ -164,8 +164,9 @@ void main() {
 
         // Assert
         verify(mockUI.promptProductId()).called(1);
-        verify(mockGetProductById(const GetProductByIdParams(id: testId)))
-            .called(1);
+        verify(
+          mockGetProductById(const GetProductByIdParams(id: testId)),
+        ).called(1);
         verify(mockUI.showProduct(testProduct)).called(1);
       });
 
@@ -192,8 +193,9 @@ void main() {
         const testId = 999;
         final failure = NotFoundFailure('Producto no encontrado');
         when(mockUI.promptProductId()).thenAnswer((_) async => testId);
-        when(mockGetProductById(const GetProductByIdParams(id: testId)))
-            .thenAnswer((_) async => Left(failure));
+        when(
+          mockGetProductById(const GetProductByIdParams(id: testId)),
+        ).thenAnswer((_) async => Left(failure));
 
         var callCount = 0;
         when(mockUI.showMainMenu()).thenAnswer((_) async {
@@ -213,8 +215,9 @@ void main() {
         const testId = 42;
         final testProduct = createTestProductEntity(id: testId);
         when(mockUI.promptProductId()).thenAnswer((_) async => testId);
-        when(mockGetProductById(any))
-            .thenAnswer((_) async => Right(testProduct));
+        when(
+          mockGetProductById(any),
+        ).thenAnswer((_) async => Right(testProduct));
 
         var callCount = 0;
         when(mockUI.showMainMenu()).thenAnswer((_) async {
@@ -226,9 +229,11 @@ void main() {
         await application.run();
 
         // Assert
-        verify(mockUI.showOperationInfo(
-          '${AppStrings.getProductByIdUseCaseTitle} (ID: $testId)',
-        )).called(1);
+        verify(
+          mockUI.showOperationInfo(
+            '${AppStrings.getProductByIdUseCaseTitle} (ID: $testId)',
+          ),
+        ).called(1);
       });
     });
 
@@ -236,8 +241,9 @@ void main() {
       test('llama al caso de uso y muestra categorías en éxito', () async {
         // Arrange
         final testCategories = createTestCategories();
-        when(mockGetAllCategories(const NoParams()))
-            .thenAnswer((_) async => Right(testCategories));
+        when(
+          mockGetAllCategories(const NoParams()),
+        ).thenAnswer((_) async => Right(testCategories));
 
         var callCount = 0;
         when(mockUI.showMainMenu()).thenAnswer((_) async {
@@ -249,8 +255,9 @@ void main() {
         await application.run();
 
         // Assert
-        verify(mockUI.showOperationInfo(AppStrings.getAllCategoriesUseCaseTitle))
-            .called(1);
+        verify(
+          mockUI.showOperationInfo(AppStrings.getAllCategoriesUseCaseTitle),
+        ).called(1);
         verify(mockGetAllCategories(const NoParams())).called(1);
         verify(mockUI.showCategories(testCategories)).called(1);
       });
@@ -258,8 +265,9 @@ void main() {
       test('muestra error cuando el caso de uso falla', () async {
         // Arrange
         final failure = ConnectionFailure('Sin conexión');
-        when(mockGetAllCategories(const NoParams()))
-            .thenAnswer((_) async => Left(failure));
+        when(
+          mockGetAllCategories(const NoParams()),
+        ).thenAnswer((_) async => Left(failure));
 
         var callCount = 0;
         when(mockUI.showMainMenu()).thenAnswer((_) async {
@@ -281,10 +289,12 @@ void main() {
         final testProducts = createTestProductEntityList();
         final testCategories = createTestCategories();
 
-        when(mockGetAllProducts(const NoParams()))
-            .thenAnswer((_) async => Right(testProducts));
-        when(mockGetAllCategories(const NoParams()))
-            .thenAnswer((_) async => Right(testCategories));
+        when(
+          mockGetAllProducts(const NoParams()),
+        ).thenAnswer((_) async => Right(testProducts));
+        when(
+          mockGetAllCategories(const NoParams()),
+        ).thenAnswer((_) async => Right(testCategories));
 
         var callCount = 0;
         when(mockUI.showMainMenu()).thenAnswer((_) async {

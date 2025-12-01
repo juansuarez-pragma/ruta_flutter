@@ -34,7 +34,14 @@ Clean Architecture de tres capas con patrón Service Locator (`get_it`) y Ports 
 
 ### Responsabilidades por Capa
 
-- **Domain** (`lib/src/domain/`): Lógica de negocio pura. Entidades (inmutables, extienden `Equatable`), casos de uso (implementan `UseCase<Type, Params>`) e interfaces de repositorio. Sin dependencias externas.
+- **Domain** (`lib/src/domain/`): Lógica de negocio pura. Incluye:
+  - **Entities**: Inmutables, extienden `Equatable`
+  - **Value Objects**: Encapsulan validaciones y reglas de negocio (`Money`, `ProductId`, `ProductTitle`)
+  - **Aggregates**: Aggregate Roots con comportamientos de dominio (`ProductAggregate`)
+  - **Domain Events**: Eventos que representan hechos significativos (`ProductViewedEvent`)
+  - **Use Cases**: Implementan `UseCase<Type, Params>`
+  - **Repository Interfaces**: Contratos para acceso a datos
+  - Sin dependencias externas.
 
 - **Data** (`lib/src/data/`): Comunicación con API y transformación de datos. Los modelos proveen métodos `fromJson()` y `toEntity()` para transformar datos JSON a entidades de dominio. Las implementaciones de repositorio extienden `BaseRepository` para el mapeo centralizado de excepciones a fallos.
 
@@ -54,6 +61,9 @@ Clean Architecture de tres capas con patrón Service Locator (`get_it`) y Ports 
 - **Interface Segregation Principle (ISP)**: Interfaces de UI segregadas por responsabilidad
 - **Single Responsibility Principle (SRP)**: Un archivo = una clase/enum/interface
 - **Adapter Pattern**: Desacopla dependencias externas (dotenv, http) mediante interfaces
+- **Value Object Pattern**: Encapsula validaciones y comportamientos en objetos inmutables
+- **Aggregate Pattern**: Raíz de agregado que garantiza consistencia e invariantes
+- **Domain Events Pattern**: Eventos que representan hechos de negocio ocurridos
 
 ### Organización de Archivos (SRP)
 
@@ -304,6 +314,7 @@ Endpoints consumidos:
 - `ApiEndpoints.products` → `GET /products`
 - `ApiEndpoints.productById(id)` → `GET /products/{id}`
 - `ApiEndpoints.categories` → `GET /products/categories`
+- `ApiEndpoints.productsByCategory(category)` → `GET /products/category/{category}`
 
 ## Métricas de Calidad de Código
 
@@ -522,12 +533,180 @@ Antes de considerar una implementación completa, verificar:
 | Manejo de Errores | ≥85% | 95% |
 | Configuración y Seguridad | ≥85% | 95% |
 | Análisis Estático | 100% | 100% |
-| Cobertura de Tests | ≥90% | 92.17% |
-| **TOTAL** | **≥90%** | **96.83%** |
+| Cobertura de Tests | ≥90% | 93%+ |
+| **TOTAL** | **≥90%** | **97%** |
+
+## Metodología TDD
+
+El proyecto sigue la metodología **Test-Driven Development (TDD)** de forma obligatoria para toda nueva funcionalidad.
+
+### Ciclo Red-Green-Refactor
+
+```
+┌─────────┐    ┌─────────┐    ┌──────────┐
+│   RED   │───▶│  GREEN  │───▶│ REFACTOR │───┐
+│ (Test)  │    │ (Code)  │    │ (Clean)  │   │
+└─────────┘    └─────────┘    └──────────┘   │
+     ▲                                        │
+     └────────────────────────────────────────┘
+```
+
+1. **RED**: Escribir test que FALLA (código no existe)
+2. **GREEN**: Escribir código MÍNIMO para pasar
+3. **REFACTOR**: Mejorar código sin romper tests
+
+### Orden de Implementación TDD
+
+```
+1. Domain Layer (primero)
+   ├── UseCase Test → UseCase Implementation
+   └── Repository Interface (si es nuevo)
+
+2. Data Layer (segundo)
+   ├── DataSource Test → DataSource Implementation
+   ├── Repository Test → Repository Implementation
+   └── Model Test → Model (si es nuevo)
+
+3. Presentation Layer (tercero)
+   └── Application Test → Application updates
+```
+
+### Especificación Obligatoria
+
+Antes de escribir cada test, documentar la especificación:
+
+```dart
+/// ESPECIFICACIÓN: [NombreComponente]
+///
+/// Responsabilidad: [Una sola responsabilidad]
+///
+/// Entrada:
+///   - [param1]: [tipo] - [descripción]
+///
+/// Salida esperada (éxito):
+///   - [tipo de retorno y condiciones]
+///
+/// Salida esperada (error):
+///   - [tipos de error y cuándo ocurren]
+///
+/// Precondiciones:
+///   - [condiciones que deben cumplirse]
+///
+/// Postcondiciones:
+///   - [efectos después de la ejecución]
+```
+
+**Documentación completa:** Ver `docs/TDD_PROCESS.md`
+
+## DDD Táctico
+
+El proyecto implementa patrones tácticos de Domain-Driven Design para enriquecer la capa de dominio.
+
+### Value Objects
+
+Objetos inmutables que encapsulan validaciones y comportamientos:
+
+```
+lib/src/domain/value_objects/
+├── value_objects.dart     # Barrel file
+├── value_object.dart      # Clase base abstracta
+├── shared/
+│   └── money.dart         # Valor monetario no negativo
+└── product/
+    ├── product_id.dart    # ID de producto (entero positivo)
+    └── product_title.dart # Título (no vacío, max 200 chars)
+```
+
+**Ejemplo de uso:**
+```dart
+// Money: Valores monetarios con precisión de 2 decimales
+final precio = Money.fromDouble(99.99);
+final descuento = Money.fromDouble(10.00);
+final total = precio.subtract(descuento); // $89.99
+
+// ProductId: Identificador validado
+final id = ProductId(42); // OK
+// ProductId(0); // ❌ ArgumentError
+
+// ProductTitle: Título validado
+final title = ProductTitle('Laptop Gaming'); // OK
+// ProductTitle(''); // ❌ ArgumentError
+```
+
+### Domain Events
+
+Eventos que representan hechos significativos del dominio:
+
+```
+lib/src/domain/events/
+├── events.dart            # Barrel file
+├── domain_event.dart      # Clase base (eventId, occurredAt)
+└── product/
+    └── product_viewed_event.dart
+```
+
+**Ejemplo de uso:**
+```dart
+// Crear evento cuando se visualiza un producto
+final event = ProductViewedEvent(productId: ProductId(42));
+eventBus.publish(event);
+```
+
+### Aggregates
+
+Aggregate Roots que encapsulan entidades y comportamientos de dominio:
+
+```
+lib/src/domain/aggregates/
+├── aggregates.dart
+└── product/
+    └── product_aggregate.dart  # Incluye Rating (Value Object embebido)
+```
+
+**ProductAggregate - Comportamientos:**
+
+| Método | Descripción |
+|--------|-------------|
+| `hasDiscount(Money)` | Verifica si tiene descuento |
+| `calculateDiscount(Money)` | Calcula monto del descuento |
+| `discountPercentage(Money)` | Calcula porcentaje de descuento |
+| `isInCategory(String)` | Verifica categoría (case-insensitive) |
+| `recordView()` | Emite `ProductViewedEvent` |
+| `isHighlyRated({threshold})` | Rating >= threshold (default 4.0) |
+| `hasEnoughReviews({min})` | Count >= min (default 10) |
+
+**Ejemplo de uso:**
+```dart
+final product = ProductAggregate(
+  id: ProductId(1),
+  title: ProductTitle('Laptop Gaming'),
+  price: Money.fromDouble(999.99),
+  description: 'Alta performance',
+  category: 'electronics',
+  image: 'https://example.com/laptop.jpg',
+  rating: Rating(rate: 4.5, count: 150),
+);
+
+// Verificar descuento
+final originalPrice = Money.fromDouble(1199.99);
+if (product.hasDiscount(originalPrice)) {
+  print('Descuento: ${product.discountPercentage(originalPrice)}%');
+}
+
+// Verificar si es producto destacado
+if (product.isHighlyRated() && product.hasEnoughReviews()) {
+  featuredProducts.add(product);
+}
+
+// Emitir evento de visualización
+final event = product.recordView();
+```
+
+**Documentación completa:** Ver `docs/FASE_2_DDD_REPORT.md`
 
 ## Testing
 
-El proyecto cuenta con una suite completa de tests unitarios e integración con cobertura del 92.17%.
+El proyecto cuenta con una suite completa de tests unitarios e integración con cobertura del 93%+.
 
 ### Estructura de Tests
 
@@ -542,7 +721,10 @@ test/
 ├── unit/
 │   ├── domain/
 │   │   ├── entities/           # Tests de entidades (Equatable)
-│   │   └── usecases/           # Tests de casos de uso
+│   │   ├── usecases/           # Tests de casos de uso
+│   │   ├── value_objects/      # Tests de Value Objects
+│   │   ├── events/             # Tests de Domain Events
+│   │   └── aggregates/         # Tests de Aggregates
 │   ├── data/
 │   │   ├── models/             # Tests de fromJson/toEntity
 │   │   ├── repositories/       # Tests de mapeo excepciones→failures
@@ -679,7 +861,7 @@ verifyNoMoreInteractions(mockRepository);
 | Data | models, repositories, datasources | ≥90% |
 | Core | network, errors, config | ≥85% |
 | Presentation | application, contracts | ≥80% |
-| **Total** | **168 tests** | **≥90%** |
+| **Total** | **278 tests** | **≥90%** |
 
 ### Agregar Tests para Nueva Funcionalidad
 

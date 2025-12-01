@@ -8,6 +8,7 @@ import 'package:fase_2_consumo_api/src/domain/repositories/product_repository.da
 import 'package:fase_2_consumo_api/src/domain/usecases/get_all_categories_usecase.dart';
 import 'package:fase_2_consumo_api/src/domain/usecases/get_all_products_usecase.dart';
 import 'package:fase_2_consumo_api/src/domain/usecases/get_product_by_id_usecase.dart';
+import 'package:fase_2_consumo_api/src/domain/usecases/get_products_by_category_usecase.dart';
 import 'package:fase_2_consumo_api/src/presentation/adapters/console_user_interface.dart';
 import 'package:fase_2_consumo_api/src/presentation/application.dart';
 import 'package:fase_2_consumo_api/src/presentation/contracts/contracts.dart';
@@ -61,6 +62,9 @@ Future<void> init() async {
   serviceLocator.registerFactory(() => GetProductByIdUseCase(serviceLocator()));
   serviceLocator.registerFactory(
     () => GetAllCategoriesUseCase(serviceLocator()),
+  );
+  serviceLocator.registerFactory(
+    () => GetProductsByCategoryUseCase(serviceLocator()),
   );
 
   // ============================================

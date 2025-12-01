@@ -21,28 +21,34 @@ void main() {
       test('llama a ApiClient.getList con endpoint correcto', () async {
         // Arrange
         final testModels = createTestProductModelList();
-        when(mockApiClient.getList<ProductModel>(
-          endpoint: ApiEndpoints.products,
-          fromJsonList: anyNamed('fromJsonList'),
-        )).thenAnswer((_) async => testModels);
+        when(
+          mockApiClient.getList<ProductModel>(
+            endpoint: ApiEndpoints.products,
+            fromJsonList: anyNamed('fromJsonList'),
+          ),
+        ).thenAnswer((_) async => testModels);
 
         // Act
         await dataSource.getAll();
 
         // Assert
-        verify(mockApiClient.getList<ProductModel>(
-          endpoint: ApiEndpoints.products,
-          fromJsonList: anyNamed('fromJsonList'),
-        )).called(1);
+        verify(
+          mockApiClient.getList<ProductModel>(
+            endpoint: ApiEndpoints.products,
+            fromJsonList: anyNamed('fromJsonList'),
+          ),
+        ).called(1);
       });
 
       test('retorna lista de ProductModel desde ApiClient', () async {
         // Arrange
         final testModels = createTestProductModelList(count: 3);
-        when(mockApiClient.getList<ProductModel>(
-          endpoint: anyNamed('endpoint'),
-          fromJsonList: anyNamed('fromJsonList'),
-        )).thenAnswer((_) async => testModels);
+        when(
+          mockApiClient.getList<ProductModel>(
+            endpoint: anyNamed('endpoint'),
+            fromJsonList: anyNamed('fromJsonList'),
+          ),
+        ).thenAnswer((_) async => testModels);
 
         // Act
         final result = await dataSource.getAll();
@@ -54,47 +60,55 @@ void main() {
 
       test('propaga excepciones del ApiClient', () async {
         // Arrange
-        when(mockApiClient.getList<ProductModel>(
-          endpoint: anyNamed('endpoint'),
-          fromJsonList: anyNamed('fromJsonList'),
-        )).thenThrow(Exception('API Error'));
+        when(
+          mockApiClient.getList<ProductModel>(
+            endpoint: anyNamed('endpoint'),
+            fromJsonList: anyNamed('fromJsonList'),
+          ),
+        ).thenThrow(Exception('API Error'));
 
         // Act & Assert
-        expect(
-          () => dataSource.getAll(),
-          throwsA(isA<Exception>()),
-        );
+        expect(() => dataSource.getAll(), throwsA(isA<Exception>()));
       });
     });
 
     group('getById', () {
       const testId = 42;
 
-      test('llama a ApiClient.get con endpoint correcto incluyendo ID', () async {
-        // Arrange
-        final testModel = createTestProductModel(id: testId);
-        when(mockApiClient.get<ProductModel>(
-          endpoint: ApiEndpoints.productById(testId),
-          fromJson: anyNamed('fromJson'),
-        )).thenAnswer((_) async => testModel);
+      test(
+        'llama a ApiClient.get con endpoint correcto incluyendo ID',
+        () async {
+          // Arrange
+          final testModel = createTestProductModel(id: testId);
+          when(
+            mockApiClient.get<ProductModel>(
+              endpoint: ApiEndpoints.productById(testId),
+              fromJson: anyNamed('fromJson'),
+            ),
+          ).thenAnswer((_) async => testModel);
 
-        // Act
-        await dataSource.getById(testId);
+          // Act
+          await dataSource.getById(testId);
 
-        // Assert
-        verify(mockApiClient.get<ProductModel>(
-          endpoint: '/products/$testId',
-          fromJson: anyNamed('fromJson'),
-        )).called(1);
-      });
+          // Assert
+          verify(
+            mockApiClient.get<ProductModel>(
+              endpoint: '/products/$testId',
+              fromJson: anyNamed('fromJson'),
+            ),
+          ).called(1);
+        },
+      );
 
       test('retorna ProductModel desde ApiClient', () async {
         // Arrange
         final testModel = createTestProductModel(id: testId);
-        when(mockApiClient.get<ProductModel>(
-          endpoint: anyNamed('endpoint'),
-          fromJson: anyNamed('fromJson'),
-        )).thenAnswer((_) async => testModel);
+        when(
+          mockApiClient.get<ProductModel>(
+            endpoint: anyNamed('endpoint'),
+            fromJson: anyNamed('fromJson'),
+          ),
+        ).thenAnswer((_) async => testModel);
 
         // Act
         final result = await dataSource.getById(testId);
@@ -104,37 +118,48 @@ void main() {
         expect(result.id, testId);
       });
 
-      test('construye endpoint dinámico correctamente para diferentes IDs', () async {
-        // Arrange
-        const id1 = 1;
-        const id2 = 999;
-        final model1 = createTestProductModel(id: id1);
-        final model2 = createTestProductModel(id: id2);
+      test(
+        'construye endpoint dinámico correctamente para diferentes IDs',
+        () async {
+          // Arrange
+          const id1 = 1;
+          const id2 = 999;
+          final model1 = createTestProductModel(id: id1);
+          final model2 = createTestProductModel(id: id2);
 
-        when(mockApiClient.get<ProductModel>(
-          endpoint: '/products/$id1',
-          fromJson: anyNamed('fromJson'),
-        )).thenAnswer((_) async => model1);
+          when(
+            mockApiClient.get<ProductModel>(
+              endpoint: '/products/$id1',
+              fromJson: anyNamed('fromJson'),
+            ),
+          ).thenAnswer((_) async => model1);
 
-        when(mockApiClient.get<ProductModel>(
-          endpoint: '/products/$id2',
-          fromJson: anyNamed('fromJson'),
-        )).thenAnswer((_) async => model2);
+          when(
+            mockApiClient.get<ProductModel>(
+              endpoint: '/products/$id2',
+              fromJson: anyNamed('fromJson'),
+            ),
+          ).thenAnswer((_) async => model2);
 
-        // Act
-        await dataSource.getById(id1);
-        await dataSource.getById(id2);
+          // Act
+          await dataSource.getById(id1);
+          await dataSource.getById(id2);
 
-        // Assert
-        verify(mockApiClient.get<ProductModel>(
-          endpoint: '/products/$id1',
-          fromJson: anyNamed('fromJson'),
-        )).called(1);
-        verify(mockApiClient.get<ProductModel>(
-          endpoint: '/products/$id2',
-          fromJson: anyNamed('fromJson'),
-        )).called(1);
-      });
+          // Assert
+          verify(
+            mockApiClient.get<ProductModel>(
+              endpoint: '/products/$id1',
+              fromJson: anyNamed('fromJson'),
+            ),
+          ).called(1);
+          verify(
+            mockApiClient.get<ProductModel>(
+              endpoint: '/products/$id2',
+              fromJson: anyNamed('fromJson'),
+            ),
+          ).called(1);
+        },
+      );
     });
   });
 }

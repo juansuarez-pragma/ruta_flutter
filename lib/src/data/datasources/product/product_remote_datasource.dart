@@ -7,4 +7,7 @@ abstract class ProductRemoteDataSource {
 
   /// Obtiene un producto por su ID.
   Future<ProductModel> getById(int id);
+
+  /// Obtiene productos filtrados por categoría.
+  Future<List<ProductModel>> getByCategory(String category);
 }

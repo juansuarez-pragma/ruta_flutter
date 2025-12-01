@@ -17,28 +17,37 @@ void main() {
 
   group('CategoryRemoteDataSourceImpl', () {
     group('getAll', () {
-      test('llama a ApiClient.getPrimitiveList con endpoint correcto', () async {
-        // Arrange
-        final testCategories = createTestCategories();
-        when(mockApiClient.getPrimitiveList<String>(
-          endpoint: ApiEndpoints.categories,
-        )).thenAnswer((_) async => testCategories);
+      test(
+        'llama a ApiClient.getPrimitiveList con endpoint correcto',
+        () async {
+          // Arrange
+          final testCategories = createTestCategories();
+          when(
+            mockApiClient.getPrimitiveList<String>(
+              endpoint: ApiEndpoints.categories,
+            ),
+          ).thenAnswer((_) async => testCategories);
 
-        // Act
-        await dataSource.getAll();
+          // Act
+          await dataSource.getAll();
 
-        // Assert
-        verify(mockApiClient.getPrimitiveList<String>(
-          endpoint: ApiEndpoints.categories,
-        )).called(1);
-      });
+          // Assert
+          verify(
+            mockApiClient.getPrimitiveList<String>(
+              endpoint: ApiEndpoints.categories,
+            ),
+          ).called(1);
+        },
+      );
 
       test('retorna lista de strings desde ApiClient', () async {
         // Arrange
         final testCategories = createTestCategories();
-        when(mockApiClient.getPrimitiveList<String>(
-          endpoint: anyNamed('endpoint'),
-        )).thenAnswer((_) async => testCategories);
+        when(
+          mockApiClient.getPrimitiveList<String>(
+            endpoint: anyNamed('endpoint'),
+          ),
+        ).thenAnswer((_) async => testCategories);
 
         // Act
         final result = await dataSource.getAll();
@@ -51,9 +60,11 @@ void main() {
 
       test('retorna lista vacía cuando no hay categorías', () async {
         // Arrange
-        when(mockApiClient.getPrimitiveList<String>(
-          endpoint: anyNamed('endpoint'),
-        )).thenAnswer((_) async => <String>[]);
+        when(
+          mockApiClient.getPrimitiveList<String>(
+            endpoint: anyNamed('endpoint'),
+          ),
+        ).thenAnswer((_) async => <String>[]);
 
         // Act
         final result = await dataSource.getAll();
@@ -64,15 +75,14 @@ void main() {
 
       test('propaga excepciones del ApiClient', () async {
         // Arrange
-        when(mockApiClient.getPrimitiveList<String>(
-          endpoint: anyNamed('endpoint'),
-        )).thenThrow(Exception('API Error'));
+        when(
+          mockApiClient.getPrimitiveList<String>(
+            endpoint: anyNamed('endpoint'),
+          ),
+        ).thenThrow(Exception('API Error'));
 
         // Act & Assert
-        expect(
-          () => dataSource.getAll(),
-          throwsA(isA<Exception>()),
-        );
+        expect(() => dataSource.getAll(), throwsA(isA<Exception>()));
       });
     });
   });

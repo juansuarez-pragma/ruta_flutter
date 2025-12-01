@@ -41,4 +41,14 @@ class ProductRepositoryImpl extends BaseRepository
       notFoundMessage: AppStrings.notFoundCategoriesFailureMessage,
     );
   }
+
+  @override
+  Future<Either<Failure, List<ProductEntity>>> getProductsByCategory(
+    String category,
+  ) async {
+    return await handleRequest(() async {
+      final productModels = await _productDataSource.getByCategory(category);
+      return productModels.map((model) => model.toEntity()).toList();
+    }, notFoundMessage: AppStrings.notFoundCategoriesFailureMessage);
+  }
 }

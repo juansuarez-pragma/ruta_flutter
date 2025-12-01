@@ -53,21 +53,24 @@ void main() {
     });
 
     group('apiBaseUrl', () {
-      test('retorna el valor de API_BASE_URL cuando está inicializado', () async {
-        // Arrange
-        const expectedUrl = 'https://api.example.com';
-        when(mockEnvReader.load(any)).thenAnswer((_) async {});
-        when(mockEnvReader['API_BASE_URL']).thenReturn(expectedUrl);
-        when(mockEnvReader.containsKey('API_BASE_URL')).thenReturn(true);
+      test(
+        'retorna el valor de API_BASE_URL cuando está inicializado',
+        () async {
+          // Arrange
+          const expectedUrl = 'https://api.example.com';
+          when(mockEnvReader.load(any)).thenAnswer((_) async {});
+          when(mockEnvReader['API_BASE_URL']).thenReturn(expectedUrl);
+          when(mockEnvReader.containsKey('API_BASE_URL')).thenReturn(true);
 
-        await EnvConfig.instance.initialize(reader: mockEnvReader);
+          await EnvConfig.instance.initialize(reader: mockEnvReader);
 
-        // Act
-        final result = EnvConfig.instance.apiBaseUrl;
+          // Act
+          final result = EnvConfig.instance.apiBaseUrl;
 
-        // Assert
-        expect(result, isNotEmpty);
-      });
+          // Assert
+          expect(result, isNotEmpty);
+        },
+      );
     });
   });
 

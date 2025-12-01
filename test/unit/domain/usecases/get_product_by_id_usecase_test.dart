@@ -23,8 +23,9 @@ void main() {
     test('retorna producto cuando el repositorio tiene éxito', () async {
       // Arrange
       final testProduct = createTestProductEntity(id: testId);
-      when(mockRepository.getProductById(testId))
-          .thenAnswer((_) async => Right(testProduct));
+      when(
+        mockRepository.getProductById(testId),
+      ).thenAnswer((_) async => Right(testProduct));
 
       // Act
       final result = await useCase(params);
@@ -38,8 +39,9 @@ void main() {
     test('retorna Failure cuando el repositorio falla', () async {
       // Arrange
       final failure = NotFoundFailure('Producto no encontrado');
-      when(mockRepository.getProductById(testId))
-          .thenAnswer((_) async => Left(failure));
+      when(
+        mockRepository.getProductById(testId),
+      ).thenAnswer((_) async => Left(failure));
 
       // Act
       final result = await useCase(params);
@@ -54,8 +56,9 @@ void main() {
       const specificId = 42;
       const specificParams = GetProductByIdParams(id: specificId);
       final testProduct = createTestProductEntity(id: specificId);
-      when(mockRepository.getProductById(specificId))
-          .thenAnswer((_) async => Right(testProduct));
+      when(
+        mockRepository.getProductById(specificId),
+      ).thenAnswer((_) async => Right(testProduct));
 
       // Act
       await useCase(specificParams);
