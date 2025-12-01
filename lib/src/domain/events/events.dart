@@ -8,3 +8,6 @@ export 'domain_event.dart';
 
 // Product Events
 export 'product/product_viewed_event.dart';
+
+// Cart Events
+export 'cart/cart_events.dart';

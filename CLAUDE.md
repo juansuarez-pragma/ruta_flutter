@@ -641,8 +641,10 @@ Eventos que representan hechos significativos del dominio:
 lib/src/domain/events/
 ├── events.dart            # Barrel file
 ├── domain_event.dart      # Clase base (eventId, occurredAt)
-└── product/
-    └── product_viewed_event.dart
+├── product/
+│   └── product_viewed_event.dart
+└── cart/
+    └── cart_events.dart   # ItemAddedToCart, ItemRemoved, QuantityUpdated, CartCleared
 ```
 
 **Ejemplo de uso:**
@@ -650,6 +652,10 @@ lib/src/domain/events/
 // Crear evento cuando se visualiza un producto
 final event = ProductViewedEvent(productId: ProductId(42));
 eventBus.publish(event);
+
+// Eventos del carrito
+final result = cart.addItemWithEvent(...);
+print(result.event); // ItemAddedToCartEvent
 ```
 
 ### Aggregates
@@ -659,8 +665,10 @@ Aggregate Roots que encapsulan entidades y comportamientos de dominio:
 ```
 lib/src/domain/aggregates/
 ├── aggregates.dart
-└── product/
-    └── product_aggregate.dart  # Incluye Rating (Value Object embebido)
+├── product/
+│   └── product_aggregate.dart  # Incluye Rating (Value Object embebido)
+└── cart/
+    └── cart_aggregate.dart     # Carrito de compras con eventos
 ```
 
 **ProductAggregate - Comportamientos:**
@@ -702,7 +710,120 @@ if (product.isHighlyRated() && product.hasEnoughReviews()) {
 final event = product.recordView();
 ```
 
-**Documentación completa:** Ver `docs/FASE_2_DDD_REPORT.md`
+**CartAggregate - Comportamientos:**
+
+| Método | Descripción | Evento |
+|--------|-------------|--------|
+| `addItem()` | Agrega producto o incrementa cantidad | `ItemAddedToCartEvent` |
+| `updateQuantity()` | Actualiza cantidad de ítem | `CartItemQuantityUpdatedEvent` |
+| `removeItem()` | Elimina ítem del carrito | `ItemRemovedFromCartEvent` |
+| `clear()` | Vacía el carrito | `CartClearedEvent` |
+
+**Consultas:**
+- `items`, `isEmpty`, `isNotEmpty`
+- `itemCount`, `uniqueItemCount`, `total`
+- `containsProduct()`, `getItem()`
+
+**Ejemplo de uso:**
+```dart
+var cart = CartAggregate.empty();
+
+// Agregar productos
+cart = cart.addItem(
+  productId: ProductId(1),
+  quantity: 2,
+  unitPrice: Money.fromDouble(100.0),
+);
+
+print(cart.total);     // $200.00
+print(cart.itemCount); // 2
+
+// Con eventos
+final result = cart.addItemWithEvent(...);
+print(result.event); // ItemAddedToCartEvent
+```
+
+**Documentación completa:** Ver `docs/FASE_2_DDD_REPORT.md` y `docs/FASE_4_CART_DOMAIN_REPORT.md`
+
+## ATDD (Acceptance Test-Driven Development)
+
+El proyecto implementa tests de aceptación en formato BDD (Behavior-Driven Development) con Given-When-Then.
+
+### Estructura de Tests de Aceptación
+
+```
+test/acceptance/
+├── acceptance_test_base.dart       # Helpers BDD
+└── features/
+    ├── product_listing_acceptance_test.dart
+    ├── product_detail_acceptance_test.dart
+    ├── product_category_acceptance_test.dart
+    ├── product_aggregate_acceptance_test.dart
+    └── cart_acceptance_test.dart
+```
+
+### Formato de Tests
+
+```dart
+test(
+  'Given catálogo con productos, '
+  'When solicita ver todos, '
+  'Then recibe lista completa',
+  () async {
+    // Given
+    final productList = createTestProductEntityList(count: 5);
+    when(mockRepository.getAllProducts())
+        .thenAnswer((_) async => Right(productList));
+
+    // When
+    final result = await useCase(const NoParams());
+
+    // Then
+    expect(result.isRight(), isTrue);
+  },
+);
+```
+
+### Features Documentadas
+
+| Feature | Criterios de Aceptación | Tests |
+|---------|------------------------|-------|
+| Listado de Productos | 6 | 6 |
+| Detalle de Producto | 6 | 6 |
+| Filtrar por Categoría | 6 | 6 |
+| Comportamientos DDD | 5 | 15 |
+| Carrito de Compras | 8 | 17 |
+| **Total** | **31** | **50** |
+
+**Documentación completa:** Ver `docs/FASE_3_ATDD_REPORT.md` y `docs/FASE_4_CART_DOMAIN_REPORT.md`
+
+## CI/CD (Integración Continua)
+
+El proyecto usa GitHub Actions para automatizar calidad de código.
+
+### Pipeline
+
+```
+.github/workflows/ci.yml
+```
+
+**Jobs:**
+1. **analyze**: Formato y análisis estático
+2. **test**: Tests unitarios e integración + cobertura
+3. **test-acceptance**: Tests de aceptación ATDD
+4. **quality-gate**: Verificación final
+
+**Triggers:** Push/PR a `main`, `test`, `develop`
+
+**Comandos locales para simular CI:**
+```bash
+dart format --output=none --set-exit-if-changed .
+dart analyze --fatal-infos
+dart test
+dart test test/acceptance/
+```
+
+**Documentación completa:** Ver `docs/FASE_5_CI_CD_REPORT.md`
 
 ## Testing
 
@@ -735,8 +856,10 @@ test/
 │   │   └── config/             # Tests de EnvConfig
 │   └── presentation/
 │       └── contracts/          # Tests de MenuOption
-└── integration/
-    └── presentation/           # Tests de Application (flujos completos)
+├── integration/
+│   └── presentation/           # Tests de Application (flujos completos)
+└── acceptance/
+    └── features/               # Tests de aceptación BDD
 ```
 
 ### Comandos de Testing
@@ -861,7 +984,7 @@ verifyNoMoreInteractions(mockRepository);
 | Data | models, repositories, datasources | ≥90% |
 | Core | network, errors, config | ≥85% |
 | Presentation | application, contracts | ≥80% |
-| **Total** | **278 tests** | **≥90%** |
+| **Total** | **311 tests** | **≥90%** |
 
 ### Agregar Tests para Nueva Funcionalidad
 

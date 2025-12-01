@@ -12,3 +12,6 @@ export 'shared/money.dart';
 // Product
 export 'product/product_id.dart';
 export 'product/product_title.dart';
+
+// Cart
+export 'cart/cart_item.dart';
