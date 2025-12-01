@@ -44,6 +44,7 @@ Future<void> init() async {
       getAllProducts: serviceLocator(),
       getProductById: serviceLocator(),
       getAllCategories: serviceLocator(),
+      getProductsByCategory: serviceLocator(),
       onExit: () => serviceLocator<http.Client>().close(),
     ),
   );

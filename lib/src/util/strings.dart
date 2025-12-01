@@ -19,17 +19,23 @@ class AppStrings {
   static const String menuOptionGetProductById = 'Obtener un producto por ID';
   static const String menuOptionGetAllCategories =
       'Obtener todas las categorías';
+  static const String menuOptionGetProductsByCategory =
+      'Obtener productos por categoría';
   static const String menuOptionExit = 'Salir';
   static const String menuPrompt = 'Opción:';
 
   // Solicitudes
   static const String promptProductId =
       'Por favor, ingresa el ID del producto:';
+  static const String promptCategory = 'Selecciona una categoría (número):';
+  static const String invalidCategoryError = 'Categoría no válida.';
 
   // Títulos de casos de uso
   static const String getAllProductsUseCaseTitle = 'GetAllProductsUseCase';
   static const String getProductByIdUseCaseTitle = 'GetProductByIdUseCase';
   static const String getAllCategoriesUseCaseTitle = 'GetAllCategoriesUseCase';
+  static const String getProductsByCategoryUseCaseTitle =
+      'GetProductsByCategoryUseCase';
   static const String executingUseCase = '[+] EJECUTANDO:';
 
   // Mensajes de éxito

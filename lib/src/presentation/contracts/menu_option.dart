@@ -3,6 +3,7 @@ enum MenuOption {
   getAllProducts,
   getProductById,
   getAllCategories,
+  getProductsByCategory,
   exit,
   invalid,
 }
