@@ -31,8 +31,8 @@ WORKDIR /app
 # Copiar ejecutable compilado
 COPY --from=build /app/bin/app /app/bin/app
 
-# Copiar archivo de configuración
-COPY --from=build /app/.env /app/.env
+# Copiar archivo de configuración (desde .env.example)
+COPY --from=build /app/.env.example /app/.env
 
 # Ejecutar en modo interactivo
 ENTRYPOINT ["/app/bin/app"]
