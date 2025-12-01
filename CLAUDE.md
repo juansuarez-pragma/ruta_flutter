@@ -159,7 +159,7 @@ Esto permite que implementaciones parciales (ej. un widget que solo muestra prod
 
 - **`ConsoleUserInterface`** (Adapter): Implementación concreta para terminal usando `stdin`/`stdout`.
 
-- **`Application`**: Orquesta el flujo de la aplicación. Recibe una instancia de `UserInterface` por inyección de dependencias y coordina la interacción con los casos de uso.
+- **`ApplicationController`**: Orquesta el flujo de la aplicación. Recibe una instancia de `UserInterface` por inyección de dependencias y coordina la interacción con los casos de uso.
 
 **Cómo cambiar la UI:**
 
@@ -234,13 +234,13 @@ serviceLocator.registerLazySingleton<OrderRemoteDataSource>(
 ### Flujo de Dependencias
 
 ```
-bin/main → Application → UserInterface (Port) ← ConsoleUserInterface (Adapter)
+bin/main → ApplicationController → UserInterface (Port) ← ConsoleUserInterface (Adapter)
                 ↓
            Casos de Uso → Interfaz Repository ← Repository Impl → DataSources → ApiClient → HTTP
 ```
 
 Todas las dependencias registradas en `lib/src/di/injection_container.dart`:
-- `Application`, Casos de Uso: `registerFactory` (nueva instancia por llamada)
+- `ApplicationController`, Casos de Uso: `registerFactory` (nueva instancia por llamada)
 - `UserInterface`, Repositories, DataSources, HTTP Client: `registerLazySingleton`
 
 **Convención de nombres:** Se usa `serviceLocator` en lugar de abreviaciones como `sl` para mejorar la legibilidad del código.
@@ -249,7 +249,7 @@ Todas las dependencias registradas en `lib/src/di/injection_container.dart`:
 
 1. DataSource lanza excepciones tipadas (`ServerException`, `ConnectionException`, `NotFoundException`, `ClientException`)
 2. El método `handleRequest()` del Repository captura excepciones y retorna `Left(Failure)`
-3. `Application` usa `result.fold()` y delega la presentación del error a `UserInterface`
+3. `ApplicationController` usa `result.fold()` y delega la presentación del error a `UserInterface`
 
 ### Externalización de Textos
 
@@ -568,7 +568,7 @@ El proyecto sigue la metodología **Test-Driven Development (TDD)** de forma obl
    └── Model Test → Model (si es nuevo)
 
 3. Presentation Layer (tercero)
-   └── Application Test → Application updates
+   └── ApplicationController Test → ApplicationController updates
 ```
 
 ### Especificación Obligatoria
@@ -857,7 +857,7 @@ test/
 │   └── presentation/
 │       └── contracts/          # Tests de MenuOption
 ├── integration/
-│   └── presentation/           # Tests de Application (flujos completos)
+│   └── presentation/           # Tests de ApplicationController (flujos completos)
 └── acceptance/
     └── features/               # Tests de aceptación BDD
 ```
@@ -1004,7 +1004,7 @@ Al agregar nueva funcionalidad, seguir este orden:
    - Tests de nuevos handlers
 
 4. **Integration Tests**:
-   - Test del flujo completo en Application
+   - Test del flujo completo en ApplicationController
 
 #### Plantilla para Test de UseCase
 

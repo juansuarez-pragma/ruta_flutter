@@ -4,7 +4,8 @@ import 'package:test/test.dart';
 import 'package:fase_2_consumo_api/src/core/errors/failures.dart';
 import 'package:fase_2_consumo_api/src/core/usecase/usecase.dart';
 import 'package:fase_2_consumo_api/src/domain/usecases/get_product_by_id_usecase.dart';
-import 'package:fase_2_consumo_api/src/presentation/application.dart';
+import 'package:fase_2_consumo_api/src/presentation/application.dart'
+    show ApplicationController;
 import 'package:fase_2_consumo_api/src/presentation/contracts/contracts.dart';
 import 'package:fase_2_consumo_api/src/util/strings.dart';
 
@@ -12,7 +13,7 @@ import '../../helpers/mocks.mocks.dart';
 import '../../helpers/test_helpers.dart';
 
 void main() {
-  late Application application;
+  late ApplicationController application;
   late MockUserInterface mockUI;
   late MockGetAllProductsUseCase mockGetAllProducts;
   late MockGetProductByIdUseCase mockGetProductById;
@@ -26,7 +27,7 @@ void main() {
     mockGetAllCategories = MockGetAllCategoriesUseCase();
     exitCalled = false;
 
-    application = Application(
+    application = ApplicationController(
       ui: mockUI,
       getAllProducts: mockGetAllProducts,
       getProductById: mockGetProductById,
@@ -35,7 +36,7 @@ void main() {
     );
   });
 
-  group('Application', () {
+  group('ApplicationController', () {
     group('run', () {
       test('muestra mensaje de bienvenida al iniciar', () async {
         // Arrange

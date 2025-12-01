@@ -5,7 +5,7 @@ import 'package:fase_2_consumo_api/src/domain/usecases/get_product_by_id_usecase
 import 'package:fase_2_consumo_api/src/presentation/contracts/contracts.dart';
 import 'package:fase_2_consumo_api/src/util/strings.dart';
 
-/// Coordina la interacción entre la interfaz de usuario y los casos de uso.
+/// Controlador principal que coordina la interacción entre la UI y los casos de uso.
 ///
 /// Esta clase actúa como el punto de entrada de la aplicación, orquestando
 /// el flujo de la aplicación sin conocer los detalles de implementación
@@ -14,14 +14,14 @@ import 'package:fase_2_consumo_api/src/util/strings.dart';
 ///
 /// Sigue el principio de inversión de dependencias: depende de abstracciones
 /// ([UserInterface]) no de implementaciones concretas.
-class Application {
+class ApplicationController {
   final UserInterface _ui;
   final GetAllProductsUseCase _getAllProducts;
   final GetProductByIdUseCase _getProductById;
   final GetAllCategoriesUseCase _getAllCategories;
   final void Function() _onExit;
 
-  Application({
+  ApplicationController({
     required UserInterface ui,
     required GetAllProductsUseCase getAllProducts,
     required GetProductByIdUseCase getProductById,

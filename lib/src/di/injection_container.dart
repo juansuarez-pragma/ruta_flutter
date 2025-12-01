@@ -10,7 +10,8 @@ import 'package:fase_2_consumo_api/src/domain/usecases/get_all_products_usecase.
 import 'package:fase_2_consumo_api/src/domain/usecases/get_product_by_id_usecase.dart';
 import 'package:fase_2_consumo_api/src/domain/usecases/get_products_by_category_usecase.dart';
 import 'package:fase_2_consumo_api/src/presentation/adapters/console_user_interface.dart';
-import 'package:fase_2_consumo_api/src/presentation/application.dart';
+import 'package:fase_2_consumo_api/src/presentation/application.dart'
+    show ApplicationController;
 import 'package:fase_2_consumo_api/src/presentation/contracts/contracts.dart';
 
 /// Instancia global del Service Locator para inyección de dependencias.
@@ -44,9 +45,9 @@ Future<void> init() async {
     () => ConsoleUserInterface(),
   );
 
-  // Application - Coordinador principal
+  // ApplicationController - Coordinador principal
   serviceLocator.registerFactory(
-    () => Application(
+    () => ApplicationController(
       ui: serviceLocator<UserInterface>(),
       getAllProducts: serviceLocator(),
       getProductById: serviceLocator(),
