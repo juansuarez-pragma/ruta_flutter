@@ -31,54 +31,42 @@ El proyecto está construido siguiendo principios de software de alta calidad pa
 - **Variables de Entorno:** La configuración sensible (URLs, timeouts) se gestiona mediante archivos `.env` usando el paquete `dotenv`, evitando URLs hardcodeadas en el código.
 - **Externalización de Textos:** Todos los textos de la aplicación (mensajes, títulos, etc.) se gestionan en una clase `AppStrings` para facilitar el mantenimiento y futuras internacionalizaciones.
 
-## Configuración del Proyecto
-
-Asegúrate de tener el [SDK de Dart](https://dart.dev/get-dart) instalado.
-
-1. Clona el repositorio (si aplica).
-2. Navega al directorio del proyecto:
-   ```bash
-   cd fase_2_consumo_api
-   ```
-3. Instala las dependencias:
-   ```bash
-   dart pub get
-   ```
-4. Configura las variables de entorno:
-   ```bash
-   cp .env.example .env
-   ```
-   Edita el archivo `.env` según tus necesidades.
-
-## Variables de Entorno
-
-El proyecto utiliza variables de entorno para configuración. Copia `.env.example` a `.env` y ajusta los valores:
-
-| Variable | Descripción | Requerida | Valor por defecto |
-|----------|-------------|-----------|-------------------|
-| `API_BASE_URL` | URL base para la API de Fake Store | Sí | `https://fakestoreapi.com` |
-
-> **Nota:** El archivo `.env` está excluido del control de versiones por seguridad. Solo `.env.example` se versiona como plantilla.
-
 ## Cómo Ejecutar la Aplicación
 
-### Opción 1: Con Dart SDK
+### Opción 1: Con Docker (recomendado)
 
-Desde el directorio `fase_2_consumo_api`, ejecuta el siguiente comando:
-
-```bash
-dart run
-```
-
-### Opción 2: Con Docker
-
-Si no tienes Dart instalado, puedes ejecutar la aplicación usando Docker:
+No requiere instalación. Solo necesitas tener Docker:
 
 ```bash
 docker run -it juancarlos05/fake-store-cli
 ```
 
-> **Nota:** El flag `-it` es necesario porque la aplicación es interactiva.
+### Opción 2: Con Dart SDK
+
+Requiere [Dart SDK](https://dart.dev/get-dart) instalado.
+
+1. Clona el repositorio y navega al directorio:
+   ```bash
+   cd fase_2_consumo_api
+   ```
+2. Instala las dependencias:
+   ```bash
+   dart pub get
+   ```
+3. Configura las variables de entorno:
+   ```bash
+   cp .env.example .env
+   ```
+4. Ejecuta la aplicación:
+   ```bash
+   dart run
+   ```
+
+#### Variables de Entorno
+
+| Variable | Descripción | Valor por defecto |
+|----------|-------------|-------------------|
+| `API_BASE_URL` | URL base de la API | `https://fakestoreapi.com` |
 
 ## Cómo Usar
 
