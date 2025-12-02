@@ -9,10 +9,11 @@ Este proyecto ha sido desarrollado con asistencia de herramientas de IA (Claude 
 ## Características
 
 - **Interfaz de Consola Interactiva (CLI):** Permite al usuario elegir qué acción realizar a través de un menú en la terminal.
-- **Consumo de API:** Realiza peticiones a 3 endpoints diferentes:
+- **Consumo de API:** Realiza peticiones a 4 endpoints diferentes:
   - Obtener todos los productos.
   - Obtener un producto específico por su ID.
   - Obtener todas las categorías de productos.
+  - Obtener productos filtrados por categoría.
 - **Manejo de Errores:** Implementa un sistema robusto para manejar errores de conexión o de la API.
 
 ## Arquitectura y Diseño
@@ -83,10 +84,12 @@ Por favor, elige una opción:
 1. Obtener todos los productos
 2. Obtener un producto por ID
 3. Obtener todas las categorías
-4. Salir
-Opción: 
+4. Obtener productos por categoría
+5. Salir
+Opción:
 ```
 
 - Escribe el número de la opción que deseas (ej. `1`) y presiona `Enter`.
 - Si eliges la opción `2`, la aplicación te pedirá que ingreses un ID de producto.
-- Para cerrar la aplicación, elige la opción `4`.
+- Si eliges la opción `4`, la aplicación mostrará las categorías disponibles para seleccionar.
+- Para cerrar la aplicación, elige la opción `5`.
