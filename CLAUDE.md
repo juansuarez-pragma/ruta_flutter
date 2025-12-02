@@ -747,7 +747,7 @@ docker run -it juancarlos05/fake-store-cli
 
 ## Testing
 
-El proyecto cuenta con una suite completa de tests unitarios e integración con cobertura del 87%.
+El proyecto cuenta con una suite de tests unitarios y de aceptación con cobertura del 87%.
 
 ### Estructura de Tests
 
@@ -771,10 +771,7 @@ test/
 │   │   ├── network/            # Tests de ApiResponseHandler
 │   │   ├── errors/             # Tests de Failures y Exceptions
 │   │   └── config/             # Tests de EnvConfig
-│   └── presentation/
-│       └── contracts/          # Tests de MenuOption
-├── integration/
-│   └── presentation/           # Tests de ApplicationController (flujos completos)
+│   └── presentation/           # Tests de ApplicationController
 └── acceptance/
     └── features/               # Tests de aceptación BDD
 ```
