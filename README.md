@@ -1,95 +1,49 @@
-# Fase 2: Consumo de API con Dart
+# Fake Store CLI
 
-Este proyecto es una aplicación de consola interactiva desarrollada en Dart como parte de la Fase 2 de la Ruta de Crecimiento Práctica. La aplicación consume datos de la [Fake Store API](https://fakestoreapi.com/) y los presenta en la terminal.
+Aplicación de consola interactiva en Dart que consume la [Fake Store API](https://fakestoreapi.com/).
 
 ## Desarrollo Asistido por IA
 
-Este proyecto ha sido desarrollado con asistencia de herramientas de IA (Claude y Gemini) para validar y acelerar la velocidad de desarrollo, manteniendo buenas prácticas de arquitectura, testing y documentación.
+Proyecto desarrollado con asistencia de Claude y Gemini para validar velocidad de desarrollo.
 
 ## Características
 
-- **Interfaz de Consola Interactiva (CLI):** Permite al usuario elegir qué acción realizar a través de un menú en la terminal.
-- **Consumo de API:** Realiza peticiones a 4 endpoints diferentes:
-  - Obtener todos los productos.
-  - Obtener un producto específico por su ID.
-  - Obtener todas las categorías de productos.
-  - Obtener productos filtrados por categoría.
-- **Manejo de Errores:** Implementa un sistema robusto para manejar errores de conexión o de la API.
+- Interfaz de consola interactiva (CLI)
+- Consumo de 4 endpoints de la API
+- Manejo robusto de errores de conexión y API
+- Arquitectura limpia y testeable
 
-## Arquitectura y Diseño
+## Ejecución
 
-El proyecto está construido siguiendo principios de software de alta calidad para garantizar que sea escalable, mantenible y testeable.
-
-- **Clean Architecture:** La lógica está separada en tres capas principales:
-  - **Domain:** Contiene la lógica de negocio pura (entidades, casos de uso, contratos de repositorios).
-  - **Data:** Implementa la lógica de acceso a datos (modelos, datasource para la API, implementación de repositorios).
-  - **Core:** Lógica transversal como el contenedor de dependencias y patrones reutilizables.
-- **Inyección de Dependencias:** Se utiliza el Service Locator `get_it` para desacoplar las capas y gestionar las dependencias de forma centralizada.
-- **Patrones de Diseño:**
-  - **Repository Pattern:** Para abstraer la fuente de datos.
-  - **Strategy Pattern:** Utilizado en el `ApiResponseHandler` para gestionar diferentes respuestas HTTP de una manera limpia y escalable.
-  - **Singleton Pattern:** Utilizado en `EnvConfig` para gestión centralizada de variables de entorno.
-  - **Adapter Pattern:** Desacopla dependencias externas (dotenv, http) mediante interfaces abstractas.
-  - **Ports & Adapters Pattern:** Desacopla la UI de la lógica de negocio mediante interfaces abstractas.
-  - **Clase Base para Repositorios:** Se usa una clase `BaseRepository` para centralizar y reutilizar la lógica de manejo de excepciones en todos los repositorios.
-  - **Parseo Manual de JSON:** Los modelos de datos se parsean de JSON a objetos Dart de forma manual, eliminando la necesidad de herramientas de generación de código como `json_serializable`.
-- **Variables de Entorno:** La configuración sensible (URLs, timeouts) se gestiona mediante archivos `.env` usando el paquete `dotenv`, evitando URLs hardcodeadas en el código.
-- **Externalización de Textos:** Todos los textos de la aplicación (mensajes, títulos, etc.) se gestionan en una clase `AppStrings` para facilitar el mantenimiento y futuras internacionalizaciones.
-
-## Cómo Ejecutar la Aplicación
-
-### Opción 1: Con Docker (recomendado)
-
-No requiere instalación. Solo necesitas tener Docker:
+### Con Docker (recomendado)
 
 ```bash
 docker run -it juancarlos05/fake-store-cli
 ```
 
-### Opción 2: Con Dart SDK
+### Con Dart SDK
 
-Requiere [Dart SDK](https://dart.dev/get-dart) instalado.
+```bash
+# Instalar dependencias
+dart pub get
 
-1. Clona el repositorio y navega al directorio:
-   ```bash
-   cd fase_2_consumo_api
-   ```
-2. Instala las dependencias:
-   ```bash
-   dart pub get
-   ```
-3. Configura las variables de entorno:
-   ```bash
-   cp .env.example .env
-   ```
-4. Ejecuta la aplicación:
-   ```bash
-   dart run
-   ```
+# Configurar variables de entorno
+cp .env.example .env
 
-#### Variables de Entorno
+# Ejecutar
+dart run
+```
 
-| Variable | Descripción | Valor por defecto |
-|----------|-------------|-------------------|
-| `API_BASE_URL` | URL base de la API | `https://fakestoreapi.com` |
-
-## Cómo Usar
-
-Una vez que la aplicación se inicie, verás un mensaje de bienvenida y un menú de opciones:
+## Uso
 
 ```
---- Bienvenido al Cliente Interactivo de Fake Store API ---
-
-Por favor, elige una opción:
 1. Obtener todos los productos
 2. Obtener un producto por ID
 3. Obtener todas las categorías
 4. Obtener productos por categoría
 5. Salir
-Opción:
 ```
 
-- Escribe el número de la opción que deseas (ej. `1`) y presiona `Enter`.
-- Si eliges la opción `2`, la aplicación te pedirá que ingreses un ID de producto.
-- Si eliges la opción `4`, la aplicación mostrará las categorías disponibles para seleccionar.
-- Para cerrar la aplicación, elige la opción `5`.
+## Documentación Técnica
+
+Ver [CLAUDE.md](CLAUDE.md) para detalles de arquitectura, patrones y guías de desarrollo.
