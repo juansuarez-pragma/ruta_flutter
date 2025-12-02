@@ -2,6 +2,10 @@
 
 Este proyecto es una aplicación de consola interactiva desarrollada en Dart como parte de la Fase 2 de la Ruta de Crecimiento Práctica. La aplicación consume datos de la [Fake Store API](https://fakestoreapi.com/) y los presenta en la terminal.
 
+## Desarrollo Asistido por IA
+
+Este proyecto ha sido desarrollado con asistencia de herramientas de IA (Claude y Gemini) para validar y acelerar la velocidad de desarrollo, manteniendo buenas prácticas de arquitectura, testing y documentación.
+
 ## Características
 
 - **Interfaz de Consola Interactiva (CLI):** Permite al usuario elegir qué acción realizar a través de un menú en la terminal.
