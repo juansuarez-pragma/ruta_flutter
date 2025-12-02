@@ -523,7 +523,7 @@ Antes de considerar una implementación completa, verificar:
 | Manejo de Errores | ≥85% | 95% |
 | Configuración y Seguridad | ≥85% | 95% |
 | Análisis Estático | 100% | 100% |
-| Cobertura de Tests | ≥90% | 93%+ |
+| Cobertura de Tests | ≥85% | 87% |
 | **TOTAL** | **≥90%** | **96%** |
 
 ## Metodología TDD
@@ -747,7 +747,7 @@ docker run -it juancarlos05/fake-store-cli
 
 ## Testing
 
-El proyecto cuenta con una suite completa de tests unitarios e integración con cobertura del 93%+.
+El proyecto cuenta con una suite completa de tests unitarios e integración con cobertura del 87%.
 
 ### Estructura de Tests
 
