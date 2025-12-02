@@ -901,7 +901,7 @@ verifyNoMoreInteractions(mockRepository);
 | Data | models, repositories, datasources | ≥90% |
 | Core | network, errors, config | ≥85% |
 | Presentation | application, contracts | ≥80% |
-| **Total** | **207 tests** | **≥90%** |
+| **Total** | **164 tests** | **≥90%** |
 
 ### Agregar Tests para Nueva Funcionalidad
 

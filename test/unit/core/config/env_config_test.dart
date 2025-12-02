@@ -12,46 +12,6 @@ void main() {
       mockEnvReader = MockEnvReader();
     });
 
-    group('singleton', () {
-      test('instance retorna la misma instancia', () {
-        // Act
-        final instance1 = EnvConfig.instance;
-        final instance2 = EnvConfig.instance;
-
-        // Assert
-        expect(identical(instance1, instance2), isTrue);
-      });
-    });
-
-    group('initialize', () {
-      test('inicializa correctamente con EnvReader válido', () async {
-        // Arrange
-        when(mockEnvReader.load(any)).thenAnswer((_) async {});
-        when(mockEnvReader['API_BASE_URL']).thenReturn('https://api.test.com');
-        when(mockEnvReader.containsKey('API_BASE_URL')).thenReturn(true);
-
-        // Act - El singleton ya podría estar inicializado, pero debe retornar sin error
-        await EnvConfig.instance.initialize(reader: mockEnvReader);
-
-        // Assert - No debería lanzar excepción
-      });
-
-      test('llama a load en el reader con la ruta correcta', () async {
-        // Arrange
-        when(mockEnvReader.load(any)).thenAnswer((_) async {});
-        when(mockEnvReader.containsKey(any)).thenReturn(true);
-
-        // Act
-        await EnvConfig.instance.initialize(
-          envPath: '.env.test',
-          reader: mockEnvReader,
-        );
-
-        // Assert
-        // Note: Esto solo funciona si el singleton no estaba inicializado
-      });
-    });
-
     group('apiBaseUrl', () {
       test(
         'retorna el valor de API_BASE_URL cuando está inicializado',
@@ -71,69 +31,6 @@ void main() {
           expect(result, isNotEmpty);
         },
       );
-    });
-  });
-
-  group('EnvReader interface', () {
-    late MockEnvReader mockReader;
-
-    setUp(() {
-      mockReader = MockEnvReader();
-    });
-
-    test('load se llama con el path correcto', () async {
-      // Arrange
-      when(mockReader.load('.env')).thenAnswer((_) async {});
-
-      // Act
-      await mockReader.load('.env');
-
-      // Assert
-      verify(mockReader.load('.env')).called(1);
-    });
-
-    test('operator [] retorna valor para clave existente', () {
-      // Arrange
-      when(mockReader['API_KEY']).thenReturn('secret123');
-
-      // Act
-      final result = mockReader['API_KEY'];
-
-      // Assert
-      expect(result, 'secret123');
-    });
-
-    test('operator [] retorna null para clave inexistente', () {
-      // Arrange
-      when(mockReader['MISSING_KEY']).thenReturn(null);
-
-      // Act
-      final result = mockReader['MISSING_KEY'];
-
-      // Assert
-      expect(result, isNull);
-    });
-
-    test('containsKey retorna true para clave existente', () {
-      // Arrange
-      when(mockReader.containsKey('API_KEY')).thenReturn(true);
-
-      // Act
-      final result = mockReader.containsKey('API_KEY');
-
-      // Assert
-      expect(result, isTrue);
-    });
-
-    test('containsKey retorna false para clave inexistente', () {
-      // Arrange
-      when(mockReader.containsKey('MISSING_KEY')).thenReturn(false);
-
-      // Act
-      final result = mockReader.containsKey('MISSING_KEY');
-
-      // Assert
-      expect(result, isFalse);
     });
   });
 

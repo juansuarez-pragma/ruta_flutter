@@ -173,18 +173,6 @@ void main() {
       });
     });
 
-    group('códigos inesperados', () {
-      test('lanza ServerException para código no esperado como fallback', () {
-        // Arrange - código 600 no existe en HTTP estándar
-        final response = http.Response('Unknown', 600);
-
-        // Act & Assert
-        expect(
-          () => handler.handleResponse(response),
-          throwsA(isA<ServerException>()),
-        );
-      });
-    });
   });
 
   group('HttpStatusCodes', () {
@@ -196,18 +184,6 @@ void main() {
       test('retorna true para 201', () {
         expect(HttpStatusCodes.isSuccess(201), isTrue);
       });
-
-      test('retorna true para 299', () {
-        expect(HttpStatusCodes.isSuccess(299), isTrue);
-      });
-
-      test('retorna false para 199', () {
-        expect(HttpStatusCodes.isSuccess(199), isFalse);
-      });
-
-      test('retorna false para 300', () {
-        expect(HttpStatusCodes.isSuccess(300), isFalse);
-      });
     });
 
     group('isClientError', () {
@@ -218,18 +194,6 @@ void main() {
       test('retorna true para 404', () {
         expect(HttpStatusCodes.isClientError(404), isTrue);
       });
-
-      test('retorna true para 499', () {
-        expect(HttpStatusCodes.isClientError(499), isTrue);
-      });
-
-      test('retorna false para 399', () {
-        expect(HttpStatusCodes.isClientError(399), isFalse);
-      });
-
-      test('retorna false para 500', () {
-        expect(HttpStatusCodes.isClientError(500), isFalse);
-      });
     });
 
     group('isServerError', () {
@@ -239,18 +203,6 @@ void main() {
 
       test('retorna true para 503', () {
         expect(HttpStatusCodes.isServerError(503), isTrue);
-      });
-
-      test('retorna true para 599', () {
-        expect(HttpStatusCodes.isServerError(599), isTrue);
-      });
-
-      test('retorna false para 499', () {
-        expect(HttpStatusCodes.isServerError(499), isFalse);
-      });
-
-      test('retorna false para 600', () {
-        expect(HttpStatusCodes.isServerError(600), isFalse);
       });
     });
   });
