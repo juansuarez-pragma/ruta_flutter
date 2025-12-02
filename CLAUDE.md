@@ -596,7 +596,6 @@ El proyecto implementa tests de aceptación en formato BDD (Behavior-Driven Deve
 
 ```
 test/acceptance/
-├── acceptance_test_base.dart       # Helpers BDD
 └── features/
     ├── product_listing_acceptance_test.dart
     ├── product_detail_acceptance_test.dart

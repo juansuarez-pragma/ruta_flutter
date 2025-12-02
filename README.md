@@ -62,11 +62,23 @@ El proyecto utiliza variables de entorno para configuración. Copia `.env.exampl
 
 ## Cómo Ejecutar la Aplicación
 
+### Opción 1: Con Dart SDK
+
 Desde el directorio `fase_2_consumo_api`, ejecuta el siguiente comando:
 
 ```bash
 dart run
 ```
+
+### Opción 2: Con Docker
+
+Si no tienes Dart instalado, puedes ejecutar la aplicación usando Docker:
+
+```bash
+docker run -it juancarlos05/fake-store-cli
+```
+
+> **Nota:** El flag `-it` es necesario porque la aplicación es interactiva.
 
 ## Cómo Usar
 

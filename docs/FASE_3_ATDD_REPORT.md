@@ -8,21 +8,18 @@ La Fase 3 implementó Acceptance Test-Driven Development (ATDD) con tests en for
 
 | Métrica | Antes | Después | Cambio |
 |---------|-------|---------|--------|
-| Tests totales | 278 | 311 | +33 tests |
-| Tests de aceptación | 0 | 33 | +33 |
-| Features documentadas | 0 | 4 | +4 |
-| Criterios de aceptación | 0 | 23 | +23 |
+| Tests de aceptación | 0 | 18 | +18 |
+| Features documentadas | 0 | 3 | +3 |
+| Criterios de aceptación | 0 | 18 | +18 |
 
 ## Estructura de Tests de Aceptación
 
 ```
 test/acceptance/
-├── acceptance_test_base.dart       # Helpers BDD (feature, scenario, given, etc.)
 └── features/
     ├── product_listing_acceptance_test.dart    # 6 tests
     ├── product_detail_acceptance_test.dart     # 6 tests
-    ├── product_category_acceptance_test.dart   # 6 tests
-    └── product_aggregate_acceptance_test.dart  # 15 tests
+    └── product_category_acceptance_test.dart   # 6 tests
 ```
 
 ## Features y Criterios de Aceptación
@@ -69,19 +66,6 @@ test/acceptance/
 | AC5 | Se muestran errores de conexión de forma amigable | ✅ |
 | AC6 | Se manejan errores del servidor | ✅ |
 
-### Feature 4: Comportamientos de Dominio del Producto (DDD)
-
-**Historia de Usuario:**
-> Como sistema de e-commerce, quiero que los productos tengan comportamientos de negocio para aplicar reglas de descuento, destacados y métricas.
-
-| AC | Criterio de Aceptación | Estado |
-|----|------------------------|--------|
-| AC1 | El sistema puede calcular descuentos de productos | ✅ |
-| AC2 | El sistema puede identificar productos destacados | ✅ |
-| AC3 | El sistema puede verificar categoría del producto | ✅ |
-| AC4 | El sistema registra visualizaciones de productos | ✅ |
-| AC5 | Los Value Objects validan datos correctamente | ✅ |
-
 ## Formato de Tests BDD
 
 Los tests siguen el formato Given-When-Then en español:
@@ -110,23 +94,6 @@ test(
 );
 ```
 
-## Helpers BDD Disponibles
-
-El archivo `acceptance_test_base.dart` proporciona helpers para escribir tests en estilo Gherkin:
-
-```dart
-// Helpers de estructura
-feature('Nombre de la feature', () { ... });
-scenario('Descripción del escenario', () { ... });
-
-// Helpers de pasos (para tests individuales con estructura)
-given('contexto inicial', () { ... });
-gherkinWhen('acción', () { ... });  // gherkinWhen para evitar conflicto con mockito
-then('resultado esperado', () { ... });
-and('paso adicional', () { ... });
-but('condición alternativa', () { ... });
-```
-
 ## Beneficios del ATDD
 
 ### 1. Documentación Viva
@@ -151,8 +118,7 @@ Los tests de aceptación detectan cambios que rompen el comportamiento esperado.
 | Listado de Productos | 6 | Éxito, info completa, precios válidos, vacío, errores |
 | Detalle de Producto | 6 | Éxito, info completa, validación ID, no encontrado, errores |
 | Filtrar por Categoría | 6 | Éxito, solo categoría, vacía, listar categorías, errores |
-| Comportamientos DDD | 15 | Descuentos, destacados, categoría, eventos, validaciones |
-| **Total** | **33** | **23 criterios de aceptación** |
+| **Total** | **18** | **18 criterios de aceptación** |
 
 ## Comandos de Ejecución
 
@@ -183,4 +149,4 @@ dart test
 
 ## Conclusión
 
-La Fase 3 estableció una base sólida de tests de aceptación que documentan el comportamiento esperado del sistema. Con 33 nuevos tests en formato BDD, el proyecto ahora tiene 311 tests totales, proporcionando alta confianza en la calidad del código y facilitando la comunicación de requisitos con stakeholders.
+La Fase 3 estableció una base sólida de tests de aceptación que documentan el comportamiento esperado del sistema. Con 18 tests de aceptación en formato BDD, el proyecto proporciona alta confianza en la calidad del código y facilita la comunicación de requisitos con stakeholders.
