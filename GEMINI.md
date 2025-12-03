@@ -1,57 +1,58 @@
-## Descripción General del Proyecto
+# GEMINI.md
 
-Esta es una aplicación de línea de comandos en Dart que funciona como un cliente interactivo para la [API de Fake Store](https://fakestoreapi.com/). Permite a los usuarios obtener todos los productos, un producto por su ID o todas las categorías de productos. El proyecto está construido con un enfoque en la arquitectura limpia, separando las responsabilidades en tres capas distintas: Dominio, Datos y Núcleo (Core).
+Guía para Gemini AI al trabajar con este repositorio.
 
-**Tecnologías y Principios Clave:**
+## Descripción
 
-*   **Lenguaje:** Dart
-*   **Arquitectura:** Arquitectura Limpia (Clean Architecture)
-*   **Inyección de Dependencias:** `get_it` (patrón de Localizador de Servicios)
-*   **Cliente HTTP:** `http`
-*   **Manejo de Errores:** `dartz` (para el tipo `Either`) y un `ApiResponseHandler` personalizado
-*   **Configuración:** `dotenv` para gestión de variables de entorno
-*   **Patrones de Diseño:** Repository, Strategy, Singleton, Adapter, Ports & Adapters
-*   **Pruebas (Testing):** El proyecto está estructurado para ser comprobable, aunque actualmente no hay pruebas implementadas.
+Aplicación CLI en Dart que consume la [Fake Store API](https://fakestoreapi.com/). Clean Architecture, parseo manual de JSON y manejo funcional de errores con `Either` de `dartz`.
 
-## Compilación y Ejecución
+## Comandos
 
-1.  **Instalar Dependencias:**
-    ```bash
-    dart pub get
-    ```
+```bash
+dart pub get                      # Instalar dependencias
+dart run                          # Ejecutar aplicación
+dart test                         # Ejecutar tests (164+, 87% cobertura)
+dart analyze                      # Análisis estático
+dart format .                     # Formatear código
 
-2.  **Configurar Variables de Entorno:**
-    ```bash
-    cp .env.example .env
-    ```
+# Docker
+docker run -it juancarlos05/fake-store-cli
+```
 
-3.  **Ejecutar la Aplicación:**
-    ```bash
-    dart run
-    ```
+## Arquitectura
 
-## Variables de Entorno
+```
+lib/src/
+├── domain/          # Entidades, UseCases, Repository interfaces
+├── data/            # Models (fromJson/toEntity), DataSources, Repository impls
+├── presentation/    # UI desacoplada (Ports & Adapters)
+├── core/            # Errors, Network, Config (EnvConfig singleton)
+└── di/              # get_it (usar `serviceLocator`, no `sl`)
+```
 
-El proyecto utiliza el paquete `dotenv` para gestionar la configuración. Las variables se definen en el archivo `.env`:
+**Flujo:** UI → UseCase → Repository Interface ← Repository Impl → DataSource → ApiClient → HTTP
 
-| Variable | Descripción | Requerida |
-|----------|-------------|-----------|
-| `API_BASE_URL` | URL base de la API | Sí |
+## Convenciones
 
-La clase `EnvConfig` (`lib/src/core/config/env_config.dart`) implementa el patrón Singleton y proporciona acceso tipado a las variables de configuración. Utiliza el patrón Adapter mediante `EnvReader` para desacoplar la implementación concreta de dotenv.
+- **Clean Architecture**: domain/data/presentation/core
+- **Inyección de dependencias**: `get_it` en `lib/src/di/injection_container.dart`
+- **Manejo de errores**: `Either<Failure, T>` de `dartz`, excepciones convertidas a Failures en Repository
+- **Parseo JSON**: Manual en Models, sin generación de código
+- **Textos de usuario**: Externalizados en `lib/src/util/strings.dart`
+- **Variables de entorno**: `.env` con `API_BASE_URL`, manejado por `EnvConfig`
+- **Documentación**: Comentarios `///` en español
+- **SRP**: Un archivo = una clase/enum/interface
 
-## Convenciones de Desarrollo
+## Testing
 
-*   **Arquitectura Limpia:** El código está organizado en las capas `domain`, `data`, `presentation` y `core`.
-    *   `domain`: Contiene la lógica de negocio (entidades, casos de uso, contratos de repositorio).
-    *   `data`: Implementa el acceso a los datos (modelos, fuentes de datos, implementaciones de repositorio).
-    *   `presentation`: Capa de UI desacoplada mediante Ports & Adapters (contratos e implementaciones de interfaz).
-    *   `core`: Contiene aspectos transversales (manejo de errores, utilidades de red, configuración).
-    *   `di`: Contenedor de inyección de dependencias.
-*   **Inyección de Dependencias:** El paquete `get_it` se utiliza para gestionar las dependencias. Todas las dependencias se registran en `lib/src/di/injection_container.dart`. Se usa `serviceLocator` como nombre descriptivo en lugar de abreviaciones.
-*   **Patrón de Repositorio:** El `ProductRepository` define un contrato para las operaciones de datos, y `ProductRepositoryImpl` proporciona la implementación. Se utiliza un `BaseRepository` para centralizar la lógica de manejo de errores.
-*   **Manejo de Errores:** La aplicación utiliza el tipo `Either` del paquete `dartz` para representar el éxito o el fracaso. Se utiliza un `ApiResponseHandler` personalizado para asignar los códigos de estado HTTP a excepciones específicas.
-*   **Externalización de Cadenas de Texto:** Todas las cadenas de texto orientadas al usuario se gestionan en el archivo `lib/src/util/strings.dart` para simplificar el mantenimiento y la posible internacionalización.
-*   **Análisis Manual de JSON:** El JSON se analiza manualmente en las clases de modelo, evitando herramientas de generación de código.
-*   **Variables de Entorno:** La configuración sensible se gestiona mediante `EnvConfig`, que carga valores desde archivos `.env`. Nunca se deben hardcodear URLs o credenciales en el código.
-*   **Seguridad Nula (Null Safety):** El proyecto tiene seguridad nula habilitada.
+- **Patrón AAA**: Arrange-Act-Assert
+- **Nombres en español**: `'retorna lista cuando tiene éxito'`
+- **Mocks**: `test/helpers/mocks.dart`, regenerar con `dart run build_runner build`
+- **Helpers**: `test/helpers/test_helpers.dart`
+
+## API Endpoints
+
+- `GET /products` - Listar productos
+- `GET /products/{id}` - Producto por ID
+- `GET /products/categories` - Listar categorías
+- `GET /products/category/{category}` - Productos por categoría
