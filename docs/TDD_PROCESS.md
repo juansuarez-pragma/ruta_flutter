@@ -18,9 +18,9 @@ REFACTOR → Mejorar sin romper tests
 
 | # | Regla |
 |---|-------|
-| 1 | NUNCA código sin test que falle primero |
-| 2 | UN solo test fallando a la vez |
-| 3 | Código MÍNIMO para pasar el test |
+| 1 | Nunca escribir código sin test que falle |
+| 2 | Solo un test fallando a la vez |
+| 3 | Escribir solo el código mínimo necesario |
 | 4 | Ciclo completo en < 10 minutos |
 
 ## Estructura de Test
