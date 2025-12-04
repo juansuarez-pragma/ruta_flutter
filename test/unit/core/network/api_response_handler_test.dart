@@ -172,7 +172,6 @@ void main() {
         );
       });
     });
-
   });
 
   group('HttpStatusCodes', () {

@@ -1,5 +1,5 @@
-import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
+
 import 'package:fase_2_consumo_api/src/core/config/config.dart';
 import 'package:fase_2_consumo_api/src/core/network/api_response_handler.dart';
 import 'package:fase_2_consumo_api/src/data/datasources/datasources.dart';
@@ -14,18 +14,23 @@ import 'package:fase_2_consumo_api/src/presentation/application.dart'
     show ApplicationController;
 import 'package:fase_2_consumo_api/src/presentation/contracts/contracts.dart';
 
-/// Instancia global del Service Locator para inyección de dependencias.
+import 'contracts/service_locator_contract.dart';
+import 'service_locator_registry.dart';
 
-final GetIt serviceLocator = GetIt.instance;
+/// Contenedor de inyeccion de dependencias (privado al modulo).
+///
+/// Cambiar el adaptador es tan simple como cambiar el enum:
+/// - [AdapterType.getIt] para usar GetIt
+/// - [AdapterType.kiwi] para usar Kiwi
+final ServiceLocatorContract _container = ServiceLocatorRegistry.get(
+  AdapterType.kiwi,
+);
 
-/// Tipos de registro:
-/// - `registerFactory`: Nueva instancia en cada llamada (Use Cases, Application)
-/// - `registerLazySingleton`: Instancia única, creada cuando se necesita
-Future<void> init() async {
+Future<ApplicationController> init() async {
   // ============================================
   // Configuración
   // ============================================
-  serviceLocator.registerLazySingleton<EnvConfig>(() => EnvConfig.instance);
+  _container.registerLazySingleton<EnvConfig>(() => EnvConfig.instance);
 
   // ============================================
   // Capa de Presentación
@@ -33,64 +38,61 @@ Future<void> init() async {
 
   // Interfaz de Usuario (Patrón Port/Adapter)
   // Para cambiar la UI, registrar otra implementación de UserInterface
-  serviceLocator.registerLazySingleton<UserInterface>(
-    () => ConsoleUserInterface(),
-  );
+  _container.registerLazySingleton<UserInterface>(() => ConsoleUserInterface());
 
   // ApplicationController - Coordinador principal
-  serviceLocator.registerFactory(
+  _container.registerFactory(
     () => ApplicationController(
-      ui: serviceLocator<UserInterface>(),
-      getAllProducts: serviceLocator(),
-      getProductById: serviceLocator(),
-      getAllCategories: serviceLocator(),
-      getProductsByCategory: serviceLocator(),
-      onExit: () => serviceLocator<http.Client>().close(),
+      ui: _container<UserInterface>(),
+      getAllProducts: _container(),
+      getProductById: _container(),
+      getAllCategories: _container(),
+      getProductsByCategory: _container(),
+      onExit: () => _container<http.Client>().close(),
     ),
   );
 
   // ============================================
   // Capa de Dominio - Casos de Uso
   // ============================================
-  serviceLocator.registerFactory(() => GetAllProductsUseCase(serviceLocator()));
-  serviceLocator.registerFactory(() => GetProductByIdUseCase(serviceLocator()));
-  serviceLocator.registerFactory(
-    () => GetAllCategoriesUseCase(serviceLocator()),
-  );
-  serviceLocator.registerFactory(
-    () => GetProductsByCategoryUseCase(serviceLocator()),
-  );
+  _container.registerFactory(() => GetAllProductsUseCase(_container()));
+  _container.registerFactory(() => GetProductByIdUseCase(_container()));
+  _container.registerFactory(() => GetAllCategoriesUseCase(_container()));
+  _container.registerFactory(() => GetProductsByCategoryUseCase(_container()));
 
   // ============================================
   // Capa de Datos - Repositorio
   // ============================================
-  serviceLocator.registerLazySingleton<ProductRepository>(
+  _container.registerLazySingleton<ProductRepository>(
     () => ProductRepositoryImpl(
-      productDataSource: serviceLocator(),
-      categoryDataSource: serviceLocator(),
+      productDataSource: _container(),
+      categoryDataSource: _container(),
     ),
   );
 
   // ============================================
   // Capa de Datos - Fuentes de Datos
   // ============================================
-  serviceLocator.registerLazySingleton<ProductRemoteDataSource>(
-    () => ProductRemoteDataSourceImpl(apiClient: serviceLocator()),
+  _container.registerLazySingleton<ProductRemoteDataSource>(
+    () => ProductRemoteDataSourceImpl(apiClient: _container()),
   );
-  serviceLocator.registerLazySingleton<CategoryRemoteDataSource>(
-    () => CategoryRemoteDataSourceImpl(apiClient: serviceLocator()),
+  _container.registerLazySingleton<CategoryRemoteDataSource>(
+    () => CategoryRemoteDataSourceImpl(apiClient: _container()),
   );
 
   // ============================================
   // Core - Red
   // ============================================
-  serviceLocator.registerLazySingleton<ApiClient>(
+  _container.registerLazySingleton<ApiClient>(
     () => ApiClientImpl(
-      client: serviceLocator(),
-      responseHandler: serviceLocator(),
-      config: serviceLocator(),
+      client: _container(),
+      responseHandler: _container(),
+      config: _container(),
     ),
   );
-  serviceLocator.registerLazySingleton(() => ApiResponseHandler());
-  serviceLocator.registerLazySingleton(() => http.Client());
+  _container.registerLazySingleton(() => ApiResponseHandler());
+  _container.registerLazySingleton(() => http.Client());
+
+  // Retorna el controlador raiz con todas las dependencias inyectadas
+  return _container<ApplicationController>();
 }
