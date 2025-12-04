@@ -162,12 +162,12 @@ Externalizados en `lib/src/util/strings.dart` (clase `AppStrings`).
 
 ## Sistema de Agentes
 
-Este proyecto utiliza **7 agentes especializados** que trabajan en pipeline para desarrollo con calidad y seguridad garantizadas. El sistema cubre el **83% de los problemas reportados por la industria** en código generado por IA.
+Este proyecto utiliza **8 agentes especializados** que trabajan en pipeline para desarrollo con calidad y seguridad garantizadas. El sistema cubre el **83% de los problemas reportados por la industria** en código generado por IA.
 
 ### Flujo de Desarrollo
 
 ```
-PLANNER → SOLID → SECURITY ↔ DEPENDENCIES → IMPLEMENTER → TESTFLUTTER → VERIFIER
+PLANNER → SOLID → SECURITY ↔ DEPENDENCIES → IMPLEMENTER → CODEQUALITYFLUTTER → TESTFLUTTER → VERIFIER
 ```
 
 ### Agentes Disponibles
@@ -179,6 +179,7 @@ PLANNER → SOLID → SECURITY ↔ DEPENDENCIES → IMPLEMENTER → TESTFLUTTER 
 | **security** | Guardian de Seguridad | Audita OWASP Top 10, detecta XSS, SQLi, secrets, vulnerabilidades |
 | **dependencies** | Guardian de Dependencias | Previene slopsquatting, detecta APIs deprecadas, valida supply chain |
 | **implementer** | Desarrollador TDD | Implementa con TDD estricto (Red-Green-Refactor) y guardrails |
+| **codequalityflutter** | Analista de Calidad | Métricas de complejidad, performance, memory leaks, Effective Dart |
 | **testflutter** | Especialista QA | Crea tests unitarios, widget, integración, E2E, golden |
 | **verifier** | Auditor de Completitud | Verifica conformidad con el plan, genera reporte final |
 
@@ -189,9 +190,11 @@ PLANNER → SOLID → SECURITY ↔ DEPENDENCIES → IMPLEMENTER → TESTFLUTTER 
 | Seguridad (OWASP Top 10) | 100% | SECURITY |
 | Supply Chain / Slopsquatting | 100% | DEPENDENCIES |
 | Alucinaciones de código | 88% | IMPLEMENTER, DEPENDENCIES |
-| Calidad / Sobre-ingeniería | 67% | SOLID |
+| Calidad / Sobre-ingeniería | 85% | SOLID, CODEQUALITYFLUTTER |
 | Testing | 67% | TESTFLUTTER, VERIFIER |
 | Arquitectura | 75% | PLANNER, SOLID |
+| Performance Flutter | 100% | CODEQUALITYFLUTTER |
+| Memory Management | 100% | CODEQUALITYFLUTTER |
 
 ### Activación de Agentes
 
@@ -202,6 +205,7 @@ PLANNER → SOLID → SECURITY ↔ DEPENDENCIES → IMPLEMENTER → TESTFLUTTER 
 | "audita seguridad", "OWASP", "vulnerabilidades" | SECURITY |
 | "verifica paquetes", "dependencias", "APIs deprecadas" | DEPENDENCIES |
 | "escribe código", "TDD", "implementa paso" | IMPLEMENTER |
+| "calidad", "complejidad", "performance", "memory leaks" | CODEQUALITYFLUTTER |
 | "tests", "cobertura", "QA" | TESTFLUTTER |
 | "verifica", "está completo", "audita" | VERIFIER |
 
@@ -211,6 +215,7 @@ PLANNER → SOLID → SECURITY ↔ DEPENDENCIES → IMPLEMENTER → TESTFLUTTER 
 - **Seguridad integrada**: SECURITY valida OWASP Top 10 antes de aprobar
 - **Anti-slopsquatting**: DEPENDENCIES verifica que paquetes existen en pub.dev
 - **TDD estricto**: IMPLEMENTER nunca escribe código sin test que falle
+- **Métricas de calidad**: CODEQUALITYFLUTTER valida complejidad, performance y memory leaks
 - **Guardrails múltiples**: Validación en cada fase del pipeline
 - **Verificación obligatoria**: VERIFIER aprueba antes de completar
 - **Anti-alucinación**: Verificar que APIs y paquetes existen antes de usar
@@ -219,11 +224,12 @@ PLANNER → SOLID → SECURITY ↔ DEPENDENCIES → IMPLEMENTER → TESTFLUTTER 
 
 ```
 .claude/agents/
-├── planner.md      # Arquitecto investigador
-├── solid.md        # Validador de principios
-├── security.md     # Guardian de seguridad (OWASP Top 10)
-├── dependencies.md # Guardian de dependencias (anti-slopsquatting)
-├── implementer.md  # Desarrollador TDD
-├── testflutter.md  # Especialista en testing
-└── verifier.md     # Auditor de completitud
+├── planner.md           # Arquitecto investigador
+├── solid.md             # Validador de principios
+├── security.md          # Guardian de seguridad (OWASP Top 10)
+├── dependencies.md      # Guardian de dependencias (anti-slopsquatting)
+├── implementer.md       # Desarrollador TDD
+├── codequalityflutter.md # Analista de calidad de código
+├── testflutter.md       # Especialista en testing
+└── verifier.md          # Auditor de completitud
 ```
