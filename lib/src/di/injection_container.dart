@@ -23,7 +23,7 @@ import 'service_locator_registry.dart';
 /// - [AdapterType.getIt] para usar GetIt
 /// - [AdapterType.kiwi] para usar Kiwi
 final ServiceLocatorContract _container = ServiceLocatorRegistry.get(
-  AdapterType.kiwi,
+  AdapterType.getIt,
 );
 
 Future<ApplicationController> init() async {
