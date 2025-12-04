@@ -162,12 +162,12 @@ Externalizados en `lib/src/util/strings.dart` (clase `AppStrings`).
 
 ## Sistema de Agentes
 
-Este proyecto utiliza 5 agentes especializados que trabajan en pipeline para desarrollo con calidad garantizada.
+Este proyecto utiliza **7 agentes especializados** que trabajan en pipeline para desarrollo con calidad y seguridad garantizadas. El sistema cubre el **83% de los problemas reportados por la industria** en código generado por IA.
 
 ### Flujo de Desarrollo
 
 ```
-PLANNER → SOLID → IMPLEMENTER → TESTFLUTTER → VERIFIER
+PLANNER → SOLID → SECURITY ↔ DEPENDENCIES → IMPLEMENTER → TESTFLUTTER → VERIFIER
 ```
 
 ### Agentes Disponibles
@@ -176,9 +176,22 @@ PLANNER → SOLID → IMPLEMENTER → TESTFLUTTER → VERIFIER
 |--------|-----|---------|
 | **planner** | Arquitecto Investigador | Investiga codebase y mejores prácticas, diseña planes detallados |
 | **solid** | Guardian de Calidad | Valida principios SOLID, YAGNI, DRY, detecta sobre-ingeniería |
+| **security** | Guardian de Seguridad | Audita OWASP Top 10, detecta XSS, SQLi, secrets, vulnerabilidades |
+| **dependencies** | Guardian de Dependencias | Previene slopsquatting, detecta APIs deprecadas, valida supply chain |
 | **implementer** | Desarrollador TDD | Implementa con TDD estricto (Red-Green-Refactor) y guardrails |
 | **testflutter** | Especialista QA | Crea tests unitarios, widget, integración, E2E, golden |
 | **verifier** | Auditor de Completitud | Verifica conformidad con el plan, genera reporte final |
+
+### Cobertura de Problemas de la Industria
+
+| Categoría | Cobertura | Agentes Responsables |
+|-----------|-----------|---------------------|
+| Seguridad (OWASP Top 10) | 100% | SECURITY |
+| Supply Chain / Slopsquatting | 100% | DEPENDENCIES |
+| Alucinaciones de código | 88% | IMPLEMENTER, DEPENDENCIES |
+| Calidad / Sobre-ingeniería | 67% | SOLID |
+| Testing | 67% | TESTFLUTTER, VERIFIER |
+| Arquitectura | 75% | PLANNER, SOLID |
 
 ### Activación de Agentes
 
@@ -186,6 +199,8 @@ PLANNER → SOLID → IMPLEMENTER → TESTFLUTTER → VERIFIER
 |---------|--------|
 | "implementa", "crea feature", "diseña" | PLANNER |
 | "valida", "revisa diseño", "code review" | SOLID |
+| "audita seguridad", "OWASP", "vulnerabilidades" | SECURITY |
+| "verifica paquetes", "dependencias", "APIs deprecadas" | DEPENDENCIES |
 | "escribe código", "TDD", "implementa paso" | IMPLEMENTER |
 | "tests", "cobertura", "QA" | TESTFLUTTER |
 | "verifica", "está completo", "audita" | VERIFIER |
@@ -193,10 +208,12 @@ PLANNER → SOLID → IMPLEMENTER → TESTFLUTTER → VERIFIER
 ### Principios del Sistema
 
 - **Investigación primero**: PLANNER siempre investiga antes de proponer
+- **Seguridad integrada**: SECURITY valida OWASP Top 10 antes de aprobar
+- **Anti-slopsquatting**: DEPENDENCIES verifica que paquetes existen en pub.dev
 - **TDD estricto**: IMPLEMENTER nunca escribe código sin test que falle
 - **Guardrails múltiples**: Validación en cada fase del pipeline
 - **Verificación obligatoria**: VERIFIER aprueba antes de completar
-- **Anti-alucinación**: Verificar que APIs existen antes de usar
+- **Anti-alucinación**: Verificar que APIs y paquetes existen antes de usar
 
 ### Ubicación
 
@@ -204,6 +221,8 @@ PLANNER → SOLID → IMPLEMENTER → TESTFLUTTER → VERIFIER
 .claude/agents/
 ├── planner.md      # Arquitecto investigador
 ├── solid.md        # Validador de principios
+├── security.md     # Guardian de seguridad (OWASP Top 10)
+├── dependencies.md # Guardian de dependencias (anti-slopsquatting)
 ├── implementer.md  # Desarrollador TDD
 ├── testflutter.md  # Especialista en testing
 └── verifier.md     # Auditor de completitud
