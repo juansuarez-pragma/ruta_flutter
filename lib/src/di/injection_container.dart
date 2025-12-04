@@ -14,17 +14,11 @@ import 'package:fase_2_consumo_api/src/presentation/application.dart'
     show ApplicationController;
 import 'package:fase_2_consumo_api/src/presentation/contracts/contracts.dart';
 
+import 'adapters/get_it_adapter.dart';
 import 'contracts/service_locator_contract.dart';
-import 'service_locator_registry.dart';
 
-/// Contenedor de inyeccion de dependencias (privado al modulo).
-///
-/// Cambiar el adaptador es tan simple como cambiar el enum:
-/// - [AdapterType.getIt] para usar GetIt
-/// - [AdapterType.kiwi] para usar Kiwi
-final ServiceLocatorContract _container = ServiceLocatorRegistry.get(
-  AdapterType.getIt,
-);
+/// Contenedor de inyeccion de dependencias.
+final ServiceLocatorContract _container = GetItAdapter();
 
 Future<ApplicationController> init() async {
   // ============================================
