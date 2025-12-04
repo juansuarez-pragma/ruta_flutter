@@ -159,3 +159,52 @@ dart test           # Todos pasan
 ## Textos de Usuario
 
 Externalizados en `lib/src/util/strings.dart` (clase `AppStrings`).
+
+## Sistema de Agentes
+
+Este proyecto utiliza 5 agentes especializados que trabajan en pipeline para desarrollo con calidad garantizada.
+
+### Flujo de Desarrollo
+
+```
+PLANNER → SOLID → IMPLEMENTER → TESTFLUTTER → VERIFIER
+```
+
+### Agentes Disponibles
+
+| Agente | Rol | Función |
+|--------|-----|---------|
+| **planner** | Arquitecto Investigador | Investiga codebase y mejores prácticas, diseña planes detallados |
+| **solid** | Guardian de Calidad | Valida principios SOLID, YAGNI, DRY, detecta sobre-ingeniería |
+| **implementer** | Desarrollador TDD | Implementa con TDD estricto (Red-Green-Refactor) y guardrails |
+| **testflutter** | Especialista QA | Crea tests unitarios, widget, integración, E2E, golden |
+| **verifier** | Auditor de Completitud | Verifica conformidad con el plan, genera reporte final |
+
+### Activación de Agentes
+
+| Trigger | Agente |
+|---------|--------|
+| "implementa", "crea feature", "diseña" | PLANNER |
+| "valida", "revisa diseño", "code review" | SOLID |
+| "escribe código", "TDD", "implementa paso" | IMPLEMENTER |
+| "tests", "cobertura", "QA" | TESTFLUTTER |
+| "verifica", "está completo", "audita" | VERIFIER |
+
+### Principios del Sistema
+
+- **Investigación primero**: PLANNER siempre investiga antes de proponer
+- **TDD estricto**: IMPLEMENTER nunca escribe código sin test que falle
+- **Guardrails múltiples**: Validación en cada fase del pipeline
+- **Verificación obligatoria**: VERIFIER aprueba antes de completar
+- **Anti-alucinación**: Verificar que APIs existen antes de usar
+
+### Ubicación
+
+```
+.claude/agents/
+├── planner.md      # Arquitecto investigador
+├── solid.md        # Validador de principios
+├── implementer.md  # Desarrollador TDD
+├── testflutter.md  # Especialista en testing
+└── verifier.md     # Auditor de completitud
+```
