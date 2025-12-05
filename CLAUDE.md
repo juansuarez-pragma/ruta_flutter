@@ -2,6 +2,38 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## IMPORTANTE: Sistema de Orquestación Automática
+
+Este proyecto utiliza un **sistema de agentes orquestado**. Para CUALQUIER tarea que no sea una pregunta simple, DEBES:
+
+1. **Usar el agente `orchestrator`** para clasificar la solicitud y decidir qué recursos usar
+2. El orquestador decidirá si usar MCPs directamente, agentes especializados, o combinación
+
+### Invocación del Orquestador
+
+```
+Para tareas de desarrollo, SIEMPRE invocar:
+Task tool -> subagent_type: "orchestrator" -> prompt: "[solicitud del usuario]"
+```
+
+### Cuándo Usar el Orquestador
+
+| Tipo de Solicitud | Usar Orquestador |
+|-------------------|------------------|
+| "implementa", "crea", "diseña" | SÍ - Pipeline completo |
+| "revisa", "audita", "valida" | SÍ - Selecciona agente(s) |
+| "ejecuta tests", "analiza" | SÍ - Decide MCP vs Agente |
+| "complejidad", "métricas", "calidad" | SÍ - CODEQUALITYFLUTTER |
+| "qué es X", "explica" | NO - Respuesta directa |
+
+### Invocación Directa de Agentes (Bypass)
+
+Si el usuario solicita explícitamente un agente:
+- "usa el agente SECURITY" → Invocar SECURITY directamente
+- "con CODEQUALITYFLUTTER analiza" → Invocar CODEQUALITYFLUTTER directamente
+
+---
+
 ## Descripción
 
 Aplicación CLI en Dart que consume la [Fake Store API](https://fakestoreapi.com/). Clean Architecture, parseo manual de JSON y manejo funcional de errores con `Either` de `dartz`.

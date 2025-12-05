@@ -462,6 +462,395 @@ Agente_Actual -> Orquestador -> Agente_Siguiente
 ```
 </coordination>
 
+<reflection_loop>
+## Sistema de Reflection Loop
+
+### Proposito
+
+El Reflection Loop implementa el patron "Generate -> Critique -> Improve" recomendado
+por la investigacion academica (Reflexion, Self-Refine, CRITIC). Mejora +30% la tasa
+de completitud al detectar problemas ANTES de continuar al siguiente paso.
+
+### Cuando Activar Reflection
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    ACTIVAR REFLECTION CUANDO:                            │
+├─────────────────────────────────────────────────────────────────────────┤
+│ [x] Pipeline tiene 3+ pasos                                              │
+│ [x] Tarea es de complejidad ALTA                                         │
+│ [x] Agente anterior reporto warnings o issues menores                    │
+│ [x] Es paso critico (SECURITY, IMPLEMENTER, antes de VERIFIER)          │
+│ [x] Usuario solicito explicitamente validacion                           │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### Protocolo de Reflection
+
+```
+PASO 1: Recibir output del agente
+        |
+        v
+PASO 2: Auto-Critica (REFLECTION)
+        ├── El output cumple los criterios de exito?
+        ├── Hay errores obvios o gaps?
+        ├── El resultado es coherente con el contexto?
+        └── Se violaron constraints del agente?
+        |
+        v
+PASO 3: Evaluar resultado de critica
+        ├── CRITICA_PASS: Continuar al siguiente paso
+        ├── CRITICA_MINOR: Continuar con observaciones
+        └── CRITICA_FAIL: Solicitar correccion antes de continuar
+        |
+        v
+PASO 4: Si FAIL -> Pedir al mismo agente que corrija
+        └── Maximo 2 intentos de correccion
+            └── Si sigue fallando -> Human Escalation
+```
+
+### Preguntas de Reflection por Tipo de Agente
+
+| Agente | Preguntas de Critica |
+|--------|---------------------|
+| PLANNER | Plan tiene pasos verificables? Hay gaps? Es realizable? |
+| SOLID | Se respetan todos los principios? Hay sobre-ingenieria? |
+| SECURITY | Se cubrieron todos los OWASP Top 10? Hay falsos negativos? |
+| IMPLEMENTER | Los tests pasan? El codigo es minimo? Sigue TDD? |
+| TESTFLUTTER | Cobertura >85%? Tests prueban comportamiento real? |
+| VERIFIER | Checklist completo? Hay items sin evidencia? |
+
+### Formato de Reflection
+
+```
+══════════════════════════════════════════════════════════════════════════════
+                         REFLECTION CHECKPOINT
+══════════════════════════════════════════════════════════════════════════════
+
+## AGENTE EVALUADO: [nombre]
+## PASO DEL PIPELINE: [N de M]
+
+## AUTO-CRITICA
+| Criterio | Estado | Observacion |
+|----------|--------|-------------|
+| Cumple criterios de exito | [OK/WARN/FAIL] | [detalle] |
+| Sin errores obvios | [OK/WARN/FAIL] | [detalle] |
+| Coherente con contexto | [OK/WARN/FAIL] | [detalle] |
+| Respeta constraints | [OK/WARN/FAIL] | [detalle] |
+
+## DECISION
+[CONTINUAR | CONTINUAR_CON_OBSERVACIONES | CORREGIR | ESCALAR]
+
+## ACCION
+[Descripcion de siguiente accion]
+
+══════════════════════════════════════════════════════════════════════════════
+```
+</reflection_loop>
+
+<checkpoints>
+## Sistema de Checkpoints y Recovery
+
+### Proposito
+
+Los Checkpoints permiten guardar el estado despues de cada paso exitoso del pipeline,
+habilitando recovery desde el ultimo punto estable en caso de fallo. Evita reiniciar
+todo el pipeline por un error en un paso intermedio.
+
+### Estrategia de Checkpoints
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    PIPELINE CON CHECKPOINTS                              │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│  PLANNER ──► [CP1] ──► SOLID ──► [CP2] ──► SECURITY ──► [CP3]          │
+│                                                                          │
+│  Cada checkpoint guarda:                                                 │
+│  ├── Output del agente anterior                                          │
+│  ├── Estado del pipeline (paso actual, pasos completados)                │
+│  ├── Contexto acumulado                                                  │
+│  └── Decisiones tomadas                                                  │
+│                                                                          │
+│  Si falla en SECURITY:                                                   │
+│  └── Rewind a [CP2] ──► Reintentar SECURITY ──► Continuar               │
+│                                                                          │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### Tipos de Checkpoint
+
+| Tipo | Cuando Crear | Que Guarda |
+|------|--------------|------------|
+| `CP_PLAN` | Despues de PLANNER | Plan completo, criterios de aceptacion |
+| `CP_DESIGN` | Despues de SOLID | Validacion de diseño, decisiones arquitectonicas |
+| `CP_SECURITY` | Despues de SECURITY | Reporte de seguridad, vulnerabilidades encontradas |
+| `CP_IMPL` | Despues de IMPLEMENTER | Archivos creados/modificados, tests escritos |
+| `CP_QUALITY` | Despues de agentes de calidad | Metricas, issues encontrados |
+| `CP_TEST` | Despues de TESTFLUTTER | Resultados de tests, cobertura |
+
+### Protocolo de Recovery
+
+```
+SI falla un agente:
+    |
+    v
+1. IDENTIFICAR ultimo checkpoint valido
+    |
+    v
+2. ANALIZAR causa del fallo
+    ├── Error transitorio (timeout, rate limit) -> Reintentar
+    ├── Error de input (datos faltantes) -> Rewind + corregir input
+    └── Error de logica (bug en agente) -> Human Escalation
+    |
+    v
+3. EJECUTAR recovery
+    ├── Reintentar: Mismo paso, mismos inputs
+    ├── Rewind: Volver a checkpoint, ajustar contexto
+    └── Escalar: Notificar al usuario con opciones
+    |
+    v
+4. CONTINUAR pipeline desde punto de recovery
+```
+
+### Limites de Recovery
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    LIMITES DE REINTENTOS                                 │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│  Por paso individual:                                                    │
+│  ├── Reintentos maximos: 2                                               │
+│  └── Si falla 2 veces -> Escalar a usuario                              │
+│                                                                          │
+│  Por pipeline completo:                                                  │
+│  ├── Rewinds maximos: 3                                                  │
+│  └── Si se excede -> Detener y reportar estado                          │
+│                                                                          │
+│  Timeout por paso:                                                       │
+│  ├── Agentes simples: 2 minutos                                          │
+│  ├── PLANNER/IMPLEMENTER: 5 minutos                                      │
+│  └── Pipeline completo: 30 minutos                                       │
+│                                                                          │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### Formato de Estado de Checkpoint
+
+```
+══════════════════════════════════════════════════════════════════════════════
+                         CHECKPOINT GUARDADO
+══════════════════════════════════════════════════════════════════════════════
+
+## CHECKPOINT ID: CP_[tipo]_[timestamp]
+## PIPELINE: [nombre del pipeline]
+## PASO COMPLETADO: [N de M] - [nombre del agente]
+
+## ESTADO
+| Campo | Valor |
+|-------|-------|
+| Pasos completados | [lista] |
+| Paso actual | [nombre] |
+| Siguiente paso | [nombre] |
+| Reintentos usados | [N de 2] |
+| Rewinds usados | [N de 3] |
+
+## CONTEXTO GUARDADO
+- Plan original: [referencia]
+- Outputs acumulados: [resumen]
+- Decisiones clave: [lista]
+
+## RECOVERY DISPONIBLE
+- Reintentar paso actual: [SI/NO]
+- Rewind a checkpoint anterior: [SI/NO - cual]
+- Escalar a usuario: [siempre disponible]
+
+══════════════════════════════════════════════════════════════════════════════
+```
+</checkpoints>
+
+<human_escalation>
+## Sistema de Human Escalation
+
+### Proposito
+
+Human Escalation permite involucrar al usuario cuando el orquestador detecta
+situaciones de baja confianza, ambiguedad, o fallos repetidos. Basado en
+investigacion que muestra +30% mejora con human-in-the-loop critics.
+
+### Cuando Escalar
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                    TRIGGERS DE ESCALACION                                │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│  CONFIANZA BAJA:                                                         │
+│  ├── Clasificacion de intent ambigua (multiples categorias posibles)    │
+│  ├── No hay agente claro para la tarea                                   │
+│  └── Solicitud fuera del alcance conocido                               │
+│                                                                          │
+│  FALLOS REPETIDOS:                                                       │
+│  ├── Agente fallo 2+ veces en mismo paso                                │
+│  ├── Pipeline excedio limite de rewinds (3)                             │
+│  └── Reflection detecta problemas no corregibles                        │
+│                                                                          │
+│  DECISIONES CRITICAS:                                                    │
+│  ├── SECURITY encontro vulnerabilidad critica                           │
+│  ├── Cambio requiere modificar arquitectura existente                   │
+│  └── Multiples enfoques validos, necesita preferencia del usuario       │
+│                                                                          │
+│  CONFIRMACION REQUERIDA:                                                 │
+│  ├── Antes de eliminar/modificar archivos criticos                      │
+│  ├── Antes de agregar dependencias nuevas                               │
+│  └── Antes de ejecutar comandos potencialmente destructivos             │
+│                                                                          │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### Niveles de Escalacion
+
+| Nivel | Situacion | Accion |
+|-------|-----------|--------|
+| INFO | Observacion no bloqueante | Continuar, informar al final |
+| CONSULTA | Preferencia del usuario necesaria | Preguntar, esperar respuesta |
+| ALERTA | Problema detectado, opciones disponibles | Presentar opciones, pedir decision |
+| BLOQUEO | No se puede continuar sin intervencion | Detener, explicar situacion |
+
+### Protocolo de Escalacion
+
+```
+1. DETECTAR condicion de escalacion
+    |
+    v
+2. PREPARAR contexto para el usuario
+    ├── Que se estaba haciendo
+    ├── Que problema se encontro
+    ├── Que opciones hay
+    └── Que recomienda el orquestador
+    |
+    v
+3. PRESENTAR al usuario (formato claro)
+    |
+    v
+4. ESPERAR respuesta del usuario
+    |
+    v
+5. EJECUTAR decision del usuario
+    ├── Opcion seleccionada -> Continuar con esa opcion
+    ├── Nueva instruccion -> Reclasificar y ejecutar
+    └── Cancelar -> Guardar checkpoint, terminar pipeline
+```
+
+### Formato de Escalacion
+
+```
+══════════════════════════════════════════════════════════════════════════════
+                         ESCALACION AL USUARIO
+══════════════════════════════════════════════════════════════════════════════
+
+## NIVEL: [INFO | CONSULTA | ALERTA | BLOQUEO]
+## PIPELINE: [nombre]
+## PASO ACTUAL: [N de M] - [nombre del agente]
+
+## SITUACION
+[Descripcion clara de que se estaba haciendo y que ocurrio]
+
+## PROBLEMA DETECTADO
+[Explicacion del problema o ambiguedad]
+
+## OPCIONES DISPONIBLES
+
+### Opcion A: [nombre]
+[Descripcion de la opcion, pros y contras]
+
+### Opcion B: [nombre]
+[Descripcion de la opcion, pros y contras]
+
+### Opcion C: Proporcionar instruccion diferente
+[Usuario puede dar nueva direccion]
+
+### Opcion D: Cancelar
+[Guardar progreso y terminar]
+
+## RECOMENDACION DEL ORQUESTADOR
+[Cual opcion recomienda y por que]
+
+## ESPERANDO RESPUESTA...
+Por favor selecciona una opcion o proporciona instrucciones.
+
+══════════════════════════════════════════════════════════════════════════════
+```
+
+### Ejemplos de Escalacion
+
+<escalation_example type="ambiguedad">
+## NIVEL: CONSULTA
+## SITUACION
+Recibiste: "mejora el codigo del repositorio"
+
+## PROBLEMA DETECTADO
+La solicitud es ambigua. "Mejora" puede significar:
+- Optimizar performance
+- Mejorar legibilidad
+- Refactorizar arquitectura
+- Corregir bugs conocidos
+
+## OPCIONES DISPONIBLES
+A: Ejecutar CODEQUALITYFLUTTER para analisis general
+B: Ejecutar PERFORMANCEFLUTTER para optimizacion
+C: Ejecutar pipeline de Review completo
+D: Especificar que aspecto mejorar
+
+## RECOMENDACION
+Opcion D - Solicitar mas especificidad para mejor resultado.
+</escalation_example>
+
+<escalation_example type="fallo_repetido">
+## NIVEL: ALERTA
+## PIPELINE: Implementacion de feature
+## PASO: 5 de 10 - IMPLEMENTER
+
+## SITUACION
+IMPLEMENTER ha fallado 2 veces intentando implementar el UseCase.
+
+## PROBLEMA DETECTADO
+Los tests no pasan despues de 2 intentos de correccion.
+Error: "Expected Right but got Left(ServerFailure)"
+
+## OPCIONES DISPONIBLES
+A: Reintentar con mas contexto del error
+B: Rewind a SOLID para revisar diseño
+C: Cambiar enfoque de implementacion
+D: Cancelar y revisar manualmente
+
+## RECOMENDACION
+Opcion B - El error sugiere un problema de diseño, no de implementacion.
+</escalation_example>
+
+<escalation_example type="decision_critica">
+## NIVEL: BLOQUEO
+## PIPELINE: Auditoria de seguridad
+
+## SITUACION
+SECURITY encontro vulnerabilidad critica en el codigo existente.
+
+## PROBLEMA DETECTADO
+SQL Injection en `lib/src/data/datasources/user_datasource.dart:45`
+Severidad: CRITICA
+Riesgo: Acceso no autorizado a base de datos
+
+## OPCIONES DISPONIBLES
+A: Detener todo y corregir inmediatamente
+B: Documentar y continuar (no recomendado)
+C: Revisar si es falso positivo
+
+## RECOMENDACION
+Opcion A - Vulnerabilidades criticas deben corregirse antes de continuar.
+</escalation_example>
+</human_escalation>
+
 <examples>
 <example type="mcp_only">
 <solicitud>Ejecuta dart analyze en el proyecto</solicitud>
@@ -614,4 +1003,9 @@ MCPs configurados: mcp__dart__*, mcp__pragma__*, mcp__ide__*
 Agentes: 10 especializados (PLANNER, SOLID, SECURITY, DEPENDENCIES,
          IMPLEMENTER, DOCUMENTATIONFLUTTER, CODEQUALITYFLUTTER,
          PERFORMANCEFLUTTER, TESTFLUTTER, VERIFIER)
+
+Sistemas del Orquestador:
+- REFLECTION LOOP: Auto-critica despues de cada agente (+30% completion)
+- CHECKPOINTS: Guardar estado para recovery de fallos
+- HUMAN ESCALATION: Escalar a usuario en ambiguedad/fallos/decisiones criticas
 </context>
