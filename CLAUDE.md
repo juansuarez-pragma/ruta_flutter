@@ -162,12 +162,12 @@ Externalizados en `lib/src/util/strings.dart` (clase `AppStrings`).
 
 ## Sistema de Agentes
 
-Este proyecto utiliza **9 agentes especializados** que trabajan en pipeline para desarrollo con calidad y seguridad garantizadas. El sistema cubre el **87% de los problemas reportados por la industria** en código generado por IA.
+Este proyecto utiliza **10 agentes especializados** que trabajan en pipeline para desarrollo con calidad y seguridad garantizadas. El sistema cubre el **90% de los problemas reportados por la industria** en código generado por IA.
 
 ### Flujo de Desarrollo
 
 ```
-PLANNER → SOLID → SECURITY ↔ DEPENDENCIES → IMPLEMENTER → CODEQUALITYFLUTTER → PERFORMANCEFLUTTER → TESTFLUTTER → VERIFIER
+PLANNER → SOLID → SECURITY ↔ DEPENDENCIES → IMPLEMENTER → DOCUMENTATIONFLUTTER → CODEQUALITYFLUTTER → PERFORMANCEFLUTTER → TESTFLUTTER → VERIFIER
 ```
 
 ### Agentes Disponibles
@@ -179,6 +179,7 @@ PLANNER → SOLID → SECURITY ↔ DEPENDENCIES → IMPLEMENTER → CODEQUALITYF
 | **security** | Guardian de Seguridad | Audita OWASP Top 10, detecta XSS, SQLi, secrets, vulnerabilidades |
 | **dependencies** | Guardian de Dependencias | Previene slopsquatting, detecta APIs deprecadas, valida supply chain |
 | **implementer** | Desarrollador TDD | Implementa con TDD estricto (Red-Green-Refactor) y guardrails |
+| **documentationflutter** | Especialista en Docs | Audita doc comments, Effective Dart docs, README, anti-patterns |
 | **codequalityflutter** | Analista de Calidad | Métricas de complejidad, Effective Dart, análisis general de calidad |
 | **performanceflutter** | Auditor de Performance | 60fps, widget rebuilds, memory leaks, isolates, animaciones |
 | **testflutter** | Especialista QA | Crea tests unitarios, widget, integración, E2E, golden |
@@ -198,6 +199,7 @@ PLANNER → SOLID → SECURITY ↔ DEPENDENCIES → IMPLEMENTER → CODEQUALITYF
 | Memory Management | 100% | PERFORMANCEFLUTTER, CODEQUALITYFLUTTER |
 | Widget Rebuilds & Optimization | 100% | PERFORMANCEFLUTTER |
 | Code Quality Metrics | 100% | CODEQUALITYFLUTTER |
+| Documentation Quality | 100% | DOCUMENTATIONFLUTTER |
 
 ### Activación de Agentes
 
@@ -208,7 +210,8 @@ PLANNER → SOLID → SECURITY ↔ DEPENDENCIES → IMPLEMENTER → CODEQUALITYF
 | "audita seguridad", "OWASP", "vulnerabilidades" | SECURITY |
 | "verifica paquetes", "dependencias", "APIs deprecadas" | DEPENDENCIES |
 | "escribe código", "TDD", "implementa paso" | IMPLEMENTER |
-| "calidad", "complejidad", "Effective Dart", "métricas" | CODEQUALITYFLUTTER |
+| "documentación", "doc comments", "README", "dartdoc" | DOCUMENTATIONFLUTTER |
+| "calidad", "complejidad", "métricas código" | CODEQUALITYFLUTTER |
 | "performance", "60fps", "rebuilds", "memory leaks", "isolates" | PERFORMANCEFLUTTER |
 | "tests", "cobertura", "QA" | TESTFLUTTER |
 | "verifica", "está completo", "audita" | VERIFIER |
@@ -219,7 +222,8 @@ PLANNER → SOLID → SECURITY ↔ DEPENDENCIES → IMPLEMENTER → CODEQUALITYF
 - **Seguridad integrada**: SECURITY valida OWASP Top 10 antes de aprobar
 - **Anti-slopsquatting**: DEPENDENCIES verifica que paquetes existen en pub.dev
 - **TDD estricto**: IMPLEMENTER nunca escribe código sin test que falle
-- **Métricas de calidad**: CODEQUALITYFLUTTER valida complejidad ciclomática/cognitiva y Effective Dart
+- **Documentación Effective Dart**: DOCUMENTATIONFLUTTER audita doc comments y detecta anti-patterns
+- **Métricas de calidad**: CODEQUALITYFLUTTER valida complejidad ciclomática/cognitiva
 - **Performance 60fps**: PERFORMANCEFLUTTER audita frame budget, rebuilds y memory leaks
 - **Guardrails múltiples**: Validación en cada fase del pipeline
 - **Verificación obligatoria**: VERIFIER aprueba antes de completar
@@ -229,13 +233,14 @@ PLANNER → SOLID → SECURITY ↔ DEPENDENCIES → IMPLEMENTER → CODEQUALITYF
 
 ```
 .claude/agents/
-├── planner.md            # Arquitecto investigador
-├── solid.md              # Validador de principios
-├── security.md           # Guardian de seguridad (OWASP Top 10)
-├── dependencies.md       # Guardian de dependencias (anti-slopsquatting)
-├── implementer.md        # Desarrollador TDD
-├── codequalityflutter.md # Analista de calidad de código
-├── performanceflutter.md # Auditor de performance (60fps)
-├── testflutter.md        # Especialista en testing
-└── verifier.md           # Auditor de completitud
+├── planner.md             # Arquitecto investigador
+├── solid.md               # Validador de principios
+├── security.md            # Guardian de seguridad (OWASP Top 10)
+├── dependencies.md        # Guardian de dependencias (anti-slopsquatting)
+├── implementer.md         # Desarrollador TDD
+├── documentationflutter.md# Especialista en documentación
+├── codequalityflutter.md  # Analista de calidad de código
+├── performanceflutter.md  # Auditor de performance (60fps)
+├── testflutter.md         # Especialista en testing
+└── verifier.md            # Auditor de completitud
 ```
