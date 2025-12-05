@@ -11,4 +11,6 @@ export 'menu_option.dart';
 export 'message_output.dart';
 export 'product_output.dart';
 export 'user_input.dart';
+export 'user_input_extended.dart';
 export 'user_interface.dart';
+export 'user_output.dart';

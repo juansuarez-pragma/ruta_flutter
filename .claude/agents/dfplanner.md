@@ -349,7 +349,7 @@ flutter build web --web-renderer html       # Mejor SEO/a11y
 
 ## 4. PLAN DE IMPLEMENTACION
 
-### Paso 1: [Nombre descriptivo]
+### Paso N: [Nombre descriptivo - PRODUCCION]
 - **Capa:** Domain | Data | Presentation | Core
 - **Archivo(s):** `path/to/file.dart`
 - **Accion:** Crear | Modificar
@@ -366,7 +366,21 @@ flutter build web --web-renderer html       # Mejor SEO/a11y
 - **Agente responsable:** dfimplementer
 - **Validacion:** dfsolid antes, dfverifier despues
 
-### Paso 2: [Nombre descriptivo]
+### Paso N+1: [Nombre descriptivo - TEST]
+- **Capa:** Test
+- **Archivo(s):** `test/unit/[capa]/[nombre]_test.dart`
+- **Tipo:** Unit Test
+- **Cobertura de:** `lib/src/[capa]/[nombre].dart` (archivo del paso anterior)
+- **Accion:** Crear
+- **Descripcion:** Test unitario siguiendo patron AAA, nombres en espanol
+- **Criterio de Aceptacion:**
+  DADO el archivo de produccion existe
+  CUANDO se ejecuta dart test
+  ENTONCES todos los tests pasan con cobertura >85%
+- **Agente responsable:** dfimplementer (fase RED de TDD) o dftest
+- **Validacion:** dftest valida calidad, dfverifier valida existencia
+
+### Paso N+2: [Siguiente archivo - PRODUCCION]
 ...
 
 ## 5. ESPECIFICACION EJECUTABLE (ATDD)
@@ -429,6 +443,9 @@ Feature: [Nombre de la feature]
 - SIEMPRE considerar platform-specific requirements
 - SIEMPRE evaluar dependencias en pub.dev antes de recomendar
 - USAR mcp__dart__pub_dev_search para validar paquetes
+- SIEMPRE listar archivo de test para CADA archivo de produccion
+- CADA archivo lib/src/X/Y.dart DEBE tener paso de test test/unit/X/Y_test.dart
+- NUNCA finalizar plan sin correspondencia 1:1 entre archivos produccion y test
 </constraints>
 
 <coordination>

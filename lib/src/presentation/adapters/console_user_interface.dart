@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:fase_2_consumo_api/src/domain/entities/product_entity.dart';
+import 'package:fase_2_consumo_api/src/domain/entities/user_entity.dart';
 import 'package:fase_2_consumo_api/src/presentation/contracts/contracts.dart';
 import 'package:fase_2_consumo_api/src/util/strings.dart';
 
@@ -26,7 +27,9 @@ class ConsoleUserInterface implements UserInterface {
     print('2. ${AppStrings.menuOptionGetProductById}');
     print('3. ${AppStrings.menuOptionGetAllCategories}');
     print('4. ${AppStrings.menuOptionGetProductsByCategory}');
-    print('5. ${AppStrings.menuOptionExit}');
+    print('5. ${AppStrings.menuOptionGetAllUsers}');
+    print('6. ${AppStrings.menuOptionGetUserById}');
+    print('7. ${AppStrings.menuOptionExit}');
     stdout.write('${AppStrings.menuPrompt} ');
 
     final choice = stdin.readLineSync()?.trim();
@@ -36,7 +39,9 @@ class ConsoleUserInterface implements UserInterface {
       '2' => MenuOption.getProductById,
       '3' => MenuOption.getAllCategories,
       '4' => MenuOption.getProductsByCategory,
-      '5' => MenuOption.exit,
+      '5' => MenuOption.getAllUsers,
+      '6' => MenuOption.getUserById,
+      '7' => MenuOption.exit,
       _ => MenuOption.invalid,
     };
   }
@@ -44,6 +49,13 @@ class ConsoleUserInterface implements UserInterface {
   @override
   Future<int?> promptProductId() async {
     stdout.write('${AppStrings.promptProductId} ');
+    final input = stdin.readLineSync()?.trim();
+    return int.tryParse(input ?? '');
+  }
+
+  @override
+  Future<int?> promptUserId() async {
+    stdout.write('${AppStrings.promptUserId} ');
     final input = stdin.readLineSync()?.trim();
     return int.tryParse(input ?? '');
   }
@@ -135,6 +147,56 @@ class ConsoleUserInterface implements UserInterface {
     );
     print(
       '${AppStrings.productImage.padRight(_labelPadding)}${product.image}\n',
+    );
+  }
+
+  @override
+  void showUsers(List<UserEntity> users) {
+    print(
+      '${AppStrings.successFound} ${users.length} ${AppStrings.usersLabel}\n',
+    );
+    for (final user in users) {
+      _printUserSummary(user);
+    }
+  }
+
+  @override
+  void showUser(UserEntity user) {
+    _printUserDetail(user);
+  }
+
+  void _printUserSummary(UserEntity user) {
+    print('--- ${AppStrings.userLabel} ${user.id} ---');
+    print('${AppStrings.userId.padRight(_labelPadding)}${user.id}');
+    print('${AppStrings.userUsername.padRight(_labelPadding)}${user.username}');
+    print('${AppStrings.userEmail.padRight(_labelPadding)}${user.email}');
+    print(
+      '${AppStrings.userName.padRight(_labelPadding)}${user.name.firstname} ${user.name.lastname}',
+    );
+    print('${AppStrings.userPhone.padRight(_labelPadding)}${user.phone}\n');
+  }
+
+  void _printUserDetail(UserEntity user) {
+    print('--- ${AppStrings.userLabel} ${user.id} ---');
+    print('${AppStrings.userId.padRight(_labelPadding)}${user.id}');
+    print('${AppStrings.userUsername.padRight(_labelPadding)}${user.username}');
+    print('${AppStrings.userEmail.padRight(_labelPadding)}${user.email}');
+    print(
+      '${AppStrings.userName.padRight(_labelPadding)}${user.name.firstname} ${user.name.lastname}',
+    );
+    print('${AppStrings.userPhone.padRight(_labelPadding)}${user.phone}');
+    print(AppStrings.userAddress);
+    print(
+      '${AppStrings.userAddressStreet.padRight(_labelPadding)}${user.address.street} ${user.address.number}',
+    );
+    print(
+      '${AppStrings.userAddressCity.padRight(_labelPadding)}${user.address.city}',
+    );
+    print(
+      '${AppStrings.userAddressZipcode.padRight(_labelPadding)}${user.address.zipcode}',
+    );
+    print(
+      '${AppStrings.userAddressCoords.padRight(_labelPadding)}${user.address.geolocation.lat}, ${user.address.geolocation.long}\n',
     );
   }
 }

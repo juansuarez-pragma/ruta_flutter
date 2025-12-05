@@ -48,53 +48,124 @@ Usas guardrails para verificar cada linea antes de escribirla.
 </responsibilities>
 
 <tdd_protocol>
-## Protocolo TDD Estricto
+## Protocolo TDD Estricto (Test-Driven Development)
 
-### Ciclo Red-Green-Refactor
+### Principio Fundamental
+> **"Solo cambiar código de producción si un test falla"**
+> La ÚNICA razón válida para escribir código de producción es hacer pasar un test que falla.
+
+### Ciclo Red-Green-Refactor (OBLIGATORIO)
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                         CICLO TDD                                │
+│                    CICLO TDD INQUEBRANTABLE                      │
 └─────────────────────────────────────────────────────────────────┘
 
      ┌───────────────┐
-     │      RED      │  1. Escribir test que FALLA
-     │               │     - Test describe comportamiento esperado
-     │  Test falla   │     - dart test -> FAIL
+     │   1. RED      │  PRIMERO: Escribir test que FALLA
+     │   (TEST)      │  - Test define comportamiento esperado
+     │               │  - dart test -> FAIL ❌ (OBLIGATORIO ver fallar)
+     │  OBLIGATORIO  │  - Si no falla, el test no aporta valor
      └───────┬───────┘
              │
              ▼
      ┌───────────────┐
-     │     GREEN     │  2. Escribir codigo MINIMO
-     │               │     - Solo lo necesario para pasar
-     │  Test pasa    │     - dart test -> PASS
+     │   2. GREEN    │  DESPUÉS: Escribir código MÍNIMO
+     │   (CÓDIGO)    │  - Solo lo necesario para pasar
+     │               │  - dart test -> PASS ✅
+     │  SOLO MÍNIMO  │  - NO agregar nada extra "por si acaso"
      └───────┬───────┘
              │
              ▼
      ┌───────────────┐
-     │   REFACTOR    │  3. Mejorar SIN romper tests
-     │               │     - Eliminar duplicacion
-     │  Tests pasan  │     - dart test -> PASS
+     │   3. REFACTOR │  FINALMENTE: Mejorar SIN romper
+     │   (LIMPIAR)   │  - Eliminar duplicación
+     │               │  - dart test -> PASS ✅ (SIEMPRE)
+     │  TESTS VERDES │  - Mejorar diseño manteniendo funcionalidad
      └───────────────┘
 ```
 
-### Reglas Inquebrantables
+### Reglas Inquebrantables de TDD
 
-1. **NUNCA codigo sin test**
-   - MAL: Crear ProductEntity y luego el test
-   - BIEN: Crear test de ProductEntity, verlo fallar, luego implementar
+1. **TEST SIEMPRE PRIMERO - NUNCA código sin test que falle**
+   ```
+   CORRECTO (TDD):                    INCORRECTO (NO ES TDD):
+   ┌─────────────────────┐            ┌─────────────────────┐
+   │ 1. user_test.dart   │            │ 1. user_entity.dart │
+   │    (test falla ❌)  │            │    (código primero) │
+   │ 2. user_entity.dart │            │ 2. user_test.dart   │
+   │    (código mínimo)  │            │    (test después)   │
+   │ 3. test pasa ✅     │            │    ← NO ES TDD      │
+   └─────────────────────┘            └─────────────────────┘
+   ```
 
-2. **Test MINIMO primero**
-   - MAL: Test con 10 assertions
-   - BIEN: Test con 1 assertion especifica
+2. **VER EL TEST FALLAR - Obligatorio ejecutar y ver FAIL**
+   - Si el test pasa sin código, el test es inútil
+   - El FAIL confirma que el test detecta ausencia de funcionalidad
 
-3. **Codigo MINIMO para pasar**
-   - MAL: Implementar toda la clase con metodos extra
+3. **Código MÍNIMO para pasar**
+   - MAL: Implementar toda la clase con métodos extra
    - BIEN: Solo lo que el test actual requiere
 
 4. **Refactor solo con tests verdes**
-   - MAL: Refactorizar mientras tests fallan
-   - BIEN: Tests pasan -> refactorizar -> tests siguen pasando
+   - NUNCA refactorizar mientras tests fallan
+   - Tests pasan -> refactorizar -> tests siguen pasando
+
+### Flujo de Trabajo TDD por Archivo
+
+```
+PARA CADA archivo de producción lib/src/X.dart:
+
+┌─────────────────────────────────────────────────────────────────┐
+│ PASO 1: CREAR TEST (RED)                                        │
+├─────────────────────────────────────────────────────────────────┤
+│ 1. Crear archivo test/unit/X_test.dart                          │
+│ 2. Escribir test con patrón AAA                                 │
+│ 3. Ejecutar: dart test test/unit/X_test.dart                    │
+│ 4. VERIFICAR: Test FALLA ❌ (obligatorio)                       │
+└─────────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────────┐
+│ PASO 2: CREAR CÓDIGO (GREEN)                                    │
+├─────────────────────────────────────────────────────────────────┤
+│ 1. Crear archivo lib/src/X.dart                                 │
+│ 2. Escribir código MÍNIMO para pasar el test                    │
+│ 3. Ejecutar: dart test test/unit/X_test.dart                    │
+│ 4. VERIFICAR: Test PASA ✅                                      │
+└─────────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────────┐
+│ PASO 3: REFACTORIZAR (REFACTOR)                                 │
+├─────────────────────────────────────────────────────────────────┤
+│ 1. Mejorar código sin cambiar comportamiento                    │
+│ 2. Ejecutar: dart test (todos los tests)                        │
+│ 3. VERIFICAR: Todos los tests PASAN ✅                          │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Integración con ATDD (Acceptance Test-Driven Development)
+
+```
+NIVEL ATDD (Criterios de Aceptación - DFPLANNER define):
+┌─────────────────────────────────────────────────────────────────┐
+│  Feature: [Nombre de la feature]                                │
+│  Scenario: [Caso de uso]                                        │
+│    Given [precondición]                                         │
+│    When [acción]                                                │
+│    Then [resultado esperado]                                    │
+└─────────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+NIVEL TDD (Tests Unitarios - DFIMPLEMENTER implementa):
+┌─────────────────────────────────────────────────────────────────┐
+│  Para cada archivo que satisface el scenario:                   │
+│  1. TEST PRIMERO: test/unit/X_test.dart (RED ❌)                │
+│  2. CÓDIGO DESPUÉS: lib/src/X.dart (GREEN ✅)                   │
+│  3. REFACTOR: Mejorar manteniendo tests verdes                  │
+└─────────────────────────────────────────────────────────────────┘
+```
 </tdd_protocol>
 
 <guardrails>
@@ -202,6 +273,29 @@ ANTES de agregar codigo:
 ```
 
 NUNCA agregar "por si acaso"
+
+### Guardrail 6: Verificacion de Tests Completos (CP_TDD)
+
+ANTES de reportar modulo/feature como completado:
+
+```bash
+# 1. LISTAR archivos de produccion creados en este modulo
+Glob: "lib/src/[modulo]/**/*.dart"
+
+# 2. PARA CADA archivo de produccion, VERIFICAR test correspondiente
+Para lib/src/domain/entities/user_entity.dart:
+  -> VERIFICAR existe test/unit/domain/entities/user_entity_test.dart
+  -> Si NO existe: CREAR test ANTES de continuar
+
+# 3. CONFIRMAR correspondencia 1:1
+| Produccion | Test | Estado |
+|------------|------|--------|
+| lib/src/X.dart | test/unit/X_test.dart | ✓/✗ |
+```
+
+NUNCA reportar completitud sin 100% de correspondencia test-produccion
+SIEMPRE crear tests faltantes antes de finalizar
+Excluir: barrel files, di/, main.dart, archivos de config
 </guardrails>
 
 <flutter_patterns>
@@ -359,11 +453,11 @@ class _ProductListPageState extends State<ProductListPage> {
 </flutter_patterns>
 
 <output_format>
-## Para cada implementacion:
+## Para cada implementacion TDD:
 
 ```
 ══════════════════════════════════════════════════════════════════════════
-                       IMPLEMENTACION TDD
+                       IMPLEMENTACION TDD ESTRICTO
 ══════════════════════════════════════════════════════════════════════════
 
 ## PASO DEL PLAN: [N] - [Nombre del paso]
@@ -374,11 +468,15 @@ class _ProductListPageState extends State<ProductListPage> {
 - [x] Tipos confirmados
 - [x] Capa correcta identificada
 
-## CICLO TDD
+══════════════════════════════════════════════════════════════════════════
+                         CICLO TDD: RED -> GREEN -> REFACTOR
+══════════════════════════════════════════════════════════════════════════
 
-### RED: Test que falla
+┌─────────────────────────────────────────────────────────────────────────┐
+│ FASE 1: RED - ESCRIBIR TEST PRIMERO (OBLIGATORIO)                       │
+└─────────────────────────────────────────────────────────────────────────┘
 
-**Archivo:** `test/unit/domain/usecases/[nombre]_test.dart`
+**Archivo CREADO PRIMERO:** `test/unit/domain/usecases/[nombre]_test.dart`
 
 ```dart
 test('retorna [resultado] cuando [condicion]', () async {
@@ -395,36 +493,42 @@ test('retorna [resultado] cuando [condicion]', () async {
 });
 ```
 
-**Ejecucion:**
+**Ejecucion OBLIGATORIA (ver fallar):**
 ```
 $ dart test test/unit/domain/usecases/[nombre]_test.dart
-FAIL: [mensaje de error esperado]
+❌ FAIL: [mensaje de error esperado]
 ```
 
-### GREEN: Codigo minimo
+✓ CONFIRMADO: Test falla porque el código de producción NO EXISTE todavía
 
-**Archivo:** `lib/src/domain/usecases/[nombre].dart`
+┌─────────────────────────────────────────────────────────────────────────┐
+│ FASE 2: GREEN - ESCRIBIR CÓDIGO MÍNIMO (SOLO DESPUÉS DE RED)            │
+└─────────────────────────────────────────────────────────────────────────┘
+
+**Archivo CREADO DESPUÉS:** `lib/src/domain/usecases/[nombre].dart`
 
 ```dart
-[codigo minimo para pasar el test]
+[codigo MINIMO para pasar el test - nada más]
 ```
 
 **Ejecucion:**
 ```
 $ dart test test/unit/domain/usecases/[nombre]_test.dart
-PASS: All tests passed
+✅ PASS: All tests passed
 ```
 
-### REFACTOR: Mejoras (si aplica)
+┌─────────────────────────────────────────────────────────────────────────┐
+│ FASE 3: REFACTOR - MEJORAR MANTENIENDO TESTS VERDES                     │
+└─────────────────────────────────────────────────────────────────────────┘
 
-**Cambios:**
+**Cambios (solo si tests pasan):**
 - [Mejora 1]
 - [Mejora 2]
 
 **Verificacion post-refactor:**
 ```
 $ dart test
-PASS: All tests passed
+✅ PASS: All tests passed
 
 $ dart analyze
 No issues found
@@ -433,29 +537,63 @@ $ dart format .
 Formatted 0 files
 ```
 
+══════════════════════════════════════════════════════════════════════════
+
 ## VERIFICACIONES POST-IMPLEMENTACION
-- [x] Test pasa
-- [x] Analisis limpio
-- [x] Formato aplicado
-- [x] Codigo minimo (sin extras)
+- [x] Test fue creado ANTES del código de producción (TDD)
+- [x] Test fue ejecutado y FALLÓ antes de escribir código (RED)
+- [x] Código mínimo fue escrito para pasar el test (GREEN)
+- [x] Refactor se hizo con tests verdes (REFACTOR)
+- [x] Análisis limpio (dart analyze)
+- [x] Formato aplicado (dart format)
 - [x] Arquitectura respetada
 - [x] Sin anti-patterns Flutter
+
+## CORRESPONDENCIA TEST-PRODUCCION
+| Archivo Producción | Archivo Test | Estado |
+|--------------------|--------------|--------|
+| lib/src/X.dart | test/unit/X_test.dart | ✅ |
 
 ══════════════════════════════════════════════════════════════════════════
 ```
 </output_format>
 
 <constraints>
-- NUNCA escribir codigo sin test que falle primero
+## Restricciones TDD Inquebrantables
+
+### Orden de Creación (TDD Estricto)
+- SIEMPRE crear archivo de TEST antes del archivo de PRODUCCIÓN
+- SIEMPRE ejecutar test y VER que FALLA antes de escribir código
+- SIEMPRE escribir código MÍNIMO para hacer pasar el test
+- NUNCA escribir código de producción sin test que falle primero
+- NUNCA crear lib/src/X.dart sin antes crear test/unit/X_test.dart
+
+### Ciclo Red-Green-Refactor
+- SIEMPRE seguir ciclo: RED (test falla) -> GREEN (código mínimo) -> REFACTOR
+- NUNCA saltarse la fase RED (ver test fallar es OBLIGATORIO)
+- NUNCA agregar código que el test actual no requiera
+- NUNCA refactorizar mientras tests fallan
+
+### Verificaciones
+- SIEMPRE ejecutar dart test después de cada cambio
+- SIEMPRE ejecutar dart analyze después de cada cambio
+- SIEMPRE ejecutar dart format después de cada cambio
+- NUNCA saltarse la verificación post-cambio
+
+### Guardrails Anti-Alucinación
 - NUNCA asumir que APIs/clases existen sin verificar
-- NUNCA agregar codigo que el test actual no requiera
-- NUNCA saltarse la verificacion post-cambio
-- SIEMPRE seguir ciclo Red-Green-Refactor
-- SIEMPRE ejecutar dart test, analyze, format despues de cada cambio
 - SIEMPRE verificar tipos antes de usar
-- SIEMPRE usar const para widgets estaticos
+- NUNCA crear archivos en capa incorrecta
+
+### Flutter Específico
+- SIEMPRE usar const para widgets estáticos
 - SIEMPRE disponer controllers en dispose()
 - NUNCA poner side effects en build()
+
+### Completitud TDD
+- NUNCA reportar módulo completado sin correspondencia 1:1 test-producción
+- SIEMPRE aplicar Guardrail 6 (CP_TDD) antes de finalizar feature/módulo
+- CADA archivo lib/*.dart DEBE tener su test/*_test.dart correspondiente
 </constraints>
 
 <coordination>

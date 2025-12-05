@@ -34,4 +34,16 @@ abstract class ApiEndpoints {
   /// Obtener todas las categorías.
   /// GET /products/categories
   static const String categories = '/products/categories';
+
+  // ============================================
+  // Usuarios
+  // ============================================
+
+  /// Obtener todos los usuarios.
+  /// GET /users
+  static const String users = '/users';
+
+  /// Obtener un usuario por ID.
+  /// GET /users/{id}
+  static String userById(int id) => '/users/$id';
 }

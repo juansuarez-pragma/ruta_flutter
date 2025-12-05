@@ -88,13 +88,93 @@ UI → UseCase → Repository Interface ← Repository Impl → DataSource → A
 
 ## Agregar Nueva Funcionalidad
 
-### Nuevo Endpoint (orden TDD)
+### Metodología TDD Estricta (Test-Driven Development)
 
-1. **Domain**: Test de UseCase → Implementación → Agregar método a Repository interface
-2. **Data**: Test de DataSource → Implementación delegando a ApiClient
-3. **Data**: Test de Repository → Implementación extendiendo BaseRepository
-4. **DI**: Registrar en `lib/src/di/injection_container.dart`
-5. **Presentation**: Integrar en ApplicationController
+> **Principio Fundamental**: "Solo cambiar código de producción si un test falla"
+> La ÚNICA razón válida para escribir código de producción es hacer pasar un test que falla.
+
+#### Ciclo TDD Obligatorio: RED → GREEN → REFACTOR
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ 1. RED (TEST PRIMERO)                                           │
+│    - Crear archivo test/unit/X_test.dart                        │
+│    - Escribir test con patrón AAA                               │
+│    - Ejecutar: dart test → FAIL ❌ (OBLIGATORIO ver fallar)     │
+├─────────────────────────────────────────────────────────────────┤
+│ 2. GREEN (CÓDIGO MÍNIMO DESPUÉS)                                │
+│    - Crear archivo lib/src/X.dart                               │
+│    - Escribir código MÍNIMO para pasar el test                  │
+│    - Ejecutar: dart test → PASS ✅                              │
+├─────────────────────────────────────────────────────────────────┤
+│ 3. REFACTOR (MEJORAR CON TESTS VERDES)                          │
+│    - Mejorar código sin cambiar comportamiento                  │
+│    - Ejecutar: dart test → PASS ✅ (siempre)                    │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Nuevo Endpoint (orden TDD ESTRICTO)
+
+Para CADA archivo de producción, seguir el ciclo TDD:
+
+1. **Domain - UseCase**:
+   - `test/unit/domain/usecases/get_X_usecase_test.dart` → FAIL ❌
+   - `lib/src/domain/usecases/get_X_usecase.dart` → PASS ✅
+
+2. **Domain - Entity**:
+   - `test/unit/domain/entities/X_entity_test.dart` → FAIL ❌
+   - `lib/src/domain/entities/X_entity.dart` → PASS ✅
+
+3. **Data - Model**:
+   - `test/unit/data/models/X_model_test.dart` → FAIL ❌
+   - `lib/src/data/models/X_model.dart` → PASS ✅
+
+4. **Data - DataSource**:
+   - `test/unit/data/datasources/X_datasource_test.dart` → FAIL ❌
+   - `lib/src/data/datasources/X_datasource_impl.dart` → PASS ✅
+
+5. **Data - Repository**:
+   - `test/unit/data/repositories/X_repository_impl_test.dart` → FAIL ❌
+   - `lib/src/data/repositories/X_repository_impl.dart` → PASS ✅
+
+6. **DI**: Registrar en `lib/src/di/injection_container.dart`
+7. **Presentation**: Integrar en ApplicationController
+
+### Integración con ATDD (Acceptance Test-Driven Development)
+
+```
+NIVEL ATDD (Requisitos - DFPLANNER define):
+┌─────────────────────────────────────────────────────────────────┐
+│  Feature: [Nombre]                                               │
+│  Scenario: [Caso de uso]                                         │
+│    Given [precondición]                                          │
+│    When [acción]                                                 │
+│    Then [resultado esperado]                                     │
+└─────────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+NIVEL TDD (Implementación - DFIMPLEMENTER ejecuta):
+┌─────────────────────────────────────────────────────────────────┐
+│  Para cada archivo que satisface el scenario:                    │
+│  1. TEST PRIMERO: test/unit/X_test.dart (RED ❌)                 │
+│  2. CÓDIGO DESPUÉS: lib/src/X.dart (GREEN ✅)                    │
+│  3. REFACTOR: Mejorar manteniendo tests verdes                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Regla de Correspondencia Test-Producción (CP_TDD)
+
+**OBLIGATORIO**: Para cada archivo en `lib/src/` debe existir su test correspondiente:
+
+| Archivo Producción | Test Correspondiente |
+|--------------------|---------------------|
+| `lib/src/domain/entities/X.dart` | `test/unit/domain/entities/X_test.dart` |
+| `lib/src/domain/usecases/X.dart` | `test/unit/domain/usecases/X_test.dart` |
+| `lib/src/data/models/X.dart` | `test/unit/data/models/X_test.dart` |
+| `lib/src/data/datasources/X_impl.dart` | `test/unit/data/datasources/X_test.dart` |
+| `lib/src/data/repositories/X_impl.dart` | `test/unit/data/repositories/X_test.dart` |
+
+**Excluidos**: barrel files, di/, main.dart, archivos de configuración
 
 ### Ejemplo DataSource
 
@@ -131,16 +211,30 @@ Future<Either<Failure, ProductEntity>> getProduct(int id);
 Future<ProductEntity> getProduct(int id);
 ```
 
-## Testing
+## Testing (TDD Obligatorio)
 
+### Metodología TDD
+- **TEST SIEMPRE PRIMERO**: Crear `_test.dart` ANTES del archivo de producción
+- **VER FALLAR**: Ejecutar test y confirmar que FALLA (fase RED)
+- **CÓDIGO MÍNIMO**: Solo lo necesario para pasar (fase GREEN)
+- **REFACTORIZAR**: Mejorar manteniendo tests verdes
+
+### Convenciones
 - **Patrón AAA**: Arrange-Act-Assert
 - **Nombres en español**: `'retorna lista cuando el repositorio tiene éxito'`
-- **164+ tests**, 87% cobertura
+- **206+ tests**, 87%+ cobertura
+- **Correspondencia 1:1**: Cada `lib/src/X.dart` tiene `test/unit/X_test.dart`
+
+### Infraestructura
 - **Mocks**: Definir en `test/helpers/mocks.dart`, regenerar con build_runner
 - **Helpers**: `test/helpers/test_helpers.dart` (factories de entidades/modelos)
 - **Fixtures**: `test/fixtures/product_fixtures.dart` (JSON de prueba)
 
+### Ejemplo TDD Completo
+
 ```dart
+// 1. PRIMERO: Crear test (fase RED)
+// test/unit/domain/usecases/get_products_usecase_test.dart
 test('retorna productos cuando tiene éxito', () async {
   // Arrange
   when(mockRepository.getAll()).thenAnswer((_) async => Right(testData));
@@ -150,6 +244,16 @@ test('retorna productos cuando tiene éxito', () async {
   expect(result, Right(testData));
   verify(mockRepository.getAll()).called(1);
 });
+
+// 2. Ejecutar: dart test → FAIL ❌ (código no existe)
+
+// 3. DESPUÉS: Crear código mínimo (fase GREEN)
+// lib/src/domain/usecases/get_products_usecase.dart
+class GetProductsUseCase extends UseCase<List<ProductEntity>, NoParams> {
+  // ... implementación mínima
+}
+
+// 4. Ejecutar: dart test → PASS ✅
 ```
 
 ## Variables de Entorno

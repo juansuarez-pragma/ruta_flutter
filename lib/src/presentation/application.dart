@@ -1,8 +1,10 @@
 import 'package:fase_2_consumo_api/src/core/usecase/usecase.dart';
 import 'package:fase_2_consumo_api/src/domain/usecases/get_all_categories_usecase.dart';
 import 'package:fase_2_consumo_api/src/domain/usecases/get_all_products_usecase.dart';
+import 'package:fase_2_consumo_api/src/domain/usecases/get_all_users_usecase.dart';
 import 'package:fase_2_consumo_api/src/domain/usecases/get_product_by_id_usecase.dart';
 import 'package:fase_2_consumo_api/src/domain/usecases/get_products_by_category_usecase.dart';
+import 'package:fase_2_consumo_api/src/domain/usecases/get_user_by_id_usecase.dart';
 import 'package:fase_2_consumo_api/src/presentation/contracts/contracts.dart';
 import 'package:fase_2_consumo_api/src/util/strings.dart';
 
@@ -18,6 +20,8 @@ class ApplicationController {
   final GetProductByIdUseCase _getProductById;
   final GetAllCategoriesUseCase _getAllCategories;
   final GetProductsByCategoryUseCase _getProductsByCategory;
+  final GetAllUsersUseCase _getAllUsers;
+  final GetUserByIdUseCase _getUserById;
   final void Function() _onExit;
 
   ApplicationController({
@@ -26,12 +30,16 @@ class ApplicationController {
     required GetProductByIdUseCase getProductById,
     required GetAllCategoriesUseCase getAllCategories,
     required GetProductsByCategoryUseCase getProductsByCategory,
+    required GetAllUsersUseCase getAllUsers,
+    required GetUserByIdUseCase getUserById,
     required void Function() onExit,
   }) : _ui = ui,
        _getAllProducts = getAllProducts,
        _getProductById = getProductById,
        _getAllCategories = getAllCategories,
        _getProductsByCategory = getProductsByCategory,
+       _getAllUsers = getAllUsers,
+       _getUserById = getUserById,
        _onExit = onExit;
 
   /// Inicia el bucle principal de la aplicación.
@@ -54,6 +62,10 @@ class ApplicationController {
           await _handleGetAllCategories();
         case MenuOption.getProductsByCategory:
           await _handleGetProductsByCategory();
+        case MenuOption.getAllUsers:
+          await _handleGetAllUsers();
+        case MenuOption.getUserById:
+          await _handleGetUserById();
         case MenuOption.exit:
           break;
         case MenuOption.invalid:
@@ -137,6 +149,35 @@ class ApplicationController {
     result.fold(
       (failure) => _ui.showError(failure.message),
       (products) => _ui.showProducts(products),
+    );
+  }
+
+  Future<void> _handleGetAllUsers() async {
+    _ui.showOperationInfo(AppStrings.getAllUsersUseCaseTitle);
+
+    final result = await _getAllUsers(const NoParams());
+
+    result.fold(
+      (failure) => _ui.showError(failure.message),
+      (users) => _ui.showUsers(users),
+    );
+  }
+
+  Future<void> _handleGetUserById() async {
+    final id = await _ui.promptUserId();
+
+    if (id == null) {
+      _ui.showError(AppStrings.invalidIdError);
+      return;
+    }
+
+    _ui.showOperationInfo('${AppStrings.getUserByIdUseCaseTitle} (ID: $id)');
+
+    final result = await _getUserById(GetUserByIdParams(id: id));
+
+    result.fold(
+      (failure) => _ui.showError(failure.message),
+      (user) => _ui.showUser(user),
     );
   }
 }

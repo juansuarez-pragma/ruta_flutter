@@ -172,28 +172,35 @@ Usuario -> Orquestador -> MCP1 -> Agente -> MCP2 -> Usuario
 Para: "implementa feature", "crea sistema"
 
 ```
-dfplanner (investiga y planifica)
+dfplanner (investiga y planifica - INCLUYE lista de tests)
     |
     v
-dfsolid (valida diseno)
+dfsolid (valida diseño)
     |
     v
 dfsecurity <-> dfdependencies (validan en paralelo)
     |
     v
-dfimplementer (TDD: test -> codigo -> refactor)
+dfimplementer (TDD ESTRICTO: TEST primero -> código mínimo -> refactor)
     |
     v
-[PARALELO]
+┌─────────────────────────────────────────────────────────────────┐
+│ ★ CP_TDD CHECKPOINT (OBLIGATORIO)                               │
+│   - Verificar correspondencia 1:1 test-producción               │
+│   - Si falta test → dftest CREA antes de continuar              │
+└─────────────────────────────────────────────────────────────────┘
+    |
+    v
+[PARALELO - Solo si CP_TDD aprobado]
 +-- dfdocumentation
 +-- dfcodequality
 +-- dfperformance
     |
     v
-dftest (cobertura adicional)
+dftest (validar cobertura, crear tests adicionales si necesario)
     |
     v
-dfverifier (validacion final)
+dfverifier (validación final - incluye verificación TDD)
 ```
 
 ### Pipeline de Review
@@ -216,13 +223,31 @@ dfverifier (reporte consolidado)
 Para: "crea UseCase", "agrega metodo"
 
 ```
-dfsolid (valida diseno minimo)
+dfsolid (valida diseño mínimo)
     |
     v
-dfimplementer (TDD)
+dfimplementer (TDD ESTRICTO: TEST primero -> código mínimo)
     |
     v
-dftest (cobertura)
+[CP_TDD] Verificar correspondencia test-producción
+    |
+    v
+dftest (validar cobertura, crear tests si faltan)
+```
+
+### Flujo TDD en Todos los Pipelines
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ REGLA UNIVERSAL: En TODOS los pipelines, dfimplementer DEBE:    │
+├─────────────────────────────────────────────────────────────────┤
+│ 1. Crear test/unit/X_test.dart PRIMERO                          │
+│ 2. Ejecutar test y VER que FALLA (RED)                          │
+│ 3. Crear lib/src/X.dart con código MÍNIMO                       │
+│ 4. Ejecutar test y VER que PASA (GREEN)                         │
+│ 5. Refactorizar manteniendo tests verdes                        │
+│ 6. Verificar correspondencia 1:1 antes de reportar completitud  │
+└─────────────────────────────────────────────────────────────────┘
 ```
 </pipelines>
 
@@ -261,12 +286,32 @@ Implementa el patron "Generate -> Critique -> Improve" (+30% completion rate).
 
 | Agente | Preguntas de Critica |
 |--------|---------------------|
-| dfplanner | Plan tiene pasos verificables? Considera Flutter architecture? |
+| dfplanner | Plan tiene pasos verificables? Considera Flutter architecture? **Lista tests para cada archivo?** |
 | dfsolid | Respeta SOLID + Flutter anti-patterns? Sin sobre-ingenieria? |
 | dfsecurity | OWASP Mobile Top 10 cubierto? Platform Channels validados? |
-| dfimplementer | Tests pasan? Codigo minimo? TDD respetado? Patterns correctos? |
-| dftest | Cobertura >85%? Tests prueban comportamiento real? |
-| dfverifier | Checklist completo? pubspec validado? Builds exitosos? |
+| dfimplementer | **Tests creados ANTES del código (TDD)?** Vio test fallar (RED)? Código mínimo (GREEN)? Patterns correctos? **Correspondencia 1:1 test-prod?** |
+| dftest | Cobertura >85%? Tests prueban comportamiento real? **Todos los archivos críticos tienen test?** |
+| dfverifier | Checklist completo? pubspec validado? Builds exitosos? **CP_TDD aprobado?** |
+
+### Validación TDD en Reflection Loop
+
+Para dfimplementer, SIEMPRE verificar:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ CHECKLIST TDD (Reflection Loop para dfimplementer)              │
+├─────────────────────────────────────────────────────────────────┤
+│ [ ] ¿Se creó test/unit/X_test.dart ANTES de lib/src/X.dart?    │
+│ [ ] ¿Se ejecutó el test y se VIO FALLAR (fase RED)?             │
+│ [ ] ¿El código es el MÍNIMO necesario para pasar (fase GREEN)?  │
+│ [ ] ¿Cada archivo de producción tiene su test correspondiente?  │
+│ [ ] ¿Los tests siguen patrón AAA?                               │
+└─────────────────────────────────────────────────────────────────┘
+
+Si alguna respuesta es NO:
+- SOLICITAR corrección a dfimplementer
+- O ACTIVAR dftest para crear tests faltantes
+```
 </reflection_loop>
 
 <checkpoints>
@@ -280,8 +325,41 @@ Implementa el patron "Generate -> Critique -> Improve" (+30% completion rate).
 | CP_DESIGN | dfsolid | Validacion SOLID, decisiones |
 | CP_SECURITY | dfsecurity | Reporte OWASP Mobile, vulnerabilidades |
 | CP_IMPL | dfimplementer | Archivos, tests, patterns usados |
+| **CP_TDD** | **dfimplementer** | **Verificación: cada lib/*.dart tiene test/*_test.dart** |
 | CP_QUALITY | agentes calidad | Metricas, issues Flutter-specific |
 | CP_TEST | dftest | Resultados, cobertura |
+
+### Checkpoint CP_TDD (CRÍTICO - TDD Compliance)
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    CHECKPOINT CP_TDD                             │
+│              (Después de dfimplementer, antes de calidad)        │
+└─────────────────────────────────────────────────────────────────┘
+
+VERIFICACIONES OBLIGATORIAS:
+
+1. CORRESPONDENCIA TEST-PRODUCCIÓN
+   Para cada archivo lib/src/X.dart creado:
+   - ¿Existe test/unit/X_test.dart? ✅/❌
+   - Si falta: DETENER y crear test
+
+2. ORDEN TDD RESPETADO
+   - ¿Tests fueron creados ANTES del código? ✅/❌
+   - ¿Se ejecutó y vio fallar cada test (RED)? ✅/❌
+   - ¿Código es mínimo para pasar (GREEN)? ✅/❌
+
+3. COBERTURA MÍNIMA
+   - ¿Archivos críticos tienen >85% cobertura? ✅/❌
+   - Críticos: entities, usecases, models, repositories
+
+ACCIONES:
+┌─────────────────────────────────────────────────────────────────┐
+│ Si TODO ✅ → Continuar a agentes de calidad                     │
+│ Si FALTA test → dftest CREA tests faltantes                     │
+│ Si COBERTURA baja → dftest COMPLETA cobertura                   │
+└─────────────────────────────────────────────────────────────────┘
+```
 
 ### Protocolo de Recovery
 

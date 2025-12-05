@@ -21,12 +21,15 @@ class AppStrings {
       'Obtener todas las categorías';
   static const String menuOptionGetProductsByCategory =
       'Obtener productos por categoría';
+  static const String menuOptionGetAllUsers = 'Obtener todos los usuarios';
+  static const String menuOptionGetUserById = 'Obtener un usuario por ID';
   static const String menuOptionExit = 'Salir';
   static const String menuPrompt = 'Opción:';
 
   // Solicitudes
   static const String promptProductId =
       'Por favor, ingresa el ID del producto:';
+  static const String promptUserId = 'Por favor, ingresa el ID del usuario:';
   static const String promptCategory = 'Selecciona una categoría (número):';
   static const String invalidCategoryError = 'Categoría no válida.';
 
@@ -36,6 +39,8 @@ class AppStrings {
   static const String getAllCategoriesUseCaseTitle = 'GetAllCategoriesUseCase';
   static const String getProductsByCategoryUseCaseTitle =
       'GetProductsByCategoryUseCase';
+  static const String getAllUsersUseCaseTitle = 'GetAllUsersUseCase';
+  static const String getUserByIdUseCaseTitle = 'GetUserByIdUseCase';
   static const String executingUseCase = '[+] EJECUTANDO:';
 
   // Mensajes de éxito
@@ -51,6 +56,7 @@ class AppStrings {
   static const String notFoundProductFailureMessage = 'Producto no encontrado.';
   static const String notFoundCategoriesFailureMessage =
       'Recurso de categorías no encontrado.';
+  static const String notFoundUserFailureMessage = 'Usuario no encontrado.';
   static const String clientFailureMessage = 'Error en la petición.';
   static const String connectionFailureMessage =
       'Error de conexión a internet.';
@@ -59,7 +65,9 @@ class AppStrings {
   // Etiquetas
   static const String productsLabel = 'productos.';
   static const String categoriesLabel = 'categorías.';
+  static const String usersLabel = 'usuarios.';
   static const String productLabel = 'Producto';
+  static const String userLabel = 'Usuario';
 
   // Detalles del producto
   static const String productId = 'ID:';
@@ -68,4 +76,16 @@ class AppStrings {
   static const String productPrice = 'Precio:';
   static const String productDescription = 'Descripción:';
   static const String productImage = 'Imagen:';
+
+  // Detalles del usuario
+  static const String userId = 'ID:';
+  static const String userUsername = 'Usuario:';
+  static const String userEmail = 'Email:';
+  static const String userName = 'Nombre:';
+  static const String userPhone = 'Teléfono:';
+  static const String userAddress = 'Dirección:';
+  static const String userAddressStreet = '  Calle:';
+  static const String userAddressCity = '  Ciudad:';
+  static const String userAddressZipcode = '  Código Postal:';
+  static const String userAddressCoords = '  Coordenadas:';
 }

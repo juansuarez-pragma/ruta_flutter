@@ -4,6 +4,8 @@ enum MenuOption {
   getProductById,
   getAllCategories,
   getProductsByCategory,
+  getAllUsers,
+  getUserById,
   exit,
   invalid,
 }
