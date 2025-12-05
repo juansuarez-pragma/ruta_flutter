@@ -162,18 +162,53 @@ Externalizados en `lib/src/util/strings.dart` (clase `AppStrings`).
 
 ## Sistema de Agentes
 
-Este proyecto utiliza **10 agentes especializados** que trabajan en pipeline para desarrollo con calidad y seguridad garantizadas. El sistema cubre el **90% de los problemas reportados por la industria** en código generado por IA.
+Este proyecto utiliza un **orquestador híbrido central** que coordina **11 agentes especializados** y **MCPs (Model Context Protocol)** para desarrollo con calidad y seguridad garantizadas. El sistema cubre el **90% de los problemas reportados por la industria** en código generado por IA.
 
-### Flujo de Desarrollo
+### Arquitectura Híbrida (Agentes + MCP)
 
 ```
-PLANNER → SOLID → SECURITY ↔ DEPENDENCIES → IMPLEMENTER → DOCUMENTATIONFLUTTER → CODEQUALITYFLUTTER → PERFORMANCEFLUTTER → TESTFLUTTER → VERIFIER
+                         ┌─────────────────────────────────────┐
+                         │          ORCHESTRATOR               │
+                         │   (Punto de entrada automático)     │
+                         └──────────────┬──────────────────────┘
+                                        │
+              ┌─────────────────────────┼─────────────────────────┐
+              │                         │                         │
+              ▼                         ▼                         ▼
+       ┌──────────────┐         ┌──────────────┐         ┌──────────────┐
+       │  MCP DIRECTO │         │   HÍBRIDO    │         │   PIPELINE   │
+       │ (operacional)│         │ (MCP+Agente) │         │  (completo)  │
+       └──────────────┘         └──────────────┘         └──────────────┘
+              │                         │                         │
+              ▼                         ▼                         ▼
+       dart analyze              run_tests →              PLANNER → SOLID
+       dart test                 IMPLEMENTER →            → SECURITY ↔ DEP
+       pub search                run_tests                → IMPLEMENTER
+       format, etc.              (si fallan)              → [QUALITY] → VER
+```
+
+### Flujo de Desarrollo con Orquestador
+
+```
+USUARIO ──► ORCHESTRATOR ──┬── MCP directo (tareas operacionales)
+                           │
+                           ├── Agente único (tareas especializadas)
+                           │
+                           ├── Híbrido (MCP + Agente)
+                           │
+                           └── Pipeline completo (features complejas)
+                                   │
+                                   ▼
+                           PLANNER → SOLID → SECURITY ↔ DEPENDENCIES
+                                   → IMPLEMENTER → [QUALITY AGENTS]
+                                   → TESTFLUTTER → VERIFIER
 ```
 
 ### Agentes Disponibles
 
 | Agente | Rol | Función |
 |--------|-----|---------|
+| **orchestrator** | Orquestador Central | Clasifica intent, decide MCP vs agente, coordina ejecución, aprende patrones |
 | **planner** | Arquitecto Investigador | Investiga codebase y mejores prácticas, diseña planes detallados |
 | **solid** | Guardian de Calidad | Valida principios SOLID, YAGNI, DRY, detecta sobre-ingeniería |
 | **security** | Guardian de Seguridad | Audita OWASP Top 10, detecta XSS, SQLi, secrets, vulnerabilidades |
@@ -184,6 +219,24 @@ PLANNER → SOLID → SECURITY ↔ DEPENDENCIES → IMPLEMENTER → DOCUMENTATIO
 | **performanceflutter** | Auditor de Performance | 60fps, widget rebuilds, memory leaks, isolates, animaciones |
 | **testflutter** | Especialista QA | Crea tests unitarios, widget, integración, E2E, golden |
 | **verifier** | Auditor de Completitud | Verifica conformidad con el plan, genera reporte final |
+
+### MCPs Integrados
+
+| MCP Server | Herramientas | Uso |
+|------------|--------------|-----|
+| **mcp__dart__** | analyze_files, run_tests, dart_format, dart_fix, pub, pub_dev_search | Operaciones Dart/Flutter |
+| **mcp__pragma__** | listPragmaResources, getPragmaResources | Recursos Pragma |
+| **mcp__ide__** | getDiagnostics | Diagnósticos del IDE |
+
+### Clasificación de Intent del Orquestador
+
+| Intent | Cuándo | Recurso |
+|--------|--------|---------|
+| `MCP_ONLY` | Operaciones sin razonamiento | MCP directo |
+| `AGENT_SINGLE` | Tarea especializada | Agente específico |
+| `HYBRID` | Ejecutar + analizar/arreglar | MCP + Agente |
+| `PIPELINE` | Feature compleja | Pipeline completo |
+| `QUICK_ANSWER` | Pregunta informativa | Respuesta directa |
 
 ### Cobertura de Problemas de la Industria
 
@@ -203,18 +256,23 @@ PLANNER → SOLID → SECURITY ↔ DEPENDENCIES → IMPLEMENTER → DOCUMENTATIO
 
 ### Activación de Agentes
 
-| Trigger | Agente |
-|---------|--------|
-| "implementa", "crea feature", "diseña" | PLANNER |
-| "valida", "revisa diseño", "code review" | SOLID |
-| "audita seguridad", "OWASP", "vulnerabilidades" | SECURITY |
-| "verifica paquetes", "dependencias", "APIs deprecadas" | DEPENDENCIES |
-| "escribe código", "TDD", "implementa paso" | IMPLEMENTER |
-| "documentación", "doc comments", "README", "dartdoc" | DOCUMENTATIONFLUTTER |
-| "calidad", "complejidad", "métricas código" | CODEQUALITYFLUTTER |
-| "performance", "60fps", "rebuilds", "memory leaks", "isolates" | PERFORMANCEFLUTTER |
-| "tests", "cobertura", "QA" | TESTFLUTTER |
-| "verifica", "está completo", "audita" | VERIFIER |
+El **ORCHESTRATOR** se activa automáticamente y decide qué recursos usar:
+
+| Trigger | Decisión del Orquestador |
+|---------|--------------------------|
+| "ejecuta tests", "dart analyze", "formatea" | MCP directo (sin agente) |
+| "busca paquete", "lista devices" | MCP directo (sin agente) |
+| "implementa", "crea feature", "diseña" | PIPELINE: PLANNER → ... → VERIFIER |
+| "valida", "revisa diseño", "code review" | AGENT: SOLID |
+| "audita seguridad", "OWASP", "vulnerabilidades" | AGENT: SECURITY |
+| "verifica paquetes", "dependencias" | AGENT: DEPENDENCIES |
+| "escribe código", "TDD", "implementa paso" | HYBRID: IMPLEMENTER + mcp__dart__run_tests |
+| "documentación", "doc comments", "README" | AGENT: DOCUMENTATIONFLUTTER |
+| "calidad", "complejidad", "métricas" | AGENT: CODEQUALITYFLUTTER |
+| "performance", "60fps", "rebuilds" | AGENT: PERFORMANCEFLUTTER |
+| "tests", "cobertura", "QA" | AGENT: TESTFLUTTER |
+| "verifica", "está completo" | AGENT: VERIFIER |
+| "qué es", "cómo funciona", "explica" | Respuesta directa (sin recursos) |
 
 ### Principios del Sistema
 
@@ -233,6 +291,7 @@ PLANNER → SOLID → SECURITY ↔ DEPENDENCIES → IMPLEMENTER → DOCUMENTATIO
 
 ```
 .claude/agents/
+├── orchestrator.md        # Orquestador central (punto de entrada)
 ├── planner.md             # Arquitecto investigador
 ├── solid.md               # Validador de principios
 ├── security.md            # Guardian de seguridad (OWASP Top 10)
@@ -244,3 +303,13 @@ PLANNER → SOLID → SECURITY ↔ DEPENDENCIES → IMPLEMENTER → DOCUMENTATIO
 ├── testflutter.md         # Especialista en testing
 └── verifier.md            # Auditor de completitud
 ```
+
+### Beneficios del Orquestador Híbrido
+
+| Beneficio | Descripción |
+|-----------|-------------|
+| **Eficiencia de tokens** | MCPs directos evitan overhead de agentes para tareas simples |
+| **Mejor latencia** | Operaciones simples no pasan por razonamiento de agente |
+| **Contexto compartido** | MCP como capa de contexto entre agentes |
+| **Escalabilidad** | Agregar MCPs sin modificar agentes |
+| **Aprendizaje continuo** | Orquestador detecta patrones y sugiere mejoras |
