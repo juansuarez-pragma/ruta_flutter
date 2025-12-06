@@ -296,6 +296,102 @@ Para lib/src/domain/entities/user_entity.dart:
 NUNCA reportar completitud sin 100% de correspondencia test-produccion
 SIEMPRE crear tests faltantes antes de finalizar
 Excluir: barrel files, di/, main.dart, archivos de config
+
+### Guardrail 7: Verificación Post-Escritura (CRÍTICO)
+
+DESPUÉS de cada Write o Edit:
+
+```bash
+# 1. VERIFICAR que el archivo fue creado/modificado
+Read: [path del archivo recién escrito]
+
+# 2. CONFIRMAR contenido esperado
+# - Verificar que las importaciones están correctas
+# - Verificar que la estructura es la esperada
+# - Verificar que no hay errores de sintaxis
+
+# 3. SI el archivo no existe o está mal:
+# - Reintentar la escritura
+# - Verificar permisos
+# - Verificar path correcto
+```
+
+NUNCA asumir que Write funcionó correctamente
+SIEMPRE leer después de escribir para confirmar
+
+### Guardrail 8: Glob Antes de Read (Descubrimiento de Rutas)
+
+ANTES de leer cualquier archivo:
+
+```bash
+# 1. NO asumir rutas - usar Glob para descubrir
+# MAL:
+Read: "lib/src/presentation/application.dart"  # Asumido
+
+# BIEN:
+Glob: "lib/src/presentation/*.dart"  # Descubrir primero
+# Resultado: application.dart encontrado
+Read: "lib/src/presentation/application.dart"  # Confirmado
+
+# 2. Para archivos que pueden variar en ubicación:
+Glob: "lib/src/**/injection_container.dart"
+Glob: "test/helpers/mocks*.dart"
+```
+
+NUNCA asumir que un archivo existe en una ruta específica
+SIEMPRE usar Glob para confirmar existencia y ruta correcta
+
+### Guardrail 9: Acciones Post-Modificación (Código Generado)
+
+DESPUÉS de modificar archivos con anotaciones de generación:
+
+```bash
+# 1. SI se modifica @GenerateMocks (test/helpers/mocks.dart):
+dart run build_runner build --delete-conflicting-outputs
+# OBLIGATORIO regenerar mocks.mocks.dart
+
+# 2. SI se modifica @JsonSerializable:
+dart run build_runner build --delete-conflicting-outputs
+# OBLIGATORIO regenerar *.g.dart
+
+# 3. SI se modifica @freezed:
+dart run build_runner build --delete-conflicting-outputs
+# OBLIGATORIO regenerar *.freezed.dart
+
+# 4. VERIFICAR que la regeneración fue exitosa:
+Glob: "test/helpers/mocks.mocks.dart"  # Debe existir actualizado
+```
+
+NUNCA olvidar regenerar código después de modificar anotaciones
+SIEMPRE ejecutar build_runner cuando se modifica @GenerateMocks, @JsonSerializable, @freezed
+
+### Guardrail 10: Análisis de Impacto Pre-Modificación
+
+ANTES de modificar una clase/interfaz:
+
+```bash
+# 1. BUSCAR archivos que dependen de la clase
+Grep: "NombreClase"
+# Identifica: imports, extends, implements, usos
+
+# 2. BUSCAR tests que usan la clase
+Grep: "NombreClase" path:test/
+
+# 3. SI se agregan parámetros requeridos:
+# - Identificar TODOS los lugares que instancian la clase
+# - Planificar actualización de TODOS los usos
+# - Incluir mocks y tests
+
+# 4. EJEMPLO: Agregar parámetro a ApplicationController
+Grep: "ApplicationController("
+# Resultado:
+#   - lib/src/di/injection_container.dart:48
+#   - test/unit/presentation/application_test.dart:43
+# → AMBOS deben actualizarse
+```
+
+NUNCA agregar parámetros requeridos sin actualizar todos los usos
+SIEMPRE buscar dependencias antes de modificar firmas de clases/funciones
 </guardrails>
 
 <flutter_patterns>

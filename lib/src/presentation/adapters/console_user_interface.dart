@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:fase_2_consumo_api/src/domain/entities/cart_entity.dart';
 import 'package:fase_2_consumo_api/src/domain/entities/product_entity.dart';
 import 'package:fase_2_consumo_api/src/domain/entities/user_entity.dart';
 import 'package:fase_2_consumo_api/src/presentation/contracts/contracts.dart';
@@ -29,7 +30,10 @@ class ConsoleUserInterface implements UserInterface {
     print('4. ${AppStrings.menuOptionGetProductsByCategory}');
     print('5. ${AppStrings.menuOptionGetAllUsers}');
     print('6. ${AppStrings.menuOptionGetUserById}');
-    print('7. ${AppStrings.menuOptionExit}');
+    print('7. ${AppStrings.menuOptionGetAllCarts}');
+    print('8. ${AppStrings.menuOptionGetCartById}');
+    print('9. ${AppStrings.menuOptionGetCartsByUser}');
+    print('10. ${AppStrings.menuOptionExit}');
     stdout.write('${AppStrings.menuPrompt} ');
 
     final choice = stdin.readLineSync()?.trim();
@@ -41,7 +45,10 @@ class ConsoleUserInterface implements UserInterface {
       '4' => MenuOption.getProductsByCategory,
       '5' => MenuOption.getAllUsers,
       '6' => MenuOption.getUserById,
-      '7' => MenuOption.exit,
+      '7' => MenuOption.getAllCarts,
+      '8' => MenuOption.getCartById,
+      '9' => MenuOption.getCartsByUser,
+      '10' => MenuOption.exit,
       _ => MenuOption.invalid,
     };
   }
@@ -198,5 +205,73 @@ class ConsoleUserInterface implements UserInterface {
     print(
       '${AppStrings.userAddressCoords.padRight(_labelPadding)}${user.address.geolocation.lat}, ${user.address.geolocation.long}\n',
     );
+  }
+
+  // ============================================
+  // Métodos de Cart
+  // ============================================
+
+  @override
+  Future<int?> promptCartId() async {
+    stdout.write('${AppStrings.promptCartId} ');
+    final input = stdin.readLineSync()?.trim();
+    return int.tryParse(input ?? '');
+  }
+
+  @override
+  Future<int?> promptUserIdForCarts() async {
+    stdout.write('${AppStrings.promptUserIdForCarts} ');
+    final input = stdin.readLineSync()?.trim();
+    return int.tryParse(input ?? '');
+  }
+
+  @override
+  void showCarts(List<CartEntity> carts) {
+    print(
+      '${AppStrings.successFound} ${carts.length} ${AppStrings.cartsLabel}\n',
+    );
+    for (final cart in carts) {
+      _printCartSummary(cart);
+    }
+  }
+
+  @override
+  void showCart(CartEntity cart) {
+    _printCartDetail(cart);
+  }
+
+  void _printCartSummary(CartEntity cart) {
+    print('--- ${AppStrings.cartLabel} ${cart.id} ---');
+    print('${AppStrings.cartId.padRight(_labelPadding)}${cart.id}');
+    print('${AppStrings.cartUserId.padRight(_labelPadding)}${cart.userId}');
+    print(
+      '${AppStrings.cartDate.padRight(_labelPadding)}${_formatDate(cart.date)}',
+    );
+    print(
+      '${AppStrings.cartProducts.padRight(_labelPadding)}${cart.products.length} items\n',
+    );
+  }
+
+  void _printCartDetail(CartEntity cart) {
+    print('--- ${AppStrings.cartLabel} ${cart.id} ---');
+    print('${AppStrings.cartId.padRight(_labelPadding)}${cart.id}');
+    print('${AppStrings.cartUserId.padRight(_labelPadding)}${cart.userId}');
+    print(
+      '${AppStrings.cartDate.padRight(_labelPadding)}${_formatDate(cart.date)}',
+    );
+    print(AppStrings.cartProducts);
+    if (cart.products.isEmpty) {
+      print(AppStrings.cartNoProducts);
+    } else {
+      for (final product in cart.products) {
+        print('${AppStrings.cartProductId} ${product.productId}');
+        print('${AppStrings.cartProductQuantity} ${product.quantity}');
+      }
+    }
+    print('');
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 }

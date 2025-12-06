@@ -1,4 +1,3 @@
-import 'package:dartz/dartz.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 import 'package:fase_2_consumo_api/src/core/errors/exceptions.dart';

@@ -3,13 +3,18 @@ import 'package:http/http.dart' as http;
 import 'package:fase_2_consumo_api/src/core/config/config.dart';
 import 'package:fase_2_consumo_api/src/core/network/api_response_handler.dart';
 import 'package:fase_2_consumo_api/src/data/datasources/datasources.dart';
+import 'package:fase_2_consumo_api/src/data/repositories/cart_repository_impl.dart';
 import 'package:fase_2_consumo_api/src/data/repositories/product_repository_impl.dart';
 import 'package:fase_2_consumo_api/src/data/repositories/user_repository_impl.dart';
+import 'package:fase_2_consumo_api/src/domain/repositories/cart_repository.dart';
 import 'package:fase_2_consumo_api/src/domain/repositories/product_repository.dart';
 import 'package:fase_2_consumo_api/src/domain/repositories/user_repository.dart';
+import 'package:fase_2_consumo_api/src/domain/usecases/get_all_carts_usecase.dart';
 import 'package:fase_2_consumo_api/src/domain/usecases/get_all_categories_usecase.dart';
 import 'package:fase_2_consumo_api/src/domain/usecases/get_all_products_usecase.dart';
 import 'package:fase_2_consumo_api/src/domain/usecases/get_all_users_usecase.dart';
+import 'package:fase_2_consumo_api/src/domain/usecases/get_cart_by_id_usecase.dart';
+import 'package:fase_2_consumo_api/src/domain/usecases/get_carts_by_user_usecase.dart';
 import 'package:fase_2_consumo_api/src/domain/usecases/get_product_by_id_usecase.dart';
 import 'package:fase_2_consumo_api/src/domain/usecases/get_products_by_category_usecase.dart';
 import 'package:fase_2_consumo_api/src/domain/usecases/get_user_by_id_usecase.dart';
@@ -48,6 +53,9 @@ Future<ApplicationController> init() async {
       getProductsByCategory: _container(),
       getAllUsers: _container(),
       getUserById: _container(),
+      getAllCarts: _container(),
+      getCartById: _container(),
+      getCartsByUser: _container(),
       onExit: () => _container<http.Client>().close(),
     ),
   );
@@ -61,6 +69,9 @@ Future<ApplicationController> init() async {
   _container.registerFactory(() => GetProductsByCategoryUseCase(_container()));
   _container.registerFactory(() => GetAllUsersUseCase(_container()));
   _container.registerFactory(() => GetUserByIdUseCase(_container()));
+  _container.registerFactory(() => GetAllCartsUseCase(_container()));
+  _container.registerFactory(() => GetCartByIdUseCase(_container()));
+  _container.registerFactory(() => GetCartsByUserUseCase(_container()));
 
   // ============================================
   // Capa de Datos - Repositorio
@@ -74,6 +85,9 @@ Future<ApplicationController> init() async {
   _container.registerLazySingleton<UserRepository>(
     () => UserRepositoryImpl(userDataSource: _container()),
   );
+  _container.registerLazySingleton<CartRepository>(
+    () => CartRepositoryImpl(cartDataSource: _container()),
+  );
 
   // ============================================
   // Capa de Datos - Fuentes de Datos
@@ -86,6 +100,9 @@ Future<ApplicationController> init() async {
   );
   _container.registerLazySingleton<UserRemoteDataSource>(
     () => UserRemoteDataSourceImpl(apiClient: _container()),
+  );
+  _container.registerLazySingleton<CartRemoteDataSource>(
+    () => CartRemoteDataSourceImpl(apiClient: _container()),
   );
 
   // ============================================

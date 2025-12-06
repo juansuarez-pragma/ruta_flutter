@@ -1,7 +1,10 @@
 import 'package:fase_2_consumo_api/src/core/usecase/usecase.dart';
+import 'package:fase_2_consumo_api/src/domain/usecases/get_all_carts_usecase.dart';
 import 'package:fase_2_consumo_api/src/domain/usecases/get_all_categories_usecase.dart';
 import 'package:fase_2_consumo_api/src/domain/usecases/get_all_products_usecase.dart';
 import 'package:fase_2_consumo_api/src/domain/usecases/get_all_users_usecase.dart';
+import 'package:fase_2_consumo_api/src/domain/usecases/get_cart_by_id_usecase.dart';
+import 'package:fase_2_consumo_api/src/domain/usecases/get_carts_by_user_usecase.dart';
 import 'package:fase_2_consumo_api/src/domain/usecases/get_product_by_id_usecase.dart';
 import 'package:fase_2_consumo_api/src/domain/usecases/get_products_by_category_usecase.dart';
 import 'package:fase_2_consumo_api/src/domain/usecases/get_user_by_id_usecase.dart';
@@ -22,6 +25,9 @@ class ApplicationController {
   final GetProductsByCategoryUseCase _getProductsByCategory;
   final GetAllUsersUseCase _getAllUsers;
   final GetUserByIdUseCase _getUserById;
+  final GetAllCartsUseCase _getAllCarts;
+  final GetCartByIdUseCase _getCartById;
+  final GetCartsByUserUseCase _getCartsByUser;
   final void Function() _onExit;
 
   ApplicationController({
@@ -32,6 +38,9 @@ class ApplicationController {
     required GetProductsByCategoryUseCase getProductsByCategory,
     required GetAllUsersUseCase getAllUsers,
     required GetUserByIdUseCase getUserById,
+    required GetAllCartsUseCase getAllCarts,
+    required GetCartByIdUseCase getCartById,
+    required GetCartsByUserUseCase getCartsByUser,
     required void Function() onExit,
   }) : _ui = ui,
        _getAllProducts = getAllProducts,
@@ -40,6 +49,9 @@ class ApplicationController {
        _getProductsByCategory = getProductsByCategory,
        _getAllUsers = getAllUsers,
        _getUserById = getUserById,
+       _getAllCarts = getAllCarts,
+       _getCartById = getCartById,
+       _getCartsByUser = getCartsByUser,
        _onExit = onExit;
 
   /// Inicia el bucle principal de la aplicación.
@@ -66,6 +78,12 @@ class ApplicationController {
           await _handleGetAllUsers();
         case MenuOption.getUserById:
           await _handleGetUserById();
+        case MenuOption.getAllCarts:
+          await _handleGetAllCarts();
+        case MenuOption.getCartById:
+          await _handleGetCartById();
+        case MenuOption.getCartsByUser:
+          await _handleGetCartsByUser();
         case MenuOption.exit:
           break;
         case MenuOption.invalid:
@@ -178,6 +196,55 @@ class ApplicationController {
     result.fold(
       (failure) => _ui.showError(failure.message),
       (user) => _ui.showUser(user),
+    );
+  }
+
+  Future<void> _handleGetAllCarts() async {
+    _ui.showOperationInfo(AppStrings.getAllCartsUseCaseTitle);
+
+    final result = await _getAllCarts.call(const NoParams());
+
+    result.fold(
+      (failure) => _ui.showError(failure.message),
+      (carts) => _ui.showCarts(carts),
+    );
+  }
+
+  Future<void> _handleGetCartById() async {
+    final id = await _ui.promptCartId();
+
+    if (id == null) {
+      _ui.showError(AppStrings.invalidIdError);
+      return;
+    }
+
+    _ui.showOperationInfo('${AppStrings.getCartByIdUseCaseTitle} (ID: $id)');
+
+    final result = await _getCartById.call(GetCartByIdParams(id: id));
+
+    result.fold(
+      (failure) => _ui.showError(failure.message),
+      (cart) => _ui.showCart(cart),
+    );
+  }
+
+  Future<void> _handleGetCartsByUser() async {
+    final userId = await _ui.promptUserIdForCarts();
+
+    if (userId == null) {
+      _ui.showError(AppStrings.invalidIdError);
+      return;
+    }
+
+    _ui.showOperationInfo(
+      '${AppStrings.getCartsByUserUseCaseTitle} (User ID: $userId)',
+    );
+
+    final result = await _getCartsByUser.call(GetCartsByUserParams(userId: userId));
+
+    result.fold(
+      (failure) => _ui.showError(failure.message),
+      (carts) => _ui.showCarts(carts),
     );
   }
 }

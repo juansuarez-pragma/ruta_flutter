@@ -17,11 +17,16 @@ import 'package:fase_2_consumo_api/src/data/datasources/category/category_remote
 import 'package:fase_2_consumo_api/src/data/datasources/core/api_client.dart';
 import 'package:fase_2_consumo_api/src/data/datasources/product/product_remote_datasource.dart';
 import 'package:fase_2_consumo_api/src/data/datasources/user/user_remote_datasource.dart';
+import 'package:fase_2_consumo_api/src/data/datasources/cart/cart_remote_datasource.dart';
+import 'package:fase_2_consumo_api/src/domain/repositories/cart_repository.dart';
 import 'package:fase_2_consumo_api/src/domain/repositories/product_repository.dart';
 import 'package:fase_2_consumo_api/src/domain/repositories/user_repository.dart';
+import 'package:fase_2_consumo_api/src/domain/usecases/get_all_carts_usecase.dart';
 import 'package:fase_2_consumo_api/src/domain/usecases/get_all_categories_usecase.dart';
 import 'package:fase_2_consumo_api/src/domain/usecases/get_all_products_usecase.dart';
 import 'package:fase_2_consumo_api/src/domain/usecases/get_all_users_usecase.dart';
+import 'package:fase_2_consumo_api/src/domain/usecases/get_cart_by_id_usecase.dart';
+import 'package:fase_2_consumo_api/src/domain/usecases/get_carts_by_user_usecase.dart';
 import 'package:fase_2_consumo_api/src/domain/usecases/get_product_by_id_usecase.dart';
 import 'package:fase_2_consumo_api/src/domain/usecases/get_products_by_category_usecase.dart';
 import 'package:fase_2_consumo_api/src/domain/usecases/get_user_by_id_usecase.dart';
@@ -32,6 +37,7 @@ import 'package:fase_2_consumo_api/src/presentation/contracts/contracts.dart';
   // Domain - Repositories
   ProductRepository,
   UserRepository,
+  CartRepository,
 
   // Domain - Use Cases
   GetAllProductsUseCase,
@@ -40,11 +46,15 @@ import 'package:fase_2_consumo_api/src/presentation/contracts/contracts.dart';
   GetProductsByCategoryUseCase,
   GetAllUsersUseCase,
   GetUserByIdUseCase,
+  GetAllCartsUseCase,
+  GetCartByIdUseCase,
+  GetCartsByUserUseCase,
 
   // Data - DataSources
   ProductRemoteDataSource,
   CategoryRemoteDataSource,
   UserRemoteDataSource,
+  CartRemoteDataSource,
   ApiClient,
 
   // Core

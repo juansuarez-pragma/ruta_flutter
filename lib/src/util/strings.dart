@@ -23,6 +23,9 @@ class AppStrings {
       'Obtener productos por categoría';
   static const String menuOptionGetAllUsers = 'Obtener todos los usuarios';
   static const String menuOptionGetUserById = 'Obtener un usuario por ID';
+  static const String menuOptionGetAllCarts = 'Obtener todos los carritos';
+  static const String menuOptionGetCartById = 'Obtener un carrito por ID';
+  static const String menuOptionGetCartsByUser = 'Obtener carritos de un usuario';
   static const String menuOptionExit = 'Salir';
   static const String menuPrompt = 'Opción:';
 
@@ -31,6 +34,9 @@ class AppStrings {
       'Por favor, ingresa el ID del producto:';
   static const String promptUserId = 'Por favor, ingresa el ID del usuario:';
   static const String promptCategory = 'Selecciona una categoría (número):';
+  static const String promptCartId = 'Por favor, ingresa el ID del carrito:';
+  static const String promptUserIdForCarts =
+      'Por favor, ingresa el ID del usuario para ver sus carritos:';
   static const String invalidCategoryError = 'Categoría no válida.';
 
   // Títulos de casos de uso
@@ -41,6 +47,9 @@ class AppStrings {
       'GetProductsByCategoryUseCase';
   static const String getAllUsersUseCaseTitle = 'GetAllUsersUseCase';
   static const String getUserByIdUseCaseTitle = 'GetUserByIdUseCase';
+  static const String getAllCartsUseCaseTitle = 'GetAllCartsUseCase';
+  static const String getCartByIdUseCaseTitle = 'GetCartByIdUseCase';
+  static const String getCartsByUserUseCaseTitle = 'GetCartsByUserUseCase';
   static const String executingUseCase = '[+] EJECUTANDO:';
 
   // Mensajes de éxito
@@ -57,6 +66,7 @@ class AppStrings {
   static const String notFoundCategoriesFailureMessage =
       'Recurso de categorías no encontrado.';
   static const String notFoundUserFailureMessage = 'Usuario no encontrado.';
+  static const String notFoundCartFailureMessage = 'Carrito no encontrado.';
   static const String clientFailureMessage = 'Error en la petición.';
   static const String connectionFailureMessage =
       'Error de conexión a internet.';
@@ -66,8 +76,10 @@ class AppStrings {
   static const String productsLabel = 'productos.';
   static const String categoriesLabel = 'categorías.';
   static const String usersLabel = 'usuarios.';
+  static const String cartsLabel = 'carritos.';
   static const String productLabel = 'Producto';
   static const String userLabel = 'Usuario';
+  static const String cartLabel = 'Carrito';
 
   // Detalles del producto
   static const String productId = 'ID:';
@@ -88,4 +100,13 @@ class AppStrings {
   static const String userAddressCity = '  Ciudad:';
   static const String userAddressZipcode = '  Código Postal:';
   static const String userAddressCoords = '  Coordenadas:';
+
+  // Detalles del carrito
+  static const String cartId = 'ID:';
+  static const String cartUserId = 'Usuario ID:';
+  static const String cartDate = 'Fecha:';
+  static const String cartProducts = 'Productos:';
+  static const String cartProductId = '  - Producto ID:';
+  static const String cartProductQuantity = '    Cantidad:';
+  static const String cartNoProducts = '  (Sin productos)';
 }

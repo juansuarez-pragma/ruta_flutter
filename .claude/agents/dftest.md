@@ -543,6 +543,62 @@ const productsListJsonFixture = '''
 ''';
 ```
 
+### Verificación de Mocks Actualizados (CRÍTICO)
+
+DESPUÉS de modificar `test/helpers/mocks.dart`:
+
+```bash
+# 1. DETECTAR si @GenerateMocks fue modificado
+# Si se agregó/modificó/eliminó una clase en @GenerateMocks:
+
+# 2. OBLIGATORIO regenerar mocks
+dart run build_runner build --delete-conflicting-outputs
+
+# 3. VERIFICAR que la regeneración fue exitosa
+Glob: "test/helpers/mocks.mocks.dart"
+# SI no existe o tiene errores → FALLO
+
+# 4. VERIFICAR que los tests compilan
+dart analyze test/
+# SI hay errores de tipos → mocks desactualizados
+
+# 5. EJECUTAR tests
+dart test
+# SI fallan por mocks → verificar correspondencia
+```
+
+### Sincronización Mocks ↔ Interfaces
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ CUANDO se modifica una clase que está en @GenerateMocks:        │
+│                                                                  │
+│ 1. Agregar parámetro a constructor → mock necesita actualización│
+│ 2. Agregar método → mock necesita actualización                  │
+│ 3. Cambiar firma de método → mock necesita actualización         │
+│                                                                  │
+│ ACCIÓN: dart run build_runner build --delete-conflicting-outputs│
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Detección de Mocks Desactualizados
+
+```bash
+# SI un test falla con error tipo:
+# "The method 'X' was called with arguments that don't match"
+# "The class 'MockX' doesn't have a method 'Y'"
+# "The number of positional arguments expected is N but got M"
+
+# ACCIÓN INMEDIATA:
+1. Verificar que mocks.dart tiene @GenerateMocks correcto
+2. Regenerar: dart run build_runner build --delete-conflicting-outputs
+3. Re-ejecutar tests
+
+# SI el error persiste:
+# - Verificar que la interfaz mockeada coincide con su uso
+# - Verificar imports en el archivo de test
+```
+
 ### Test Helpers
 ```dart
 // test/helpers/test_helpers.dart

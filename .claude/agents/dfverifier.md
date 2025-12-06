@@ -96,6 +96,92 @@ BUSCAR:
 1. Codigo extra no especificado
 2. Codigo faltante del plan
 3. Implementacion diferente a lo especificado
+
+### Fase 5: Verificación de Código Generado (CRÍTICA)
+
+VALIDAR que los archivos reportados como creados REALMENTE existen:
+
+```bash
+# 1. PARA CADA archivo que dfimplementer reportó crear:
+Glob: "lib/src/domain/entities/[nuevo_archivo].dart"
+# SI no existe → RECHAZO INMEDIATO
+
+# 2. VERIFICAR contenido mínimo esperado
+Read: [archivo reportado]
+# Confirmar:
+# - Importaciones correctas
+# - Clase/función declarada
+# - Sin errores de sintaxis
+
+# 3. VERIFICAR archivos de test correspondientes
+Para cada lib/src/X.dart reportado:
+  Glob: "test/unit/X_test.dart"
+  # SI no existe → archivo no tiene test → FALTA
+
+# 4. VERIFICAR barrel files actualizados
+Read: lib/src/domain/entities/entities.dart
+# Confirmar: export del nuevo archivo incluido
+
+# 5. VERIFICAR DI registration (si aplica)
+Grep: "NuevaClase" path:lib/src/di/
+# Confirmar: registrado en injection_container.dart
+```
+
+NUNCA confiar ciegamente en reportes de "archivo creado"
+SIEMPRE verificar existencia física con Glob/Read
+
+### Fase 6: Verificación de Accesibilidad de Usuario (Feature Slice)
+
+VALIDAR que la feature es ACCESIBLE por el usuario final:
+
+```bash
+# 1. IDENTIFICAR punto de entrada de la feature
+# PREGUNTAR: ¿Cómo accede el usuario a esta funcionalidad?
+
+# 2. VERIFICAR cadena completa:
+# UI → Controller → UseCase → Repository → DataSource
+
+# 3. PARA CLI/Console:
+Grep: "MenuOption.[nueva_opcion]"  # Existe opción de menú?
+Read: lib/src/presentation/contracts/menu_option.dart
+# Confirmar: enum tiene la nueva opción
+
+Read: lib/src/presentation/adapters/console_user_interface.dart
+# Confirmar: menú muestra la opción
+# Confirmar: métodos de input/output implementados
+
+Read: lib/src/presentation/application.dart
+# Confirmar: switch case maneja la opción
+# Confirmar: handler invoca el usecase
+
+# 4. PARA Flutter UI:
+Grep: "Navigator" path:lib/src/presentation/
+# Verificar ruta registrada
+Grep: "BlocProvider<NuevoBLoC>"
+# Verificar BLoC integrado
+
+# 5. VERIFICAR strings de usuario
+Grep: "[nueva_feature]" path:lib/src/util/strings.dart
+# Confirmar: mensajes de UI externalizados
+
+# 6. VERIFICAR DI conecta toda la cadena
+Read: lib/src/di/injection_container.dart
+# Confirmar:
+# - UseCase registrado
+# - Repository registrado
+# - DataSource registrado
+# - Controller/BLoC recibe UseCase
+```
+
+CRITERIO DE ACEPTACIÓN:
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  SI el usuario NO puede acceder a la feature desde la UI,       │
+│  entonces la verificación FALLA aunque el backend esté completo │
+│                                                                  │
+│  Feature Slice incompleto = RECHAZADO                            │
+└─────────────────────────────────────────────────────────────────┘
+```
 </verification_protocol>
 
 <flutter_specific_verification>

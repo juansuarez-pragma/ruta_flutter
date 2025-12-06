@@ -46,4 +46,20 @@ abstract class ApiEndpoints {
   /// Obtener un usuario por ID.
   /// GET /users/{id}
   static String userById(int id) => '/users/$id';
+
+  // ============================================
+  // Carritos
+  // ============================================
+
+  /// Obtener todos los carritos.
+  /// GET /carts
+  static const String carts = '/carts';
+
+  /// Obtener un carrito por ID.
+  /// GET /carts/{id}
+  static String cartById(int id) => '/carts/$id';
+
+  /// Obtener carritos de un usuario.
+  /// GET /carts/user/{userId}
+  static String cartsByUser(int userId) => '/carts/user/$userId';
 }

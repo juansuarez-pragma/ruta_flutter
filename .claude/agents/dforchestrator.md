@@ -164,6 +164,159 @@ Usuario -> Orquestador -> MCP1 -> Agente -> MCP2 -> Usuario
 ```
 </execution_modes>
 
+<phased_execution>
+## Ejecución por Fases (Gestión de Complejidad)
+
+### Propósito
+Dividir features complejas en fases manejables para:
+- Evitar exceder límites de tokens
+- Permitir verificación incremental
+- Facilitar recuperación de errores
+- Asegurar correspondencia test-producción por fase
+
+### Criterios de División
+
+| Archivos Estimados | Fases | Estrategia |
+|--------------------|-------|------------|
+| 1-4 | 1 | Ejecución directa |
+| 5-8 | 2 | Domain+Data, Presentation+Integration |
+| 9-15 | 3 | Domain, Data, Presentation+Integration |
+| >15 | 4+ | Por Feature Slice vertical |
+
+### Template de Fases
+
+```
+FASE 1: Domain Layer
+├── Archivos: entities, usecases, repository interfaces (máx 4)
+├── Tests: unit tests para cada archivo
+├── Checkpoint: dart test test/unit/domain/ → PASS
+├── Verificación: CP_PHASE_1
+
+FASE 2: Data Layer
+├── Archivos: models, datasources, repository impl (máx 4)
+├── Tests: unit tests para cada archivo
+├── Checkpoint: dart test test/unit/data/ → PASS
+├── Verificación: CP_PHASE_2
+├── Dependencias: FASE 1 completada
+
+FASE 3: Presentation Layer
+├── Archivos: contracts, UI adapters, strings (máx 4)
+├── Tests: unit tests para cada archivo
+├── Checkpoint: dart test test/unit/presentation/ → PASS
+├── Verificación: CP_PHASE_3
+├── Dependencias: FASE 1, FASE 2 completadas
+
+FASE 4: Integration
+├── Archivos: DI, barrel exports, mocks
+├── Tests: integration tests
+├── Checkpoint: dart test → ALL PASS
+├── Verificación: CP_FINAL
+├── Dependencias: TODAS las fases anteriores
+```
+
+### Verificación Post-Fase (OBLIGATORIA)
+
+DESPUÉS de cada fase, ANTES de continuar:
+
+```bash
+# 1. VERIFICAR archivos creados existen
+Glob: "lib/src/[capa]/*.dart"
+# Comparar con lista de archivos planeados
+
+# 2. VERIFICAR tests correspondientes existen
+Para cada lib/src/X.dart de la fase:
+  Glob: "test/unit/X_test.dart"
+  # SI NO EXISTE → NO CONTINUAR
+
+# 3. EJECUTAR tests de la fase
+mcp__dart__run_tests paths: ["test/unit/[capa]/"]
+# SI FALLA → NO CONTINUAR
+
+# 4. EJECUTAR análisis de la fase
+mcp__dart__analyze_files paths: ["lib/src/[capa]/"]
+# SI ERRORES → NO CONTINUAR
+
+# 5. CONFIRMAR checkpoint
+CP_PHASE_N: PASS | FAIL
+```
+
+### Acciones por Resultado de Verificación
+
+| Resultado | Acción |
+|-----------|--------|
+| Archivo falta | dfimplementer: crear archivo + test |
+| Test falta | dftest: crear test para archivo |
+| Test falla | dfimplementer: arreglar código |
+| Análisis falla | dfimplementer: arreglar errores |
+| Todo PASS | Continuar a siguiente fase |
+
+### Recuperación de Fase Fallida
+
+```
+SI verificación de fase FALLA:
+    |
+    v
+1. IDENTIFICAR qué falló
+   - Archivo no existe
+   - Test no existe
+   - Test falla
+   - Análisis con errores
+    |
+    v
+2. DETERMINAR acción
+   - Reintentar (máx 2) → dfimplementer corrige
+   - Rewind → volver a inicio de fase
+   - Escalar → Human Escalation
+    |
+    v
+3. EJECUTAR acción correctiva
+    |
+    v
+4. RE-VERIFICAR fase
+    |
+    v
+5. SI PASS → Continuar
+   SI FAIL de nuevo → Escalar
+```
+
+### Ejemplo de Ejecución por Fases
+
+```
+SOLICITUD: "Implementa endpoint /orders"
+
+ANÁLISIS:
+- Archivos estimados: 12 (entity, usecase×3, model, datasource, repository, contracts×2, UI, DI, tests)
+- Fases: 3
+
+EJECUCIÓN:
+
+FASE 1: Domain (dfplanner + dfimplementer)
+├── entity: order_entity.dart + test
+├── usecases: get_all_orders_usecase.dart + test
+├── repository: order_repository.dart (interface)
+└── Verificación: CP_PHASE_1 ✅
+
+FASE 2: Data (dfimplementer)
+├── model: order_model.dart + test
+├── datasource: order_remote_datasource.dart + test
+├── repository: order_repository_impl.dart + test
+└── Verificación: CP_PHASE_2 ✅
+
+FASE 3: Presentation + Integration (dfimplementer)
+├── contracts: order_input.dart, order_output.dart
+├── UI: menu_option + console_user_interface updates
+├── DI: injection_container updates
+├── mocks: mocks.dart updates + build_runner
+└── Verificación: CP_PHASE_3 ✅
+
+VERIFICACIÓN FINAL: dfverifier
+├── Todos los archivos existen
+├── Todos los tests pasan
+├── Feature accesible desde UI
+└── CP_FINAL ✅
+```
+</phased_execution>
+
 <pipelines>
 ## Pipelines Predefinidos
 

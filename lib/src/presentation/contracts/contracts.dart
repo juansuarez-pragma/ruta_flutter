@@ -6,6 +6,8 @@
 /// ```
 library;
 
+export 'cart_input.dart';
+export 'cart_output.dart';
 export 'category_output.dart';
 export 'menu_option.dart';
 export 'message_output.dart';

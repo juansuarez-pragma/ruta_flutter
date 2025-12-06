@@ -6,6 +6,9 @@ enum MenuOption {
   getProductsByCategory,
   getAllUsers,
   getUserById,
+  getAllCarts,
+  getCartById,
+  getCartsByUser,
   exit,
   invalid,
 }

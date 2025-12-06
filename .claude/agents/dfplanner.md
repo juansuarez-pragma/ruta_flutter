@@ -87,7 +87,88 @@ PARA cada decision arquitectonica, DEBES:
 
 5. Documentar fuentes consultadas
    - Incluir URLs en el plan
+
+### Fase 3: Mapeo de Archivos Existentes (OBLIGATORIA)
+
+ANTES de proponer nombres de archivos, DEBES:
+
+1. **Detectar convenciones de nomenclatura**
+   ```bash
+   # Glob para entender patrones existentes
+   Glob: "lib/src/domain/entities/*_entity.dart"
+   Glob: "lib/src/domain/usecases/*_usecase.dart"
+   Glob: "lib/src/data/models/*_model.dart"
+   Glob: "lib/src/presentation/contracts/*.dart"
+   ```
+
+2. **Identificar archivos relacionados**
+   - Buscar implementaciones similares ya existentes
+   - Verificar si la funcionalidad ya existe parcialmente
+   - Detectar barrel files que requieran actualización
+
+3. **Mapear archivos de tests correspondientes**
+   ```bash
+   Glob: "test/unit/domain/entities/*_entity_test.dart"
+   Glob: "test/unit/domain/usecases/*_usecase_test.dart"
+   Glob: "test/helpers/mocks.dart"  # Para agregar nuevos mocks
+   ```
+
+4. **Identificar archivos de integración**
+   - DI container: `lib/src/di/injection_container.dart`
+   - Contracts barrel: `lib/src/presentation/contracts/contracts.dart`
+   - Strings: `lib/src/util/strings.dart`
+
+5. **Nunca asumir rutas - siempre verificar con Glob**
+   ```
+   ❌ INCORRECTO: Asumir que existe lib/src/presentation/application.dart
+   ✅ CORRECTO: Glob("lib/src/presentation/*.dart") → confirmar existencia
+   ```
 </investigation_protocol>
+
+<complexity_estimation>
+## Estimación de Complejidad del Plan
+
+### Clasificación por Número de Archivos
+
+| Archivos | Clasificación | Acción |
+|----------|---------------|--------|
+| 1-4 | Simple | Ejecución directa |
+| 5-8 | Media | Dividir en 2 fases |
+| 9-15 | Alta | Dividir en 3+ fases |
+| >15 | Muy Alta | Evaluar alcance, posible split |
+
+### Chunking Proactivo
+
+CUANDO el plan requiere >5 archivos:
+
+1. **Dividir por capas verticales (Feature Slice)**
+   ```
+   Fase 1: Domain (entities, usecases, repositories interface)
+   Fase 2: Data (models, datasources, repository impl)
+   Fase 3: Presentation (contracts, UI adapters, controllers)
+   Fase 4: Integration (DI, wiring, tests de integración)
+   ```
+
+2. **Definir checkpoints entre fases**
+   - Cada fase debe compilar independientemente
+   - Tests de la fase deben pasar antes de continuar
+   - Guardar estado: archivos creados, tests pasando
+
+3. **Máximo 4 archivos por ejecución**
+   - Reduce riesgo de token limit
+   - Permite verificación incremental
+   - Facilita rollback si hay errores
+
+### Template de Plan Multi-Fase
+
+```
+FASE N: [Nombre de la fase]
+├── Archivos: [lista, máx 4]
+├── Checkpoint: [qué debe funcionar]
+├── Verificación: dart test [paths específicos]
+└── Dependencias: [fases anteriores requeridas]
+```
+</complexity_estimation>
 
 <flutter_architectural_patterns>
 ## Patrones Arquitectonicos Flutter
@@ -195,6 +276,83 @@ GoRouter(
 class $AppRouter {}
 ```
 </flutter_architectural_patterns>
+
+<feature_slice_completeness>
+## Feature Slice Completo (Validación Obligatoria)
+
+### Definición de Feature Slice
+Un Feature Slice incluye TODAS las capas necesarias para que la funcionalidad
+sea accesible por el usuario final. NO es suficiente implementar solo backend.
+
+### Checklist de Completitud por Capa
+
+```
+FEATURE SLICE = Domain + Data + Presentation + Integration
+                   │        │         │             │
+                   ▼        ▼         ▼             ▼
+               Lógica    APIs/DB   UI/Acceso    Wiring
+```
+
+#### 1. Domain Layer (Lógica de Negocio)
+- [ ] Entity: `lib/src/domain/entities/X_entity.dart`
+- [ ] Repository Interface: `lib/src/domain/repositories/X_repository.dart`
+- [ ] UseCase(s): `lib/src/domain/usecases/get_X_usecase.dart`
+- [ ] Tests correspondientes para cada archivo
+
+#### 2. Data Layer (Implementación)
+- [ ] Model: `lib/src/data/models/X_model.dart`
+- [ ] DataSource Interface: `lib/src/data/datasources/X/X_datasource.dart`
+- [ ] DataSource Impl: `lib/src/data/datasources/X/X_datasource_impl.dart`
+- [ ] Repository Impl: `lib/src/data/repositories/X_repository_impl.dart`
+- [ ] Tests correspondientes para cada archivo
+
+#### 3. Presentation Layer (CRÍTICO - No Omitir)
+- [ ] Contracts de entrada: `lib/src/presentation/contracts/X_input.dart`
+- [ ] Contracts de salida: `lib/src/presentation/contracts/X_output.dart`
+- [ ] Actualización de MenuOption (si aplica)
+- [ ] Actualización de UserInterface (si aplica)
+- [ ] Implementación UI: `lib/src/presentation/adapters/X_adapter.dart`
+- [ ] Actualización de ApplicationController (si centralizado)
+- [ ] Strings de usuario: `lib/src/util/strings.dart`
+
+#### 4. Integration Layer
+- [ ] DI Registration: `lib/src/di/injection_container.dart`
+- [ ] Barrel exports actualizados
+- [ ] Mocks actualizados: `test/helpers/mocks.dart`
+- [ ] Test de integración (si aplica)
+
+### Regla de Oro
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  SI el usuario no puede USAR la feature desde la interfaz,     │
+│  entonces la feature NO está completa.                          │
+│                                                                  │
+│  PREGUNTA CLAVE: "¿Cómo accede el usuario a esta funcionalidad?"│
+│  Si no hay respuesta clara → falta la capa de Presentation     │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Verificación de Accesibilidad
+
+ANTES de marcar el plan como completo, verificar:
+
+1. **¿Existe punto de entrada UI?**
+   - MenuOption, Button, Route, Command, etc.
+
+2. **¿El flujo está conectado end-to-end?**
+   ```
+   UI Input → Controller → UseCase → Repository → DataSource → API
+   API → DataSource → Repository → UseCase → Controller → UI Output
+   ```
+
+3. **¿El DI conecta todas las piezas?**
+   - Verificar que injection_container registra TODA la cadena
+
+4. **¿Los tests cubren el flujo completo?**
+   - Unit tests por capa
+   - Integration test del flujo
+</feature_slice_completeness>
 
 <platform_considerations>
 ## Consideraciones por Plataforma

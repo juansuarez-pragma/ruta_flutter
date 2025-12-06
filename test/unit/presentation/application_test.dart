@@ -22,6 +22,9 @@ void main() {
   late MockGetProductsByCategoryUseCase mockGetProductsByCategory;
   late MockGetAllUsersUseCase mockGetAllUsers;
   late MockGetUserByIdUseCase mockGetUserById;
+  late MockGetAllCartsUseCase mockGetAllCarts;
+  late MockGetCartByIdUseCase mockGetCartById;
+  late MockGetCartsByUserUseCase mockGetCartsByUser;
   late bool exitCalled;
 
   setUp(() {
@@ -32,6 +35,9 @@ void main() {
     mockGetProductsByCategory = MockGetProductsByCategoryUseCase();
     mockGetAllUsers = MockGetAllUsersUseCase();
     mockGetUserById = MockGetUserByIdUseCase();
+    mockGetAllCarts = MockGetAllCartsUseCase();
+    mockGetCartById = MockGetCartByIdUseCase();
+    mockGetCartsByUser = MockGetCartsByUserUseCase();
     exitCalled = false;
 
     application = ApplicationController(
@@ -42,6 +48,9 @@ void main() {
       getProductsByCategory: mockGetProductsByCategory,
       getAllUsers: mockGetAllUsers,
       getUserById: mockGetUserById,
+      getAllCarts: mockGetAllCarts,
+      getCartById: mockGetCartById,
+      getCartsByUser: mockGetCartsByUser,
       onExit: () => exitCalled = true,
     );
   });

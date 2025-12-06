@@ -1,3 +1,5 @@
+import 'package:fase_2_consumo_api/src/presentation/contracts/cart_input.dart';
+import 'package:fase_2_consumo_api/src/presentation/contracts/cart_output.dart';
 import 'package:fase_2_consumo_api/src/presentation/contracts/category_output.dart';
 import 'package:fase_2_consumo_api/src/presentation/contracts/message_output.dart';
 import 'package:fase_2_consumo_api/src/presentation/contracts/product_output.dart';
@@ -17,4 +19,6 @@ abstract class UserInterface
         MessageOutput,
         ProductOutput,
         CategoryOutput,
-        UserOutput {}
+        UserOutput,
+        CartInput,
+        CartOutput {}
